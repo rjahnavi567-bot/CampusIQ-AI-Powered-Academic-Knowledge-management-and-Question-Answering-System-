@@ -24,16 +24,37 @@ def build_context(results):
             "Unknown"
         )
 
-        similarity = metadata.get(
-            "similarity_score",
-            result.get("score", 0)
+        chunk_type = metadata.get(
+            "type",
+            "text"
         )
 
-        context += (
-            f"{content}\n\n"
-            f"Source: {source_file}\n"
-            f"Page: {page_no}\n"
-            f"Similarity: {similarity}\n\n"
-        )
+        if chunk_type == "image":
+
+            context += (
+
+                "\n========== IMAGE ==========\n"
+
+                f"{content}\n\n"
+
+                f"Source File: {source_file}\n"
+
+                f"Page: {page_no}\n\n"
+
+            )
+
+        else:
+
+            context += (
+
+                "\n========== TEXT ==========\n"
+
+                f"{content}\n\n"
+
+                f"Source File: {source_file}\n"
+
+                f"Page: {page_no}\n\n"
+
+            )
 
     return context

@@ -24,8 +24,41 @@ def ask(request: AskRequest):
 
         results = collection.query(
             query_texts=[question],
-            n_results=5
+            n_results=10
         )
+        print("\n===== RETRIEVAL RESULTS =====")
+
+        for doc, meta in zip(
+
+            results["documents"][0],
+
+            results["metadatas"][0]
+
+):
+
+            print(
+        "TYPE:",
+        meta.get(
+            "type",
+            "text"
+        )
+    )
+
+            print(
+        "PAGE:",
+        meta.get(
+            "page_no"
+        )
+    )
+
+            print(
+        doc[:200]
+    )
+
+            print(
+        "----------------"
+    )
+    
 
     # ====================================
     # SEARCH ONLY SELECTED DOCUMENTS
@@ -40,12 +73,26 @@ def ask(request: AskRequest):
 
             partial = collection.query(
                 query_texts=[question],
-                n_results=5,
+                n_results=10,
                 where={
                     "source_file": filename
                 }
             )
+            print("\n===== CHROMA RESULTS =====")
 
+            for doc, meta in zip(
+                partial["documents"][0],
+                partial["metadatas"][0]
+):
+
+                print("TYPE:", meta.get("type"))
+
+                print("PAGE:", meta.get("page_no"))
+
+                print("CONTENT:")
+                print(doc[:300])
+
+                print("-------------------")
             all_docs.extend(
                 partial.get("documents", [[]])[0]
             )
@@ -118,13 +165,52 @@ def ask(request: AskRequest):
         documents,
         metadatas
     )
+    # prioritize requested page
 
-    top_chunks = ranked[:2]
+    if "page" in question.lower():
+
+        import re
+
+        match = re.search(
+        r'page\s+(\d+)',
+        question.lower()
+    )
+
+        if match:
+
+            page_requested = int(
+            match.group(1)
+        )
+
+            ranked.sort(
+
+            key=lambda x:
+
+            (
+                x["metadata"].get(
+                    "page_no",
+                    0
+                ) == page_requested,
+
+                x["score"]
+            ),
+
+            reverse=True
+        )
+
+    top_chunks = ranked[:6]
+    print(
+    "\n===== BEFORE CONTEXT ====="
+)
+
+    for item in ranked:
+
+        print(item)
 
     context = build_context(
         top_chunks
     )
-
+   
     print(
         "CONTEXT LENGTH:",
         len(context)
@@ -175,16 +261,27 @@ def ask(request: AskRequest):
             2
         ),
         "sources": [
-            {
-                "file":
-                chunk["metadata"].get(
-                    "source_file"
-                ),
-                "page":
-                chunk["metadata"].get(
-                    "page_no"
-                )
-            }
-            for chunk in top_chunks
-        ]
+
+    {
+
+        "file":
+        chunk["metadata"].get(
+            "source_file"
+        ),
+
+        "page":
+        chunk["metadata"].get(
+            "page_no"
+        ),
+
+        "type":
+        chunk["metadata"].get(
+            "type",
+            "text"
+        )
+
+    }
+
+    for chunk in top_chunks
+]
     }

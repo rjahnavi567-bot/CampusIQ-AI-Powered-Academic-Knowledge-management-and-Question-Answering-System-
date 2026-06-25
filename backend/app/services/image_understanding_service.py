@@ -83,15 +83,41 @@ def extract_ocr_text(image_path):
 
         return ""
 
+import time
 
 def understand_image(image_path):
+
+    start = time.time()
+
+    print(
+        f"\nProcessing Image: "
+        f"{image_path}"
+    )
 
     caption = generate_caption(
         image_path
     )
 
+    print(
+        "Caption Done:",
+        round(
+            time.time()-start,
+            2
+        ),
+        "sec"
+    )
+
     ocr_text = extract_ocr_text(
         image_path
+    )
+
+    print(
+        "OCR Done:",
+        round(
+            time.time()-start,
+            2
+        ),
+        "sec"
     )
 
     return {
