@@ -1,0 +1,19 @@
+What is data mining?
+
+What is clustering?
+
+What is classification?
+
+What is association rule mining?
+
+What is a data warehouse?
+
+What is K-Means?
+
+What is regression?
+
+What is outlier detection?
+
+What is supervised learning?
+
+What is unsupervised learning?

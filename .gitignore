@@ -1,0 +1,133 @@
+# =====================================
+# Environment Variables / Secrets
+# =====================================
+.env
+*.env
+
+# =====================================
+# Python Virtual Environments
+# =====================================
+venv/
+.venv/
+backend/venv/
+env/
+
+# =====================================
+# Python Cache
+# =====================================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# =====================================
+# IDE Files
+# =====================================
+.vscode/
+.idea/
+*.suo
+*.user
+*.swp
+
+# =====================================
+# Logs
+# =====================================
+*.log
+logs/
+
+# =====================================
+# Database Files
+# =====================================
+*.db
+*.sqlite
+*.sqlite3
+
+# =====================================
+# Chroma Vector Database
+# =====================================
+backend/chroma_db/
+chroma_db/
+
+# =====================================
+# Uploaded Documents
+# =====================================
+backend/uploads/
+uploads/
+
+# =====================================
+# Generated Embeddings / Indexes
+# =====================================
+*.npy
+*.npz
+*.pkl
+*.pickle
+
+backend/colab_exports/
+colab_exports/
+
+faiss_index/
+vector_db/
+
+# =====================================
+# Build / Distribution
+# =====================================
+build/
+dist/
+*.egg-info/
+
+# =====================================
+# Testing Outputs
+# =====================================
+.pytest_cache/
+.coverage
+htmlcov/
+
+# =====================================
+# Jupyter
+# =====================================
+.ipynb_checkpoints/
+
+# =====================================
+# Operating System Files
+# =====================================
+Thumbs.db
+.DS_Store
+
+# =====================================
+# Temporary Files
+# =====================================
+temp/
+tmp/
+*.tmp
+
+# =====================================
+# Frontend (React/Vite/Next.js)
+# =====================================
+node_modules/
+frontend/node_modules/
+
+# Build Outputs
+dist/
+build/
+.next/
+out/
+
+# Environment Files
+frontend/.env
+frontend/.env.local
+frontend/.env.development
+frontend/.env.production
+
+# Cache
+.cache/
+.parcel-cache/
+vite.svg
+
+
+# Temporary project inspection file
+FileList.txt
+
+# Evaluation output
+backend/evaluation/results.csv
+
+# Test PDFs
+backend/*.pdf
