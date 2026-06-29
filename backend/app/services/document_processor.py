@@ -6,22 +6,73 @@ import pytesseract
 import fitz  # PyMuPDF
 
 
+import fitz
+import re
+
+
+def split_into_chunks(text, chunk_size=800):
+
+    text = re.sub(r"\n{2,}", "\n\n", text)
+
+    paragraphs = text.split("\n\n")
+
+    chunks = []
+
+    current = ""
+
+    for para in paragraphs:
+
+        para = para.strip()
+
+        if not para:
+            continue
+
+        if len(current) + len(para) < chunk_size:
+
+            current += para + "\n\n"
+
+        else:
+
+            if current.strip():
+                chunks.append(current.strip())
+
+            current = para + "\n\n"
+
+    if current.strip():
+        chunks.append(current.strip())
+
+    return chunks
+
+
 def extract_pdf_text(file_path):
+
     doc = fitz.open(file_path)
 
     pages = []
 
     for page_num in range(len(doc)):
+
         page = doc.load_page(page_num)
 
-        pages.append({
-            "page_no": page_num + 1,
-            "text": page.get_text()
-        })
+        text = page.get_text("text")
+
+        chunks = split_into_chunks(text)
+
+        if len(chunks) == 0:
+
+            chunks = [""]
+
+        for chunk in chunks:
+
+            pages.append({
+
+                "page_no": page_num + 1,
+
+                "text": chunk
+
+            })
 
     return pages
-
-
 def extract_docx_text(file_path):
     doc = Document(file_path)
 

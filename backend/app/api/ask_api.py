@@ -1,12 +1,14 @@
 from fastapi import APIRouter
+import re
 
-from app.services.chroma_service import collection
+from app.services.hybrid_retrieval_service import hybrid_retrieve
 from app.services.reranker_service import rerank_results
 from app.services.context_builder import build_context
+from app.services.groq_service import generate_answer
+
+from app.database.connection import SessionLocal
 from app.database.models import QuestionHistory
 from app.schemas.ask_schema import AskRequest
-from app.database.connection import SessionLocal
-from app.services.groq_service import generate_answer
 
 router = APIRouter()
 
@@ -17,271 +19,280 @@ def ask(request: AskRequest):
     question = request.question
     marks = request.marks
 
-    # ====================================
-    # SEARCH IN ALL DOCUMENTS
-    # ====================================
-    if not request.documents:
+    # =====================================
+    # PAGE FILTER
+    # =====================================
 
-        results = collection.query(
-            query_texts=[question],
-            n_results=10
-        )
-        print("\n===== RETRIEVAL RESULTS =====")
-
-        for doc, meta in zip(
-
-            results["documents"][0],
-
-            results["metadatas"][0]
-
-):
-
-            print(
-        "TYPE:",
-        meta.get(
-            "type",
-            "text"
-        )
-    )
-
-            print(
-        "PAGE:",
-        meta.get(
-            "page_no"
-        )
-    )
-
-            print(
-        doc[:200]
-    )
-
-            print(
-        "----------------"
-    )
-    
-
-    # ====================================
-    # SEARCH ONLY SELECTED DOCUMENTS
-    # ====================================
-    else:
-
-        all_docs = []
-        all_metadatas = []
-        all_distances = []
-
-        for filename in request.documents:
-
-            partial = collection.query(
-                query_texts=[question],
-                n_results=10,
-                where={
-                    "source_file": filename
-                }
-            )
-            print("\n===== CHROMA RESULTS =====")
-
-            for doc, meta in zip(
-                partial["documents"][0],
-                partial["metadatas"][0]
-):
-
-                print("TYPE:", meta.get("type"))
-
-                print("PAGE:", meta.get("page_no"))
-
-                print("CONTENT:")
-                print(doc[:300])
-
-                print("-------------------")
-            all_docs.extend(
-                partial.get("documents", [[]])[0]
-            )
-
-            all_metadatas.extend(
-                partial.get("metadatas", [[]])[0]
-            )
-
-            all_distances.extend(
-                partial.get("distances", [[]])[0]
-            )
-
-        results = {
-            "documents": [all_docs],
-            "metadatas": [all_metadatas],
-            "distances": [all_distances]
-        }
-
-    documents = results.get(
-        "documents",
-        [[]]
-    )[0]
-
-    metadatas = results.get(
-        "metadatas",
-        [[]]
-    )[0]
-
-    scores = results.get(
-        "distances",
-        [[]]
-    )[0]
-
-    # ====================================
-    # NO RESULTS
-    # ====================================
-    if not documents:
-
-        return {
-            "question": question,
-            "answer":
-            "No relevant content found in selected document(s).",
-            "sources": []
-        }
-
-    # ====================================
-    # CONFIDENCE
-    # ====================================
-    confidence = 0
-
-    if scores:
-
-        avg_distance = (
-    sum(scores) / len(scores)
-)
-
-        confidence = max(
-    0,
-    min(
-        100,
-        round((1 / (1 + avg_distance)) * 100)
-    )
-)
-
-    # ====================================
-    # RERANK
-    # ====================================
-    ranked = rerank_results(
-        question,
-        documents,
-        metadatas
-    )
-    # prioritize requested page
-
-    if "page" in question.lower():
-
-        import re
-
-        match = re.search(
-        r'page\s+(\d+)',
+    page_match = re.search(
+        r"page\s+(\d+)",
         question.lower()
     )
 
-        if match:
+    page_no = None
 
-            page_requested = int(
-            match.group(1)
-        )
+    if page_match:
+        page_no = int(page_match.group(1))
 
-            ranked.sort(
+    # =====================================
+    # DOCUMENT FILTER
+    # =====================================
 
-            key=lambda x:
+    source_file = None
 
-            (
-                x["metadata"].get(
-                    "page_no",
-                    0
-                ) == page_requested,
+    if request.documents:
+
+        # currently search first selected file
+        # later we will improve multi-document search
+
+        source_file = request.documents[0]
+
+    # =====================================
+    # RETRIEVE
+    # =====================================
+
+    documents, metadatas, scores = hybrid_retrieve(
+
+    question=question,
+
+    page_no=page_no,
+
+    source_file=source_file,
+
+    top_k=10
+
+)
+
+    print("\n========== HYBRID RESULTS ==========\n")
+
+    for doc, meta in zip(documents, metadatas):
+
+        print("TYPE:", meta.get("type", "text"))
+        print("PAGE:", meta.get("page_no"))
+        print("FILE :", meta.get("source_file"))
+        print(doc[:200])
+        print("--------------------------------")
+
+    # =====================================
+    # NO RESULTS
+    # =====================================
+
+    if len(documents) == 0:
+
+        return {
+
+            "question": question,
+
+            "answer": "No relevant content found.",
+
+            "sources": []
+
+        }
+
+    # =====================================
+    # RERANK
+    # =====================================
+
+    ranked = rerank_results(
+
+        question,
+
+        documents,
+
+        metadatas
+
+    )
+
+    # =====================================
+    # PAGE PRIORITY
+    # =====================================
+
+    if page_no is not None:
+
+        ranked.sort(
+
+            key=lambda x: (
+
+                x["metadata"].get("page_no") == page_no,
+
+                x["metadata"].get("type") == "image",
 
                 x["score"]
+
             ),
 
             reverse=True
+
         )
 
+    # =====================================
+    # TOP CHUNKS
+    # =====================================
+
     top_chunks = ranked[:6]
-    print(
-    "\n===== BEFORE CONTEXT ====="
-)
+    # =====================================
+# Separate image and text chunks
+# =====================================
 
-    for item in ranked:
+    image_chunks = [
+    chunk
+    for chunk in top_chunks
+    if chunk["metadata"].get("type") == "image"
+]
 
-        print(item)
+    text_chunks = [
+    chunk
+    for chunk in top_chunks
+    if chunk["metadata"].get("type") != "image"
+]
 
-    context = build_context(
-        top_chunks
-    )
-   
-    print(
-        "CONTEXT LENGTH:",
-        len(context)
-    )
+# Mix both text and image context
+    combined_chunks = []
 
-    # ====================================
+    text_index = 0
+    image_index = 0
+
+    while (
+    text_index < len(text_chunks)
+    or image_index < len(image_chunks)
+):
+
+      if text_index < len(text_chunks):
+        combined_chunks.append(text_chunks[text_index])
+        text_index += 1
+
+      if image_index < len(image_chunks):
+        combined_chunks.append(image_chunks[image_index])
+        image_index += 1
+
+    context = build_context(combined_chunks)
+
+    print("\n========== CONTEXT ==========\n")
+
+    print(context)
+
+    # =====================================
     # GENERATE ANSWER
-    # ====================================
-    ai_answer = generate_answer(
+    # =====================================
+    print("\n========== FINAL CONTEXT ==========\n")
+    print(context)
+    answer = generate_answer(
+
         question,
+
         context,
+
         marks
+
     )
 
-    # ====================================
-    # SAVE QUESTION HISTORY
-    # ====================================
+    # =====================================
+    # CONFIDENCE
+    # =====================================
+
+    confidence = 0
+
+    if len(scores):
+
+        avg = sum(scores) / len(scores)
+
+        confidence = round(
+
+            max(
+
+                0,
+
+                min(
+
+                    100,
+
+                    (1 / (1 + avg)) * 100
+
+                )
+
+            ),
+
+            2
+
+        )
+
+    # =====================================
+    # SAVE HISTORY
+    # =====================================
+
     db = SessionLocal()
 
     try:
 
-        selected_docs = ", ".join(
-    request.documents
-) if request.documents else "All Documents"
-
         history = QuestionHistory(
-    question=question,
-    answer=ai_answer,
-    document_name=selected_docs
-)
+
+            question=question,
+
+            answer=answer,
+
+            document_name=", ".join(request.documents)
+
+            if request.documents
+
+            else "All Documents"
+
+        )
 
         db.add(history)
+
         db.commit()
 
     finally:
 
         db.close()
 
-    # ====================================
+    # =====================================
     # RESPONSE
-    # ====================================
+    # =====================================
+
     return {
+
         "question": question,
-        "answer": ai_answer,
+
+        "answer": answer,
+
         "marks": marks,
-        "confidence": round(
-            confidence,
-            2
-        ),
+
+        "confidence": confidence,
+
         "sources": [
 
-    {
+            {
 
-        "file":
-        chunk["metadata"].get(
-            "source_file"
-        ),
+                "file":
 
-        "page":
-        chunk["metadata"].get(
-            "page_no"
-        ),
+                    chunk["metadata"].get(
 
-        "type":
-        chunk["metadata"].get(
-            "type",
-            "text"
-        )
+                        "source_file"
 
-    }
+                    ),
 
-    for chunk in top_chunks
-]
+                "page":
+
+                    chunk["metadata"].get(
+
+                        "page_no"
+
+                    ),
+
+                "type":
+
+                    chunk["metadata"].get(
+
+                        "type",
+
+                        "text"
+
+                    )
+
+            }
+
+            for chunk in top_chunks
+
+        ]
+
     }

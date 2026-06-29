@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.services.chroma_service import collection
+from app.services.chroma_service import text_collection
 from app.services.reranker_service import rerank_results
 from app.services.context_builder import build_context
 from app.services.gemini_service import generate_answer
@@ -10,7 +10,7 @@ router = APIRouter()
 @router.get("/ask")
 def ask(question: str):
 
-    results = collection.query(
+    results = text_collection.query(
         query_texts=[question],
         n_results=10
     )

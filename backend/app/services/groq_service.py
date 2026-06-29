@@ -52,6 +52,20 @@ Important:
   Introduction
   Key Points
   Conclusion
+
+When IMAGE sections are present:
+
+1. Treat IMAGE sections as equally important as TEXT.
+2. Combine nearby TEXT and IMAGE information into one explanation.
+3. Explain every visible block, label, table, flowchart or diagram.
+4. Use OCR text whenever it helps identify labels.
+5. If OCR is incomplete, use the caption to understand the figure.
+6. Never ignore IMAGE sections.
+7. If a diagram is retrieved, include a separate heading:
+
+Diagram Explanation
+
+and explain what each component represents.
 """
 
     response = client.chat.completions.create(

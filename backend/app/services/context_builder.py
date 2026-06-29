@@ -4,57 +4,32 @@ def build_context(results):
 
     for result in results:
 
-        content = result.get(
-            "content",
-            ""
-        )
+        content = result["content"]
+        meta = result["metadata"]
 
-        metadata = result.get(
-            "metadata",
-            {}
-        )
+        page = meta.get("page_no", "")
+        source = meta.get("source_file", "")
 
-        source_file = metadata.get(
-            "source_file",
-            "Unknown"
-        )
-
-        page_no = metadata.get(
-            "page_no",
-            "Unknown"
-        )
-
-        chunk_type = metadata.get(
-            "type",
-            "text"
-        )
-
-        if chunk_type == "image":
+        if meta.get("type") == "image":
 
             context += (
-
-                "\n========== IMAGE ==========\n"
-
-                f"{content}\n\n"
-
-                f"Source File: {source_file}\n"
-
-                f"Page: {page_no}\n\n"
-
+                "\n"
+                "================ IMAGE =================\n"
+                f"Page: {page}\n"
+                f"Source: {source}\n\n"
+                f"{content}\n"
+                "========================================\n\n"
             )
 
         else:
 
             context += (
-
-                "\n========== TEXT ==========\n"
-
-                f"{content}\n\n"
-
-                f"Source File: {source_file}\n"
-
-                f"Page: {page_no}\n\n"
-
+                "\n"
+                "================ TEXT ==================\n"
+                f"Page: {page}\n"
+                f"Source: {source}\n\n"
+                f"{content}\n"
+                "========================================\n\n"
             )
 
     return context

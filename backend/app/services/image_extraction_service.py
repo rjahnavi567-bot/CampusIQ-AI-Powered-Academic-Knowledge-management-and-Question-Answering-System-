@@ -258,7 +258,7 @@ def extract_pptx_images(
                     f"{folder}/slide_"
                     f"{slide_index}.png"
                 )
-
+                print(path)
                 with open(
                     path,
                     "wb"

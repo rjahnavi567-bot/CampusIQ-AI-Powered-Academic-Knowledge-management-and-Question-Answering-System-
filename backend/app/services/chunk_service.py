@@ -19,29 +19,31 @@ def create_semantic_chunks(text):
 
     text = text.replace("\x00", "")
 
-    raw_paragraphs = [
-        p.strip()
-        for p in re.split(r"\n\s*\n+", text)
-        if p.strip()
-    ]
+    from app.services.block_extractor import (
+    extract_blocks,
+    build_sections
+)
+    blocks = extract_blocks(text)
 
-    paragraphs = []
+    sections = build_sections(blocks)
 
-    for para in raw_paragraphs:
+    paragraphs=[]
 
-        words = para.split()
+    section_headings=[]
 
-        if len(words) <= 150:
-            paragraphs.append(para)
+    for section in sections:
 
-        else:
-            for i in range(0, len(words), 150):
-                paragraphs.append(
-                    " ".join(
-                        words[i:i + 150]
-                    )
-                )
+        words=section["text"].split()
 
+        for i in range(0,len(words),150):
+
+            paragraphs.append(
+            " ".join(words[i:i+150])
+        )
+
+            section_headings.append(
+            section["heading"]
+        )
     print("Text length:", len(text))
     print("Paragraph Count:", len(paragraphs))
 
@@ -67,6 +69,8 @@ def create_semantic_chunks(text):
     similarity = 0.0
 
     for i, para in enumerate(paragraphs):
+
+        current_heading = section_headings[i]
 
         para = para.strip()
 
@@ -100,7 +104,8 @@ def create_semantic_chunks(text):
                     "similarity_score": round(
                         float(similarity),
                         4
-                    )
+                    ),
+                    "section":current_heading,
                 })
 
                 chunk_index += 1
@@ -178,7 +183,8 @@ def create_semantic_chunks(text):
                 "similarity_score": round(
                     float(similarity),
                     4
-                )
+                ),
+                "section":current_heading,
             })
 
             chunk_index += 1
@@ -222,7 +228,8 @@ def create_semantic_chunks(text):
             "similarity_score": round(
                 float(similarity),
                 4
-            )
+            ),
+            "section":current_heading,
         })
 
     print("\n===== CHUNKS CREATED =====")

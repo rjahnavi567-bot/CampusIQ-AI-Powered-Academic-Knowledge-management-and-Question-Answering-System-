@@ -1,6 +1,6 @@
 from app.services.pdf_service import extract_text_from_pdf
 from app.services.chunk_service import create_semantic_chunks
-from app.services.chroma_service import collection
+from app.services.chroma_service import text_collection
 
 pdf_path = "data mining book.pdf"
 
@@ -10,7 +10,7 @@ chunks = create_semantic_chunks(text)
 
 for i, chunk in enumerate(chunks):
 
-    collection.add(
+    text_collection.add(
         ids=[f"chunk_{i}"],
         documents=[chunk["content"]],
         metadatas=[

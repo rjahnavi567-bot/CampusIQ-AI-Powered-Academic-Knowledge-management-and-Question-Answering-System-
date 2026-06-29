@@ -1,66 +1,62 @@
-from sentence_transformers import SentenceTransformer
-from sentence_transformers.util import cos_sim
+from sentence_transformers import CrossEncoder
 
-model = SentenceTransformer(
-    "all-MiniLM-L6-v2",
-    local_files_only=True
+reranker = CrossEncoder(
+    "cross-encoder/ms-marco-MiniLM-L-6-v2"
 )
 
 
 def rerank_results(
-    query,
+    question,
     documents,
     metadatas
 ):
+    """
+    Rerank retrieved chunks using CrossEncoder.
+    """
 
-    query_embedding = model.encode(
-        query,
-        convert_to_tensor=True
+    if len(documents) == 0:
+        return []
+
+    pairs = []
+
+    for doc in documents:
+        pairs.append(
+            [question, doc]
+        )
+
+    scores = reranker.predict(
+        pairs
     )
-
-    doc_embeddings = model.encode(
-        documents,
-        convert_to_tensor=True
-    )
-
-    similarities = cos_sim(
-        query_embedding,
-        doc_embeddings
-    )[0]
 
     ranked = []
 
-    for doc, metadata, score in zip(
+    for doc, meta, score in zip(
         documents,
         metadatas,
-        similarities
+        scores
     ):
 
-        ranked.append({
-            "content": doc,
-            "metadata": metadata,
-            "score": float(score),
-
-            # IMPORTANT
-            "source_file": metadata.get(
-                "source_file",
-                "Unknown"
-            ),
-
-            "page_no": metadata.get(
-                "page_no",
-                "Unknown"
-            ),
-
-            "similarity_score": metadata.get(
-                "similarity_score",
-                0
-            )
-        })
+        ranked.append(
+            {
+                "content": doc,
+                "metadata": meta,
+                "score": float(score)
+            }
+        )
 
     ranked.sort(
         key=lambda x: x["score"],
         reverse=True
+    )
+    print("\n===== RERANK RESULTS =====")
+
+    for item in ranked:
+
+      print(
+        round(item["score"], 2),
+        item["metadata"].get("page_no"),
+        item["metadata"].get("type"),
+        item["content"][:80]
     )
 
     return ranked

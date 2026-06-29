@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.services.chroma_service import collection
+from app.services.chroma_service import text_collection
 from app.services.reranker_service import rerank_results
 
 router = APIRouter()
@@ -23,7 +23,7 @@ def search(
     # Search specific document only
     else:
 
-        results = collection.query(
+        results = text_collection.query(
             query_texts=[query],
             n_results=20,
             where={

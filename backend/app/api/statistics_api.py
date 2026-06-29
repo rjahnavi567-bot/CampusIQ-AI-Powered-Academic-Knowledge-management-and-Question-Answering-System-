@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from app.database.connection import SessionLocal
 from app.database.models import Document, Chunk, User
-from app.services.chroma_service import collection
+from app.services.chroma_service import text_collection
 from sqlalchemy import func
 from app.database.models import QuestionHistory
 router = APIRouter()
@@ -35,7 +35,7 @@ def get_statistics():
     "chunks": db.query(Chunk).count(),
     "users": db.query(User).count(),
     "questions_asked": question_count,
-    "chroma_records": collection.count()
+    "chroma_records": text_collection.count()
 }
         
     finally:

@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.services.chroma_service import collection
+from app.services.chroma_service import text_collection
 from urllib.parse import quote
 router = APIRouter()
 
@@ -7,7 +7,7 @@ router = APIRouter()
 @router.get("/search-documents")
 def search_documents(query: str):
 
-    results = collection.query(
+    results = text_collection.query(
         query_texts=[query],
         n_results=20
     )

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from app.database.connection import SessionLocal
 from app.database.models import Document, Chunk
-from app.services.chroma_service import collection
+from app.services.chroma_service import text_collection
 
 router = APIRouter()
 
@@ -159,7 +159,7 @@ def delete_document(document_id: int):
 
     db.commit()
 
-    results = collection.get()
+    results = text_collection.get()
 
     ids_to_delete = []
 
@@ -178,7 +178,7 @@ def delete_document(document_id: int):
 
     if ids_to_delete:
 
-        collection.delete(
+        text_collection.delete(
             ids=ids_to_delete
         )
 
