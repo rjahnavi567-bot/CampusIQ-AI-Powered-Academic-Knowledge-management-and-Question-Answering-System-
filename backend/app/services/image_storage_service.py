@@ -1,5 +1,6 @@
 from app.database.models import DocumentImage
 from app.services.chroma_service import image_collection
+from app.services.image_embedding_service import embed_image
 import os
 
 
@@ -26,34 +27,32 @@ def store_images(images, document_id):
     """
     Store image captions + OCR into ChromaDB.
     """
-
     for image in images:
+
+        embedding = embed_image(image["path"])
 
         image_collection.add(
 
-            ids=[
-                f"image_{document_id}_{os.path.basename(image['path'])}"
-            ],
+    ids=[
+        f"image_{document_id}_{os.path.basename(image['path'])}"
+    ],
 
-            documents=[
-                (
-                    "Image Caption:\n"
-                    + image["caption"]
-                    + "\n\nOCR:\n"
-                    + image["ocr_text"]
-                )
-            ],
+    embeddings=[
+        image["clip_embedding"]
+    ],
 
-            metadatas=[
-                {
-                    "document_id": document_id,
-                    "type": "image",
-                    "page_no": image["page_no"],
-                    "image_path": image["path"],
-                    "caption": image["caption"],
-                    "source_file": image["source_file"]
-                }
-            ]
-        )
+    documents=[
+        image["caption"] + "\n\n" + image["ocr_text"]
+    ],
 
-    print(f"Stored {len(images)} images into Image Collection.")
+    metadatas=[
+        {
+            "document_id": document_id,
+            "type": "image",
+            "page_no": image["page_no"],
+            "image_path": image["path"],
+            "caption": image.get("caption", ""),
+            "source_file": image.get("source_file", "unknown")
+        }
+    ]
+)

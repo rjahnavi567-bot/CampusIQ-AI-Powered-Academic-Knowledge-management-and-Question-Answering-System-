@@ -41,9 +41,15 @@ from app.api.grouped_history_api import (
 from app.api.document_search_api import (
     router as document_search_router
 )
+from app.database.connection import engine
+from app.database.models import Base
+
+# Import models so SQLAlchemy registers every table
+import app.database.models
 
 
 
+Base.metadata.create_all(bind=engine)
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,

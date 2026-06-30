@@ -1,13 +1,6 @@
-def get_page_text(page_no, pages):
+def get_page_text(page_lookup, page_no):
     """
-    Returns the full text of the page
-    where the image was extracted.
+    Returns page text using lookup dictionary.
     """
 
-    for page in pages:
-
-        if page["page_no"] == page_no:
-
-            return page["text"]
-
-    return ""
+    return page_lookup.get(page_no, "")

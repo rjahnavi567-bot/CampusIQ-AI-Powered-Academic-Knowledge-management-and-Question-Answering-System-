@@ -3,38 +3,55 @@ from app.services.chroma_service import text_collection
 
 def store_text_chunks(document_id, chunks):
     """
-    Store semantic text chunks into Text ChromaDB.
+    Store semantic text chunks into ChromaDB.
     """
 
     for i, chunk in enumerate(chunks):
 
+        metadata = {
+            "document_id": document_id,
+            "type": "text",
+            "topic": chunk.get("topic", ""),
+            "keywords": ",".join(
+                chunk.get("keywords", [])
+            ),
+            "source_file": chunk.get(
+                "source_file",
+                ""
+            ),
+            "page_no": int(
+                chunk.get("page_no", 1)
+            ),
+            "similarity_score": float(
+                chunk.get(
+                    "similarity_score",
+                    0
+                )
+            )
+        }
+
+        # Add file_type ONLY if it exists
+        if (
+            "file_type" in chunk
+            and chunk["file_type"] is not None
+        ):
+            metadata["file_type"] = chunk["file_type"]
+
         text_collection.add(
 
             ids=[
-                f"{chunk['source_file']}_{i}"
+                f"{document_id}_{i}"
             ],
 
             documents=[
-                chunk["content"]
+                chunk.get("content", "")
             ],
 
             metadatas=[
-                {
-                    "document_id": document_id,
-                    "type": "text",
-                    "topic": chunk["topic"],
-                    "keywords": ",".join(
-                        chunk.get("keywords", [])
-                    ),
-                    "source_file": chunk["source_file"],
-                    "file_type": chunk.get("file_type"),
-                    "page_no": chunk.get("page_no", 1),
-                    "similarity_score": chunk.get(
-                        "similarity_score",
-                        0
-                    )
-                }
+                metadata
             ]
         )
 
-    print(f"Stored {len(chunks)} text chunks.")
+    print(
+        f"Stored {len(chunks)} text chunks."
+    )

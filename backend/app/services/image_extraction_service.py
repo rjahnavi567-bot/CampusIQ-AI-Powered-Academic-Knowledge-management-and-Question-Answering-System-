@@ -255,10 +255,10 @@ def extract_pptx_images(
                 )
 
                 path = (
-                    f"{folder}/slide_"
-                    f"{slide_index}.png"
-                )
-                print(path)
+    f"{folder}/slide_"
+    f"{slide_index}_"
+    f"{shape.shape_id}.png"
+)
                 with open(
                     path,
                     "wb"
@@ -284,6 +284,8 @@ def extract_pptx_images(
                 else:
 
                     os.remove(path)
+            
+        print(path)
 
     return images
 

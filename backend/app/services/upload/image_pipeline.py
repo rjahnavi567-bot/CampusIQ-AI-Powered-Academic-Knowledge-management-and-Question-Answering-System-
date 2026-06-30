@@ -16,8 +16,8 @@ from app.services.groq_vision_service import (
     analyze_image
 )
 
-from app.services.clip_service import (
-    create_image_embedding
+from app.services.image_embedding_service import (
+    embed_image
 )
 
 from app.services.image_context_service import (
@@ -28,7 +28,7 @@ from app.services.image_context_service import (
 def process_images(
     file_path,
     document_id,
-    pages
+    pages,source_file
 ):
     """
     Complete image processing pipeline.
@@ -94,8 +94,10 @@ def process_images(
     # -------------------------
     # Understand Images
     # -------------------------
-
     for image in images:
+
+        if not os.path.exists(image["path"]):
+            continue
 
         understanding = understand_image(
             image["path"]
@@ -135,6 +137,13 @@ def process_images(
             image["page_no"]
 
         )
+        # ---------------------
+# Metadata
+# ---------------------
+
+        image["source_file"] = source_file
+        image["file_type"] = os.path.splitext(source_file)[1].lower()
+        image["document_id"] = document_id
 
         # ---------------------
         # CLIP Embedding
@@ -142,19 +151,16 @@ def process_images(
 
         try:
 
-            image["clip_embedding"] = (
-                create_image_embedding(
-                    image["path"]
-                )
-            )
+            image["clip_embedding"] = embed_image(
+        image["path"]
+    )
 
         except Exception as e:
 
             print(
-                "CLIP Error:",
-                e
-            )
+        "Image Embedding Error:",
+        e
+    )
 
             image["clip_embedding"] = None
-
     return images

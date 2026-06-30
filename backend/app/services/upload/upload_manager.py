@@ -2,7 +2,7 @@ import os
 import json
 import shutil
 import time
-
+import traceback
 from fastapi import HTTPException
 
 from app.database.connection import SessionLocal
@@ -157,7 +157,6 @@ class UploadManager:
             print(
                 f"Pages Extracted : {len(pages)}"
             )
-
             # ------------------------------------
             # Process Images
             # ------------------------------------
@@ -170,48 +169,14 @@ class UploadManager:
 
                 document_id=document_id,
 
-                pages=pages
+                pages=pages,
+                source_file=file.filename
 
             )
 
             print(
                 f"Images Found : {len(images)}"
             )
-                        # ------------------------------------
-            # Generate Better Title
-            # ------------------------------------
-
-            print("Generating document title...")
-
-            suggested_title, new_filename, new_file_path = (
-
-                generate_document_title(
-
-                    file_path=file_path,
-
-                    pages=pages,
-
-                    original_filename=file.filename
-
-                )
-
-            )
-
-            file_path = new_file_path
-
-            update_document_filename(
-
-                db=db,
-
-                document=new_doc,
-
-                new_filename=new_filename,
-
-                fnew_ile_path=file_path
-
-            )
-
-            print("New Filename :", new_filename)
 
             # ------------------------------------
             # Text Pipeline
@@ -223,7 +188,7 @@ class UploadManager:
 
                 pages=pages,
 
-                filename=new_filename
+                filename=file.filename
 
             )
 
@@ -344,17 +309,62 @@ class UploadManager:
             db.commit()
 
             print("Similarity Check Complete.")
-                        # ------------------------------------
+            try:            
+                # ------------------------------------
             # Save Chunks
             # ------------------------------------
 
-            print("Saving chunks...")
+                print("Saving chunks...")
 
-            save_chunks(
+                save_chunks(
 
                 document_id,
 
                 chunks
+
+            )
+            # ------------------------------------
+            # Store Text Embeddings
+            # ------------------------------------
+                print("Uploading text embeddings to Chroma...")
+
+                store_text_chunks(
+
+                document_id,
+
+                chunks
+
+            )
+
+            # ------------------------------------
+            # Store Image Embeddings
+            # ------------------------------------
+
+                print("Uploading image embeddings to Chroma...")
+                print("Saving image metadata...")
+                save_images(db, document_id, images)
+                print("Uploading image embeddings...")
+                store_images(images, document_id)
+            except Exception:
+
+                # Delete document
+                db.delete(new_doc)
+                db.commit()
+
+                 # Delete uploaded file
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+
+                  # Delete extracted images
+                image_folder = f"uploads/images/{document_id}"
+
+                if os.path.exists(image_folder):
+                    shutil.rmtree(image_folder)
+
+                raise
+            print(
+
+                f"Stored {len(images)} images."
 
             )
 
@@ -371,35 +381,57 @@ class UploadManager:
                 chunk_count=len(chunks)
 
             )
-
             # ------------------------------------
-            # Store Text Embeddings
+            # Generate Better Title
             # ------------------------------------
 
-            print("Uploading text embeddings to Chroma...")
+            print("Generating document title...")
 
-            store_text_chunks(
+            suggested_title, new_filename, new_file_path = (
 
-                document_id,
+                generate_document_title(
 
-                chunks
+                    file_path=file_path,
+
+                    pages=pages,
+
+                    original_filename=file.filename
+
+                )
 
             )
+            try:
+            # Rename the actual file
+                os.rename(file_path, new_file_path)
+                for chunk in chunks:
+                    chunk["source_file"] = new_filename
 
-            # ------------------------------------
-            # Store Image Embeddings
-            # ------------------------------------
+                for image in images:
+                    image["source_file"] = new_filename
 
-            print("Uploading image embeddings to Chroma...")
+                file_path = new_file_path
+            
+            except Exception:
 
-            save_images(db, document_id, images)
-            store_images(images, document_id)
+                print("Rename failed.")
 
-            print(
+                new_filename = file.filename
 
-                f"Stored {len(images)} images."
+                new_file_path = file_path
 
-            )
+            update_document_filename(
+
+    db=db,
+
+    document=new_doc,
+
+    new_filename=new_filename,
+
+    new_path=new_file_path
+
+)
+
+            print("New Filename :", new_filename)
 
             elapsed = round(
 
@@ -437,23 +469,26 @@ class UploadManager:
 
         except Exception as e:
 
+         # Rollback database
             db.rollback()
+
+    # Delete extracted image folder
+            image_folder = f"uploads/images/{document_id}"
+
+            if os.path.exists(image_folder):
+                shutil.rmtree(image_folder)
+
+    # Delete uploaded file
+            if os.path.exists(file_path):
+                os.remove(file_path)
 
             print("\nUPLOAD FAILED")
 
-            print(str(e))
+            traceback.print_exc()
 
             raise HTTPException(
-
-                status_code=500,
-
-                detail=str(e)
-
-            )
-
-        finally:
-
-            db.close()
-
+        status_code=500,
+        detail=str(e)
+    )
 
 upload_manager = UploadManager()

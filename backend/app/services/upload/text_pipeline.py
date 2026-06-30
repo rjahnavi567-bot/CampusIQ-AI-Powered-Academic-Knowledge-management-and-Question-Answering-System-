@@ -1,3 +1,5 @@
+import os
+
 from app.services.chunk_service import create_semantic_chunks
 
 
@@ -5,14 +7,18 @@ def process_text_pages(pages, filename):
     """
     Extract semantic chunks from all pages.
 
-    Returns:
-        chunks
-        content_signature
+    Returns
+    -------
+    chunks
+    content_signature
     """
 
     chunks = []
 
     content_signature = ""
+
+    # Detect extension once
+    file_type = os.path.splitext(filename)[1].lower()
 
     for page in pages:
 
@@ -36,6 +42,12 @@ def process_text_pages(pages, filename):
 
             chunk["source_file"] = filename
 
+            # NEW
+            chunk["file_type"] = file_type
+
             chunks.append(chunk)
+
+    print("\n===== FIRST CHUNK =====")
+    print(chunks[0])
 
     return chunks, content_signature
