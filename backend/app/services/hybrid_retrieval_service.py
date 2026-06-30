@@ -2,7 +2,7 @@ from app.services.chroma_service import (
     text_collection,
     image_collection
 )
-
+from app.services.embedding_service import create_embedding
 from app.services.image_embedding_service import (
     embed_text_for_image_search
 )
@@ -14,39 +14,43 @@ def hybrid_retrieve(
     source_file=None,
     top_k=10
 ):
-
-    where = {}
+    query_embedding = create_embedding(question)
+    clip_embedding = embed_text_for_image_search(question)
+    filters = []
 
     if page_no is not None:
-        where["page_no"] = page_no
+        filters.append({"page_no": page_no})
 
     if source_file is not None:
-        where["source_file"] = source_file
+        filters.append({"source_file": source_file})
+
+    where = None
+
+    if len(filters) == 1:
+        where = filters[0]
+
+    elif len(filters) > 1:
+        where = {
+        "$and": filters
+    }
 
     # ---------------------------------
     # TEXT SEARCH (384-dimensional)
     # ---------------------------------
 
-    if where:
+    query_args = {
+    "query_embeddings": [query_embedding],
+    "n_results": top_k
+}
 
-        text_results = text_collection.query(
-            query_texts=[question],
-            where=where,
-            n_results=top_k
-        )
+    if where is not None:
+        query_args["where"] = where
 
-    else:
-
-        text_results = text_collection.query(
-            query_texts=[question],
-            n_results=top_k
-        )
+    text_results = text_collection.query(**query_args)
 
     # ---------------------------------
     # IMAGE SEARCH (512-dimensional CLIP)
     # ---------------------------------
-
-    clip_embedding = embed_text_for_image_search(question)
 
     if where:
 

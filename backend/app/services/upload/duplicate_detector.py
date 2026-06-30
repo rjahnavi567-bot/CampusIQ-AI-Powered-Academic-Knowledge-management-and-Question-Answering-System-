@@ -1,7 +1,7 @@
 import json
 
 from app.services.hash_service import generate_file_hash
-from app.services.embedding_service1 import create_embedding
+from app.services.embedding_service import create_embedding
 from app.services.similarity_service1 import cosine_similarity
 
 from app.database.models import Document

@@ -1,7 +1,7 @@
 import re
 import numpy as np
 
-from app.services.embedding_service import get_embeddings
+from app.services.embedding_service import create_embeddings
 from app.services.heading_detector import is_heading
 
 SIMILARITY_THRESHOLD = 0.35
@@ -53,9 +53,7 @@ def create_semantic_chunks(text):
 
     print("Generating embeddings...")
 
-    embeddings = get_embeddings(
-        paragraphs
-    )
+    embeddings = create_embeddings(paragraphs)
 
     print("Embeddings generated.")
 

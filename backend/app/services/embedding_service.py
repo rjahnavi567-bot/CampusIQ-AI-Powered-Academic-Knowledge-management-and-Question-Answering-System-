@@ -1,23 +1,26 @@
 from sentence_transformers import SentenceTransformer
 
 model = SentenceTransformer(
-    "all-MiniLM-L6-v2"
+    "BAAI/bge-small-en-v1.5"
 )
 
+def create_embedding(text):
 
-def get_embedding(text):
-
-    return model.encode(
+    embedding = model.encode(
         text,
-        convert_to_numpy=True
+        normalize_embeddings=True
     )
 
+    return embedding.tolist()
 
-def get_embeddings(texts):
 
-    return model.encode(
+def create_embeddings(texts):
+
+    embeddings = model.encode(
         texts,
+        normalize_embeddings=True,
         batch_size=32,
-        convert_to_numpy=True,
         show_progress_bar=True
     )
+
+    return embeddings
