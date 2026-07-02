@@ -157,6 +157,53 @@ class UploadManager:
             print(
                 f"Pages Extracted : {len(pages)}"
             )
+
+            # ------------------------------------
+            # Generate Better Title
+            # ------------------------------------
+
+            print("Generating document title...")
+
+            suggested_title, new_filename, new_file_path = (
+
+                generate_document_title(
+
+                    file_path=file_path,
+
+                    pages=pages,
+
+                    original_filename=file.filename
+
+                )
+
+            )
+            try:
+            # Rename the actual file
+                os.rename(file_path, new_file_path)
+
+                file_path = new_file_path
+            
+            except Exception:
+
+                print("Rename failed.")
+
+                new_filename = file.filename
+
+                new_file_path = file_path
+
+            update_document_filename(
+
+    db=db,
+
+    document=new_doc,
+
+    new_filename=new_filename,
+
+    new_path=new_file_path
+
+)
+
+            print("New Filename :", new_filename)
             # ------------------------------------
             # Process Images
             # ------------------------------------
@@ -170,7 +217,7 @@ class UploadManager:
                 document_id=document_id,
 
                 pages=pages,
-                source_file=file.filename
+                source_file=new_filename
 
             )
 
@@ -188,7 +235,7 @@ class UploadManager:
 
                 pages=pages,
 
-                filename=file.filename
+                filename=new_filename
 
             )
 
@@ -381,57 +428,7 @@ class UploadManager:
                 chunk_count=len(chunks)
 
             )
-            # ------------------------------------
-            # Generate Better Title
-            # ------------------------------------
 
-            print("Generating document title...")
-
-            suggested_title, new_filename, new_file_path = (
-
-                generate_document_title(
-
-                    file_path=file_path,
-
-                    pages=pages,
-
-                    original_filename=file.filename
-
-                )
-
-            )
-            try:
-            # Rename the actual file
-                os.rename(file_path, new_file_path)
-                for chunk in chunks:
-                    chunk["source_file"] = new_filename
-
-                for image in images:
-                    image["source_file"] = new_filename
-
-                file_path = new_file_path
-            
-            except Exception:
-
-                print("Rename failed.")
-
-                new_filename = file.filename
-
-                new_file_path = file_path
-
-            update_document_filename(
-
-    db=db,
-
-    document=new_doc,
-
-    new_filename=new_filename,
-
-    new_path=new_file_path
-
-)
-
-            print("New Filename :", new_filename)
 
             elapsed = round(
 

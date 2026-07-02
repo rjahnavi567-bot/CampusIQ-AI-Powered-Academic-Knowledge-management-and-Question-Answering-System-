@@ -1,4 +1,5 @@
 import os
+import hashlib
 
 from app.services.image_extraction_service import (
     extract_pdf_images,
@@ -25,33 +26,67 @@ from app.services.image_context_service import (
 )
 
 
+# ---------------------------------------------------------
+# Duplicate Removal
+# ---------------------------------------------------------
+
+def remove_duplicate_images(images):
+
+    unique = []
+
+    hashes = set()
+
+    for image in images:
+
+        try:
+
+            with open(image["path"], "rb") as f:
+
+                h = hashlib.md5(f.read()).hexdigest()
+
+            if h in hashes:
+
+                os.remove(image["path"])
+
+                continue
+
+            hashes.add(h)
+
+            unique.append(image)
+
+        except Exception:
+
+            unique.append(image)
+
+    return unique
+
+
+# ---------------------------------------------------------
+# Image Processing Pipeline
+# ---------------------------------------------------------
+
 def process_images(
     file_path,
     document_id,
-    pages,source_file
+    pages,
+    source_file
 ):
-    """
-    Complete image processing pipeline.
-
-    Returns:
-        images
-    """
 
     extension = os.path.splitext(
         file_path
     )[1].lower()
 
-    page_lookup = {}
+    page_lookup = {
 
-    for page in pages:
+        page["page_no"]: page["text"]
 
-        page_lookup[
-            page["page_no"]
-        ] = page["text"]
+        for page in pages
 
-    # -------------------------
+    }
+
+    # -----------------------------------------------------
     # Extract Images
-    # -------------------------
+    # -----------------------------------------------------
 
     if extension == ".pdf":
 
@@ -75,9 +110,13 @@ def process_images(
         )
 
     elif extension in [
+
         ".png",
+
         ".jpg",
+
         ".jpeg"
+
     ]:
 
         images = extract_image_file(
@@ -91,44 +130,51 @@ def process_images(
             document_id
         )
 
-    # -------------------------
-    # Understand Images
-    # -------------------------
+    # -----------------------------------------------------
+    # Remove duplicates
+    # -----------------------------------------------------
+
+    images = remove_duplicate_images(images)
+
+    print()
+
+    print("Unique Images :", len(images))
+
+    print()
+
+    # -----------------------------------------------------
+    # Understand every image
+    # -----------------------------------------------------
+
+    processed = []
+
     for image in images:
 
         if not os.path.exists(image["path"]):
+
             continue
 
         understanding = understand_image(
+
             image["path"]
+
         )
 
         image["caption"] = understanding["caption"]
 
         image["ocr_text"] = understanding["ocr_text"]
 
-        # ---------------------
-        # Groq Vision
-        # ---------------------
-
         try:
 
             image["vision"] = analyze_image(
+
                 image["path"]
+
             )
 
-        except Exception as e:
-
-            print(
-                "Groq Vision Error:",
-                e
-            )
+        except Exception:
 
             image["vision"] = ""
-
-        # ---------------------
-        # Page Context
-        # ---------------------
 
         image["page_text"] = get_page_text(
 
@@ -137,30 +183,33 @@ def process_images(
             image["page_no"]
 
         )
-        # ---------------------
-# Metadata
-# ---------------------
 
         image["source_file"] = source_file
-        image["file_type"] = os.path.splitext(source_file)[1].lower()
+
+        image["file_type"] = os.path.splitext(
+
+            source_file
+
+        )[1].lower()
+
         image["document_id"] = document_id
 
-        # ---------------------
+        # -----------------------------------------
         # CLIP Embedding
-        # ---------------------
+        # -----------------------------------------
 
         try:
 
             image["clip_embedding"] = embed_image(
-        image["path"]
-    )
 
-        except Exception as e:
+                image["path"]
 
-            print(
-        "Image Embedding Error:",
-        e
-    )
+            )
+
+        except Exception:
 
             image["clip_embedding"] = None
-    return images
+
+        processed.append(image)
+
+    return processed

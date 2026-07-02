@@ -22,7 +22,7 @@ export default function Ask() {
     useState(null);
 
   const [sources, setSources] = useState([]);
-
+  const [images, setImages] = useState([]);
   // ==========================
   // LOAD DOCUMENTS
   // ==========================
@@ -90,6 +90,10 @@ export default function Ask() {
       setSources(
         res.data.sources || []
       );
+
+      setImages(
+    res.data.images || []
+);
 
       setConfidence(
         res.data.confidence
@@ -257,12 +261,7 @@ export default function Ask() {
             <strong>
               Confidence:
             </strong>{" "}
-            {
-              (
-                confidence * 100
-              ).toFixed(0)
-            }
-            %
+            {confidence}%
           </div>
 
         )
@@ -271,6 +270,7 @@ export default function Ask() {
       <AnswerCard
         answer={answer}
         confidence={confidence}
+        images={images}
       />
 
       <SourceList

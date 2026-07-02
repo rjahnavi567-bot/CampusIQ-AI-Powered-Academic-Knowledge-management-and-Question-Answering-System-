@@ -45,6 +45,10 @@ def hybrid_retrieve(
 
     if where is not None:
         query_args["where"] = where
+    
+    print("\n===== CHROMA FILTER =====")
+    print(where)
+    print("=========================\n")
 
     text_results = text_collection.query(**query_args)
 
@@ -81,7 +85,7 @@ def hybrid_retrieve(
             text_results["distances"][0]
 
         ):
-
+            meta["retrieval_type"] = "text"
             documents.append(doc)
             metadatas.append(meta)
             scores.append(score)
@@ -96,7 +100,7 @@ def hybrid_retrieve(
             image_results["distances"][0]
 
         ):
-
+            meta["retrieval_type"] = "image"
             documents.append(doc)
             metadatas.append(meta)
             scores.append(score)

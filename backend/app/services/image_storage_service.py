@@ -19,15 +19,30 @@ def save_images(db, document_id, images):
         )
 
         db.add(record)
+    print("\nSaving image metadata...")
+
+    for image in images:
+        print(image["path"])
 
     db.commit()
+    print("Images saved:", len(images))
 
 
 def store_images(images, document_id):
     """
     Store image captions + OCR into ChromaDB.
     """
+    print("\nUploading image embeddings...")
+
+    count = 0
     for image in images:
+        count += 1
+
+        print(
+    "Uploading:",
+    image["path"]
+)
+        
 
         embedding = embed_image(image["path"])
 

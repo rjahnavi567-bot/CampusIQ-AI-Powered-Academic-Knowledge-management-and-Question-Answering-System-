@@ -1,8 +1,8 @@
 export default function AnswerCard({
   answer,
-  confidence
+  confidence,
+  images = []
 }) {
-
   if (!answer) return null;
 
   const copyAnswer = () => {
@@ -43,6 +43,44 @@ Confidence:
       <pre>
         {answer}
       </pre>
+      {images.length > 0 && (
+
+  <div style={{ marginTop: "25px" }}>
+
+    <h3>Relevant Diagrams</h3>
+
+    {images.map((img, index) => (
+
+      <div
+        key={index}
+        style={{
+          marginBottom: "25px"
+        }}
+      >
+
+        <img
+          src={`http://localhost:8000/${img.image_path}`}
+          alt={img.caption}
+          style={{
+            maxWidth: "100%",
+            border: "1px solid #ccc",
+            borderRadius: "6px"
+          }}
+        />
+
+        <p>
+          <strong>Page:</strong> {img.page_no}
+        </p>
+
+        <p>{img.caption}</p>
+
+      </div>
+
+    ))}
+
+  </div>
+
+)}
 
     </div>
   );

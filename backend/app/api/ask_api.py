@@ -5,7 +5,9 @@ from app.services.hybrid_retrieval_service import hybrid_retrieve
 from app.services.reranker_service import rerank_results
 from app.services.context_builder import build_context
 from app.services.groq_service import generate_answer
-
+from app.services.diagram_response_service import (
+    extract_relevant_images
+)
 from app.database.connection import SessionLocal
 from app.database.models import QuestionHistory
 from app.schemas.ask_schema import AskRequest
@@ -49,6 +51,11 @@ def ask(request: AskRequest):
     # =====================================
     # RETRIEVE
     # =====================================
+    print("\n========== ASK REQUEST ==========")
+    print("Question :", question)
+    print("Selected File :", source_file)
+    print("Selected Page :", page_no)
+    print("=================================\n")
 
     documents, metadatas, scores = hybrid_retrieve(
 
@@ -129,6 +136,11 @@ def ask(request: AskRequest):
     # =====================================
 
     top_chunks = ranked[:6]
+    # -------------------------------------
+# Extract diagrams/images
+# -------------------------------------
+
+    relevant_images = extract_relevant_images(top_chunks)
     # =====================================
 # Separate image and text chunks
 # =====================================
@@ -248,51 +260,34 @@ def ask(request: AskRequest):
     # =====================================
     # RESPONSE
     # =====================================
+    print(source_file)
 
     return {
 
-        "question": question,
+    "question": question,
 
-        "answer": answer,
+    "answer": answer,
 
-        "marks": marks,
+    "marks": marks,
 
-        "confidence": confidence,
+    "confidence": confidence,
 
-        "sources": [
+    "sources": [
 
-            {
+        {
 
-                "file":
+            "file": chunk["metadata"].get("source_file"),
 
-                    chunk["metadata"].get(
+            "page": chunk["metadata"].get("page_no"),
 
-                        "source_file"
+            "type": chunk["metadata"].get("type", "text")
 
-                    ),
+        }
 
-                "page":
+        for chunk in top_chunks
 
-                    chunk["metadata"].get(
+    ],
 
-                        "page_no"
+    "images": relevant_images
 
-                    ),
-
-                "type":
-
-                    chunk["metadata"].get(
-
-                        "type",
-
-                        "text"
-
-                    )
-
-            }
-
-            for chunk in top_chunks
-
-        ]
-
-    }
+}
