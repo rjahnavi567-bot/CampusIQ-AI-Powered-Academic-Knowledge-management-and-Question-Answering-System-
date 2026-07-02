@@ -12,11 +12,22 @@ def save_images(db, document_id, images):
     for image in images:
 
         record = DocumentImage(
-            document_id=document_id,
-            image_path=image["path"],
-            page_no=image["page_no"],
-            caption=image["caption"]
-        )
+
+    document_id=document_id,
+
+    image_path=image["path"],
+
+    page_no=image["page_no"],
+
+    caption=image.get("caption", ""),
+
+    title=image.get("title", ""),
+
+    image_hash=image.get("image_hash", ""),
+
+    source_file=image.get("source_file", "")
+
+)
 
         db.add(record)
     print("\nSaving image metadata...")
@@ -30,44 +41,66 @@ def save_images(db, document_id, images):
 
 def store_images(images, document_id):
     """
-    Store image captions + OCR into ChromaDB.
+    Store image metadata into ChromaDB.
     """
-    print("\nUploading image embeddings...")
 
-    count = 0
     for image in images:
-        count += 1
-
-        print(
-    "Uploading:",
-    image["path"]
-)
-        
-
-        embedding = embed_image(image["path"])
 
         image_collection.add(
 
-    ids=[
-        f"image_{document_id}_{os.path.basename(image['path'])}"
-    ],
+            ids=[
+                f"image_{document_id}_{image['image_hash']}"
+            ],
 
-    embeddings=[
-        image["clip_embedding"]
-    ],
+            documents=[
+(
+f"""
+IMAGE_HASH:
+{image.get("image_hash","")}
 
-    documents=[
-        image["caption"] + "\n\n" + image["ocr_text"]
-    ],
+TITLE:
+{image.get("title","")}
 
-    metadatas=[
-        {
-            "document_id": document_id,
-            "type": "image",
-            "page_no": image["page_no"],
-            "image_path": image["path"],
-            "caption": image.get("caption", ""),
-            "source_file": image.get("source_file", "unknown")
-        }
-    ]
+CAPTION:
+{image.get("caption","")}
+
+OCR:
+{image.get("ocr_text","")}
+
+VISION:
+{image.get("vision","")}
+
+PAGE CONTEXT:
+{image.get("page_text","")}
+"""
 )
+],
+
+            metadatas=[
+
+                {
+
+                    "document_id": document_id,
+
+                    "type": "image",
+
+                    "page_no": image["page_no"],
+
+                    "image_path": image["path"],
+
+                    "caption": image.get("caption", ""),
+
+                    "title": image.get("title", ""),
+
+                    "image_hash": image.get("image_hash", ""),
+
+                    "source_file": image.get("source_file", ""),
+
+                    "file_type": image.get("file_type", "")
+
+                }
+
+            ]
+        )
+
+    print(f"Stored {len(images)} images.")

@@ -5,13 +5,10 @@ from app.services.hybrid_retrieval_service import hybrid_retrieve
 from app.services.reranker_service import rerank_results
 from app.services.context_builder import build_context
 from app.services.groq_service import generate_answer
-from app.services.diagram_response_service import (
-    extract_relevant_images
-)
 from app.database.connection import SessionLocal
 from app.database.models import QuestionHistory
 from app.schemas.ask_schema import AskRequest
-
+from app.database.models import DocumentImage
 router = APIRouter()
 
 
@@ -139,8 +136,6 @@ def ask(request: AskRequest):
     # -------------------------------------
 # Extract diagrams/images
 # -------------------------------------
-
-    relevant_images = extract_relevant_images(top_chunks)
     # =====================================
 # Separate image and text chunks
 # =====================================
@@ -197,35 +192,235 @@ def ask(request: AskRequest):
 
     )
 
+    # ----------------------------------------
+    # Parse USED_IMAGES
+    # ----------------------------------------
+
+    used_ids = []
+
+    match = re.search(
+
+    r"USED_IMAGES:(.*)",
+
+    answer,
+
+    re.DOTALL
+
+)
+
+    if match:
+
+        lines = match.group(1).strip().splitlines()
+
+        for line in lines:
+
+            line = line.strip()
+
+            if re.fullmatch(r"[a-f0-9]{8}", line):
+                used_ids.append(line)
+
+    # Remove USED_IMAGES section from answer
+
+    answer = re.sub(
+
+    r"USED_IMAGES:.*",
+
+    "",
+
+    answer,
+
+    flags=re.DOTALL
+
+).strip()
+
     # =====================================
-    # CONFIDENCE
+    # FETCH ALL RELEVANT DIAGRAMS
     # =====================================
 
-    confidence = 0
+    db = SessionLocal()
 
-    if len(scores):
+    relevant_images = []
+    seen = set()
 
-        avg = sum(scores) / len(scores)
+    try:
 
-        confidence = round(
+      if used_ids:
 
-            max(
+        images = (
+            db.query(DocumentImage)
+            .filter(DocumentImage.image_hash.in_(used_ids))
+            .all()
+        )
 
-                0,
+        for img in images:
 
-                min(
+            if img.image_hash in seen:
+                continue
 
-                    100,
+            seen.add(img.image_hash)
 
-                    (1 / (1 + avg)) * 100
+            relevant_images.append({
+                "title": img.title,
+                "caption": img.caption,
+                "page_no": img.page_no,
+                "image_path": img.image_path
+            })
+      else:
 
-                )
+        seen=set()
 
-            ),
+        for chunk in top_chunks:
 
-            2
+            meta=chunk["metadata"]
+
+            if meta.get("type")!="image":
+                continue
+
+            path=meta.get("image_path")
+
+            if path in seen:
+                continue
+
+            seen.add(path)
+
+            relevant_images.append({
+
+            "title":meta.get("title","Diagram"),
+
+            "caption":meta.get("caption",""),
+
+            "page_no":meta.get("page_no"),
+
+            "image_path":path
+
+        })
+
+    finally:
+
+            db.close()
+
+    relevant_images.sort(
+    key=lambda x: x["page_no"]
+)
+
+    # =====================================
+    # AI CONFIDENCE SCORE
+    # =====================================
+
+    retrieval_score = 0
+    reranker_score = 0
+    coverage_score = 0
+    image_score = 0 
+
+    # ------------------------------
+    # Retrieval Quality (30%)
+    # ------------------------------
+
+    if scores:
+
+        avg_distance = sum(scores) / len(scores)
+
+        retrieval_score = max(
+
+        0,
+
+        min(
+
+            100,
+
+            (1 - avg_distance) * 100
 
         )
+
+    )
+
+# ------------------------------
+# CrossEncoder Quality (40%)
+# ------------------------------
+
+    if ranked:
+
+        top_scores = [
+
+        item["score"]
+
+        for item in ranked[:5]
+
+    ]
+
+        avg_cross = sum(top_scores) / len(top_scores)
+
+    # CrossEncoder scores usually lie around
+    # -5 to +15
+
+        reranker_score = max(
+
+        0,
+
+        min(
+
+            100,
+
+            ((avg_cross + 5) / 20) * 100
+
+        )
+
+    )
+
+# ------------------------------
+# Evidence Coverage (20%)
+# ------------------------------
+
+    coverage_score = min(
+
+    100,
+
+    len(top_chunks) * 16.7
+
+)
+
+# ------------------------------
+# Diagram Usage (10%)
+# ------------------------------
+
+    if len(relevant_images):
+
+            image_score = min(
+
+        100,
+
+        len(relevant_images) * 25
+
+    )
+
+# ------------------------------
+# Final Confidence
+# ------------------------------
+
+    confidence = round(
+
+    retrieval_score * 0.30 +
+
+    reranker_score * 0.40 +
+
+    coverage_score * 0.20 +
+
+    image_score * 0.10,
+
+    2
+
+)
+    print("\n===== CONFIDENCE =====")
+
+    print("Retrieval :", round(retrieval_score,2))
+
+    print("Reranker :", round(reranker_score,2))
+
+    print("Coverage :", round(coverage_score,2))
+
+    print("Images :", round(image_score,2))
+
+    print("Final :", confidence)
 
     # =====================================
     # SAVE HISTORY

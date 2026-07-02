@@ -55,17 +55,33 @@ Important:
 
 When IMAGE sections are present:
 
-1. Treat IMAGE sections as equally important as TEXT.
-2. Combine nearby TEXT and IMAGE information into one explanation.
-3. Explain every visible block, label, table, flowchart or diagram.
-4. Use OCR text whenever it helps identify labels.
-5. If OCR is incomplete, use the caption to understand the figure.
-6. Never ignore IMAGE sections.
-7. If a diagram is retrieved, include a separate heading:
+1. Treat IMAGE sections exactly like textbook figures.
 
-Diagram Explanation
+2. Read TITLE before CAPTION.
 
-and explain what each component represents.
+3. Use OCR only when useful.
+
+4. Explain every diagram you actually used.
+
+5. Never ignore retrieved diagrams.
+
+6. At the END of your answer output exactly:
+
+USED_IMAGES:
+hash1
+hash2
+hash3
+
+Replace hash1, hash2... with the image_hash values of every diagram you actually used.
+
+If no diagram was used:
+
+USED_IMAGES:
+NONE
+
+Never invent hashes.
+
+Never output hashes inside the answer body.
 """
 
     response = client.chat.completions.create(

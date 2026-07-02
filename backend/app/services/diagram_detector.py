@@ -1,46 +1,72 @@
 import cv2
 import numpy as np
 
-
-MIN_COMPONENT_AREA = 2500
-
-MIN_DIAGRAM_AREA = 35000
+MIN_AREA = 35000
 
 MIN_WIDTH = 180
 
 MIN_HEIGHT = 180
 
 
+def is_text_block(binary_crop):
+    """
+    Returns True if crop mostly contains text.
+    """
+
+    h_projection = np.sum(binary_crop > 0, axis=1)
+
+    line_count = np.sum(h_projection > binary_crop.shape[1] * 0.35)
+
+    return line_count > 12
+
+
+def has_graphics(binary_crop):
+    """
+    Returns True if crop has graphics/lines/boxes.
+    """
+
+    horizontal = cv2.getStructuringElement(
+        cv2.MORPH_RECT,
+        (40, 1)
+    )
+
+    vertical = cv2.getStructuringElement(
+        cv2.MORPH_RECT,
+        (1, 40)
+    )
+
+    h = cv2.morphologyEx(
+        binary_crop,
+        cv2.MORPH_OPEN,
+        horizontal
+    )
+
+    v = cv2.morphologyEx(
+        binary_crop,
+        cv2.MORPH_OPEN,
+        vertical
+    )
+
+    graphics = cv2.countNonZero(h) + cv2.countNonZero(v)
+
+    return graphics > 500
+
+
 def detect_diagrams(page_image_path):
-    """
-    Detect diagrams, graphs, flowcharts, screenshots,
-    tables and large figures from an entire rendered page.
 
-    Returns
-    -------
-    list
-        [
-            {
-                "image": cropped_image,
-                "bbox": (x, y, w, h)
-            }
-        ]
-    """
+    image = cv2.imread(page_image_path)
 
-    page = cv2.imread(page_image_path)
-
-    if page is None:
+    if image is None:
         return []
 
-    original = page.copy()
+    original = image.copy()
 
-    gray = cv2.cvtColor(page, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(
+        image,
+        cv2.COLOR_BGR2GRAY
+    )
 
-    # ----------------------------------------
-    # Adaptive Threshold
-    # ----------------------------------------
-
-    thresh = cv2.adaptiveThreshold(
+    binary = cv2.adaptiveThreshold(
 
         gray,
 
@@ -56,10 +82,6 @@ def detect_diagrams(page_image_path):
 
     )
 
-    # ----------------------------------------
-    # Connect nearby components
-    # ----------------------------------------
-
     kernel = cv2.getStructuringElement(
 
         cv2.MORPH_RECT,
@@ -68,9 +90,9 @@ def detect_diagrams(page_image_path):
 
     )
 
-    thresh = cv2.dilate(
+    binary = cv2.dilate(
 
-        thresh,
+        binary,
 
         kernel,
 
@@ -78,35 +100,27 @@ def detect_diagrams(page_image_path):
 
     )
 
-    # ----------------------------------------
-    # Connected Components
-    # ----------------------------------------
+    contours, _ = cv2.findContours(
 
-    num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(
+        binary,
 
-        thresh,
+        cv2.RETR_EXTERNAL,
 
-        connectivity=8
+        cv2.CHAIN_APPROX_SIMPLE
 
     )
 
-    detected = []
+    diagrams = []
 
-    used_boxes = []
+    used = []
 
-    for i in range(1, num_labels):
+    for contour in contours:
 
-        x = stats[i, cv2.CC_STAT_LEFT]
+        x, y, w, h = cv2.boundingRect(contour)
 
-        y = stats[i, cv2.CC_STAT_TOP]
+        area = w * h
 
-        w = stats[i, cv2.CC_STAT_WIDTH]
-
-        h = stats[i, cv2.CC_STAT_HEIGHT]
-
-        area = stats[i, cv2.CC_STAT_AREA]
-
-        if area < MIN_COMPONENT_AREA:
+        if area < MIN_AREA:
             continue
 
         if w < MIN_WIDTH:
@@ -115,17 +129,29 @@ def detect_diagrams(page_image_path):
         if h < MIN_HEIGHT:
             continue
 
-        if w * h < MIN_DIAGRAM_AREA:
+        aspect = w / h
+
+        if aspect > 8:
+            continue
+
+        if aspect < 0.12:
             continue
 
         crop = original[y:y+h, x:x+w]
 
-        if crop.size == 0:
-            continue
+        crop_binary = binary[y:y+h, x:x+w]
+
+        # Ignore plain text paragraphs
+
+        if is_text_block(crop_binary):
+
+            if not has_graphics(crop_binary):
+
+                continue
 
         duplicate = False
 
-        for bx in used_boxes:
+        for bx in used:
 
             xx, yy, ww, hh = bx
 
@@ -140,22 +166,22 @@ def detect_diagrams(page_image_path):
             if inter_w <= 0 or inter_h <= 0:
                 continue
 
-            inter_area = inter_w * inter_h
+            inter = inter_w * inter_h
 
-            union = w*h + ww*hh - inter_area
+            union = w*h + ww*hh - inter
 
-            iou = inter_area / union
+            if inter / union > 0.60:
 
-            if iou > 0.55:
                 duplicate = True
+
                 break
 
         if duplicate:
             continue
 
-        used_boxes.append((x, y, w, h))
+        used.append((x, y, w, h))
 
-        detected.append({
+        diagrams.append({
 
             "image": crop,
 
@@ -163,4 +189,4 @@ def detect_diagrams(page_image_path):
 
         })
 
-    return detected
+    return diagrams

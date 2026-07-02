@@ -227,3 +227,35 @@ mark {
   font-weight: bold;
 
 }
+
+.diagram-grid{
+
+display:grid;
+
+grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+
+gap:20px;
+
+margin-top:20px;
+
+}
+
+.diagram-card{
+
+border:1px solid #ddd;
+
+padding:15px;
+
+border-radius:10px;
+
+background:white;
+
+}
+
+.diagram-card img{
+
+max-height:300px;
+
+object-fit:contain;
+
+}

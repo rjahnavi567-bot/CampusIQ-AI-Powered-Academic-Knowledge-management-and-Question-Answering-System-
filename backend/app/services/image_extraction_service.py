@@ -32,8 +32,6 @@ def extract_pdf_images(pdf_path, document_id):
 
     extracted = []
 
-    image_index = 0
-
     for page_no in range(len(pdf)):
 
         page = pdf.load_page(page_no)
@@ -55,44 +53,16 @@ def extract_pdf_images(pdf_path, document_id):
         pix.save(page_path)
 
         # =====================================================
-        # Detect diagrams/tables/charts
-        # =====================================================
-
-        diagrams = detect_diagrams(page_path)
-
-        for diagram in diagrams:
-
-            image_index += 1
-
-            save_path = os.path.join(
-
-                output_folder,
-
-                f"diagram_{page_no}_{image_index}.png"
-
-            )
-
-            cv2.imwrite(
-
-                save_path,
-
-                diagram["image"]
-
-            )
-
-            extracted.append({
-
-                "path": save_path,
-
-                "page_no": page_no + 1
-
-            })
-
-        # =====================================================
         # Extract embedded images
         # =====================================================
 
         images = page.get_images(full=True)
+
+        # =====================================================
+        # Embedded images first
+        # =====================================================
+
+        embedded_found = False
 
         for img in images:
 
@@ -106,79 +76,92 @@ def extract_pdf_images(pdf_path, document_id):
 
                 ext = base["ext"]
 
-                image = Image.open(
+                save_path = os.path.join(
 
-                    fitz.open(
+            output_folder,
 
-                        stream=image_bytes,
+            f"embedded_{page_no}_{xref}.{ext}"
 
-                        filetype=ext
+        )
 
-                    ).extract_image(0)["image"]
+                with open(save_path, "wb") as f:
 
-                )
+                    f.write(image_bytes)
 
-            except Exception:
+                image = Image.open(save_path)
 
-                try:
+                width, height = image.size
 
-                    base = pdf.extract_image(xref)
+                # Ignore tiny icons
 
-                    image_bytes = base["image"]
+                # Ignore tiny icons/logos but keep useful diagrams
 
-                    ext = base["ext"]
+                if width < 120 or height < 120:
 
-                    save_path = os.path.join(
-
-                        output_folder,
-
-                        f"embedded_{page_no}_{xref}.{ext}"
-
-                    )
-
-                    with open(save_path, "wb") as f:
-
-                        f.write(image_bytes)
-
-                except Exception:
+                    os.remove(save_path)
 
                     continue
 
+                # Ignore extremely thin decorative images
+
+                if width / height > 8 or height / width > 8:
+
+                    os.remove(save_path)
+
+                    continue
+
+                embedded_found = True
+
                 extracted.append({
 
-                    "path": save_path,
+            "path": save_path,
 
-                    "page_no": page_no + 1
+            "page_no": page_no + 1,
 
-                })
+            "source": "embedded"
 
-                continue
+        })
 
-            width, height = image.size
-
-            if width < 120 or height < 120:
+            except Exception:
 
                 continue
+        
+        # =====================================================
+        # If no embedded images exist
+        # then detect diagrams from page
+        # =====================================================
 
-            image_index += 1
+        if not embedded_found:
 
-            save_path = os.path.join(
+            diagrams = detect_diagrams(page_path)
 
-                output_folder,
+            for i, diagram in enumerate(diagrams):
 
-                f"embedded_{page_no}_{image_index}.png"
+                save_path = os.path.join(
 
-            )
+            output_folder,
 
-            image.save(save_path)
+            f"diagram_{page_no}_{i}.png"
 
-            extracted.append({
+        )
 
-                "path": save_path,
+                cv2.imwrite(
 
-                "page_no": page_no + 1
+            save_path,
 
-            })
+            diagram["image"]
+
+        )
+
+                extracted.append({
+
+            "path": save_path,
+
+            "page_no": page_no + 1,
+
+            "source": "detected"
+
+        })
 
     return extracted
 

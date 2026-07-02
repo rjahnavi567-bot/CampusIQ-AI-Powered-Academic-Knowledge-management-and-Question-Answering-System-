@@ -105,3 +105,18 @@ class DocumentImage(Base):
     caption = Column(
         Text
     )
+
+    # NEW
+
+    title = Column(
+        String
+    )
+
+    image_hash = Column(
+        String,
+        unique=True
+    )
+
+    source_file = Column(
+        String
+    )

@@ -16,8 +16,11 @@ export default function Ask() {
 
   const [loading, setLoading] = useState(false);
 
-  const [answer, setAnswer] = useState("");
+  const [result, setResult] = useState({
 
+    answer: ""
+
+});
   const [confidence, setConfidence] =
     useState(null);
 
@@ -83,29 +86,31 @@ export default function Ask() {
         }
       );
 
-      setAnswer(
-        res.data.answer
-      );
+      setResult(res.data);
 
-      setSources(
-        res.data.sources || []
-      );
+      setSources(res.data.sources || []);
 
+      setConfidence(res.data.confidence);
       setImages(
     res.data.images || []
 );
 
-      setConfidence(
-        res.data.confidence
-      );
 
     } catch (err) {
 
       console.log(err);
 
-      setAnswer(
-        "Error generating answer"
-      );
+      setResult({
+
+    answer: "Error generating answer"
+
+});
+
+      setImages([]);
+
+      setConfidence(null);
+
+      setSources([]);
 
     } finally {
 
@@ -258,20 +263,17 @@ export default function Ask() {
               marginTop: "15px"
             }}
           >
-            <strong>
-              Confidence:
-            </strong>{" "}
-            {confidence}%
+            <strong>Confidence:</strong> {confidence.toFixed(1)}%
           </div>
 
         )
       }
 
       <AnswerCard
-        answer={answer}
-        confidence={confidence}
-        images={images}
-      />
+    answer={result?.answer || ""}
+    confidence={confidence}
+    images={images}
+/>
 
       <SourceList
         sources={sources}
