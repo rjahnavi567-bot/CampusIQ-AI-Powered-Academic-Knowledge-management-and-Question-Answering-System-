@@ -263,7 +263,12 @@ export default function Ask() {
               marginTop: "15px"
             }}
           >
-            <strong>Confidence:</strong> {confidence.toFixed(1)}%
+            <strong>Confidence:</strong> {
+confidence != null
+    ? confidence.toFixed(2)
+    : 0
+}
+%
           </div>
 
         )

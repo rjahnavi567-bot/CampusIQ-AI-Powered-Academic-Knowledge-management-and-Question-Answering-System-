@@ -96,7 +96,7 @@ def extract_pdf_images(pdf_path, document_id):
 
                 # Ignore tiny icons/logos but keep useful diagrams
 
-                if width < 120 or height < 120:
+                if width < 250 or height < 250:
 
                     os.remove(save_path)
 

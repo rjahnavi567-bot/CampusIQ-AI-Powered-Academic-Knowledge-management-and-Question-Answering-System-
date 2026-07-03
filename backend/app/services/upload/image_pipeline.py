@@ -3,6 +3,7 @@ import hashlib
 import re
 import glob
 import cv2
+import numpy as np
 from app.services.image_extraction_service import (
     extract_pdf_images,
     extract_docx_images,
@@ -176,7 +177,31 @@ def process_images(
         )
         caption = understanding["caption"].lower()
 
-        bad_words = [
+        reject_words = [
+
+    "page of text",
+
+    "text document",
+
+    "paragraph",
+
+    "printed text",
+
+    "book page",
+
+    "document page",
+
+    "page containing text",
+
+    "scanned page",
+
+    "screenshot",
+
+    "website",
+
+    "article",
+
+    "newspaper",
 
     "person",
 
@@ -186,23 +211,23 @@ def process_images(
 
     "face",
 
-    "building",
+    "logo",
+
+    "icon",
+
+    "animal",
 
     "tree",
 
-    "landscape",
+    "building",
 
-    "animal"
+    "landscape"
 
 ]
 
-        if any(
+        caption = understanding["caption"].lower()
 
-    word in caption
-
-    for word in bad_words
-
-):
+        if any(word in caption for word in reject_words):
 
             try:
                 os.remove(image["path"])
@@ -214,6 +239,16 @@ def process_images(
         image["caption"] = understanding["caption"]
 
         image["ocr_text"] = understanding["ocr_text"]
+        ocr_words = len(image["ocr_text"].split())
+
+        if ocr_words > 120:
+
+            try:
+                os.remove(image["path"])
+            except:
+                pass
+
+            continue
 
         # -----------------------------------
         # Academic Diagram Title
@@ -418,12 +453,10 @@ def generate_image_hash(image_path):
 
     return sha.hexdigest()[:8]
 
+
+
+
 def is_useful_image(image_path):
-    """
-    Remove logos, tiny icons, blank images,
-    photographs and decorative graphics.
-    Keep only academic diagrams.
-    """
 
     image = cv2.imread(image_path)
 
@@ -436,27 +469,32 @@ def is_useful_image(image_path):
     if w < 180 or h < 180:
         return False
 
-    gray = cv2.cvtColor(
-        image,
-        cv2.COLOR_BGR2GRAY
-    )
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    edges = cv2.Canny(
-        gray,
-        80,
-        180
-    )
+    # Blank image
 
-    edge_pixels = cv2.countNonZero(edges)
+    std = np.std(gray)
 
-    ratio = edge_pixels / (w * h)
-
-    # Blank images
-    if ratio < 0.01:
+    if std < 8:
         return False
 
-    # Very dense natural photos
-    if ratio > 0.45:
+    # Edge Density
+
+    edges = cv2.Canny(gray, 80, 180)
+
+    edge_ratio = cv2.countNonZero(edges) / (w * h)
+
+    if edge_ratio < 0.01:
+        return False
+
+    if edge_ratio > 0.42:
+        return False
+
+    # White ratio
+
+    white_ratio = np.sum(gray > 245) / (w * h)
+
+    if white_ratio > 0.97:
         return False
 
     return True
