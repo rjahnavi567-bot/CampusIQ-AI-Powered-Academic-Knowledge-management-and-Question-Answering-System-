@@ -42,9 +42,15 @@ def save_images(db, document_id, images):
 def store_images(images, document_id):
     """
     Store image metadata into ChromaDB.
-    """
 
+    """
+    
     for image in images:
+        print(
+            image["title"],
+            len(image["clip_embedding"])
+        )
+
 
         image_collection.add(
 
@@ -76,6 +82,7 @@ PAGE CONTEXT:
 )
 ],
 
+            embeddings=[image["clip_embedding"]],
             metadatas=[
 
                 {

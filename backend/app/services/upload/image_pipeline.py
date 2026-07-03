@@ -295,47 +295,64 @@ def process_images(
         # Rename image using title + page + hash
         # -----------------------------------
 
-        try:
+        image_hash = generate_image_hash(image["path"])
 
-            image_hash = generate_image_hash(image["path"])
+        image["image_hash"] = image_hash
 
-            safe_title = clean_filename(image["title"])
+        safe_title = clean_filename(image["title"])
 
-            extension = os.path.splitext(image["path"])[1]
+        extension = os.path.splitext(image["path"])[1]
+        folder = os.path.dirname(image["path"])
 
-            new_name = (
+        base = (
+    f"{document_id}_"
+    f"{safe_title}"
+    f"_page{image['page_no']}"
+    f"_{image_hash}"
+)
 
-        f"{safe_title}"
+        new_path = os.path.join(
+    folder,
+    base + extension
+)
 
-        f"_p{image['page_no']}"
+        counter = 1
 
-        f"_{image_hash}"
-
-        f"{extension}"
-
-    )
+        while os.path.exists(new_path):
 
             new_path = os.path.join(
 
-        os.path.dirname(image["path"]),
+        folder,
 
-        new_name
+        f"{base}_{counter}{extension}"
 
     )
 
+            counter += 1
+        try:
+
             if image["path"] != new_path:
 
+                if os.path.exists(new_path):
+
+                    base = os.path.splitext(new_name)[0]
+
+                    new_name = (
+                f"{base}_{image_hash[:4]}"
+                f"{extension}"
+            )
+
+                    new_path = os.path.join(
+                os.path.dirname(image["path"]),
+                new_name
+            )
+
                 os.rename(
-
             image["path"],
-
             new_path
-
         )
 
                 image["path"] = new_path
-
-            image["image_hash"] = image_hash
 
         except Exception as e:
 
@@ -371,9 +388,9 @@ def process_images(
 
             same_hash = (
 
-    old["image_hash"]
+    old.get("image_hash")
 
-    == image["image_hash"]
+    == image.get("image_hash")
 
 )
 
@@ -405,7 +422,9 @@ def process_images(
 
             continue
 
-        processed.append(image)
+        if image.get("image_hash"):
+
+            processed.append(image)
   
 
     page_images = glob.glob(

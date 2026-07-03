@@ -16,6 +16,9 @@ def hybrid_retrieve(
 ):
     query_embedding = create_embedding(question)
     clip_embedding = embed_text_for_image_search(question)
+    print("\n===== QUERY EMBEDDING =====")
+    print("Query embedding length:", len(clip_embedding))
+    print("===========================\n")
     filters = []
 
     if page_no is not None:
@@ -41,7 +44,7 @@ def hybrid_retrieve(
 # ---------------------------------
 # TEXT SEARCH
 # ---------------------------------
-
+    
     query_args = {
     "query_embeddings": [query_embedding],
     "n_results": top_k
@@ -54,7 +57,20 @@ def hybrid_retrieve(
     print(where)
     print("=========================\n")
 
-    text_results = text_collection.query(**query_args)
+    try:
+
+       text_results = text_collection.query(**query_args)
+
+    except Exception as e:
+
+       print("\nTEXT SEARCH FAILED")
+       print(e)
+
+       text_results = {
+        "documents":[[]],
+        "metadatas":[[]],
+        "distances":[[]]
+    }
 
 # ---------------------------------
 # IMAGE SEARCH
@@ -80,7 +96,7 @@ def hybrid_retrieve(
         image_results = {
         "documents":[[]],
         "metadatas":[[]],
-        "distances":[]
+        "distances":[[]]
     }
 
     documents=[]
@@ -89,7 +105,12 @@ def hybrid_retrieve(
 
 # ---------------- TEXT ----------------
 
-    if text_results["documents"]:
+    if (
+    text_results
+    and text_results.get("documents")
+    and len(text_results["documents"]) > 0
+    and len(text_results["documents"][0]) > 0
+):
         for doc,meta,score in zip(
         text_results["documents"][0],
         text_results["metadatas"][0],
@@ -98,26 +119,44 @@ def hybrid_retrieve(
 
             meta["retrieval_type"]="text"
 
-        documents.append(doc)
-        metadatas.append(meta)
-        scores.append(score)
-
+            documents.append(doc)
+            metadatas.append(meta)
+            scores.append(score)
 # ---------------- IMAGE ----------------
 
-    if image_results["documents"]:
+    if (
+
+    image_results
+
+    and
+
+    image_results.get("documents")
+
+    and
+
+    len(image_results["documents"]) > 0
+
+    and
+
+    len(image_results["documents"][0]) > 0
+
+):
+
         for doc,meta,score in zip(
         image_results["documents"][0],
         image_results["metadatas"][0],
         image_results["distances"][0]
     ):
+
             meta["retrieval_type"]="image"
 
-        documents.append(doc)
-        metadatas.append(meta)
-        scores.append(score)
+            documents.append(doc)
+            metadatas.append(meta)
+            scores.append(score)
+    print("\n===== RETRIEVAL SUMMARY =====")
+    print("Text results :", len(text_results["documents"][0]))
+    print("Image results:", len(image_results["documents"][0]))
+    print("Final results:", len(documents))
+    print("=============================\n")
 
-    print("\nRetrieved Text :",len(text_results["documents"][0]))
-    print("Retrieved Images :",len(image_results["documents"][0]))
-    print("Total :",len(documents))
-
-    return documents,metadatas,scores
+    return documents, metadatas, scores
