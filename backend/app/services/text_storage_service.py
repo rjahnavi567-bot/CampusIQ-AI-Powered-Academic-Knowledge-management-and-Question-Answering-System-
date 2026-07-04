@@ -3,10 +3,25 @@ from app.services.chroma_service import text_collection
 
 def store_text_chunks(document_id, chunks):
     """
-    Store semantic text chunks into ChromaDB.
+    Store all semantic text chunks into ChromaDB
+    using a single bulk insert.
     """
 
+    if not chunks:
+        print("No chunks to store.")
+        return
+
+    ids = []
+    documents = []
+    metadatas = []
+
     for i, chunk in enumerate(chunks):
+
+        ids.append(f"{document_id}_{i}")
+
+        documents.append(
+            chunk.get("content", "")
+        )
 
         metadata = {
             "document_id": document_id,
@@ -30,27 +45,19 @@ def store_text_chunks(document_id, chunks):
             )
         }
 
-        # Add file_type ONLY if it exists
         if (
             "file_type" in chunk
             and chunk["file_type"] is not None
         ):
             metadata["file_type"] = chunk["file_type"]
 
-        text_collection.add(
+        metadatas.append(metadata)
 
-            ids=[
-                f"{document_id}_{i}"
-            ],
-
-            documents=[
-                chunk.get("content", "")
-            ],
-
-            metadatas=[
-                metadata
-            ]
-        )
+    text_collection.add(
+        ids=ids,
+        documents=documents,
+        metadatas=metadatas
+    )
 
     print(
         f"Stored {len(chunks)} text chunks."

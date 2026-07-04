@@ -160,3 +160,205 @@ def hybrid_retrieve(
     print("=============================\n")
 
     return documents, metadatas, scores
+
+# ==========================================================
+# TEXT RETRIEVAL ONLY
+# ==========================================================
+
+def retrieve_text(
+    question,
+    page_no=None,
+    source_file=None,
+    top_k=8
+):
+
+    query_embedding = create_embedding(question)
+
+    filters = []
+
+    if page_no is not None:
+        filters.append({"page_no": page_no})
+
+    if source_file is not None:
+        filters.append({"source_file": source_file})
+
+    where = None
+
+    if len(filters) == 1:
+        where = filters[0]
+
+    elif len(filters) > 1:
+        where = {
+            "$and": filters
+        }
+
+    query_args = {
+        "query_embeddings": [query_embedding],
+        "n_results": top_k
+    }
+
+    if where:
+        query_args["where"] = where
+
+    try:
+
+        results = text_collection.query(**query_args)
+
+    except Exception as e:
+
+        print("TEXT SEARCH FAILED")
+        print(e)
+
+        return [], [], []
+
+    documents = []
+    metadatas = []
+    scores = []
+
+    if (
+        results
+        and results.get("documents")
+        and len(results["documents"]) > 0
+    ):
+
+        for doc, meta, score in zip(
+
+    results["documents"][0],
+
+    results["metadatas"][0],
+
+    results["distances"][0]
+
+):
+
+            meta["retrieval_type"] = "text"
+
+            documents.append(doc)
+
+            metadatas.append(meta)
+
+            scores.append(score)
+
+    return documents, metadatas, scores
+
+# ==========================================================
+# IMAGE RETRIEVAL ONLY
+# ==========================================================
+
+def retrieve_images(
+
+    question,
+
+    pages,
+
+    source_file=None,
+
+    top_k=6
+
+):
+
+    clip_embedding = embed_text_for_image_search(question)
+
+    page_filters = []
+
+    for p in pages:
+
+        page_filters.append({
+
+            "page_no": p
+
+        })
+
+    where = {
+
+        "$or": page_filters
+
+    }
+
+    if source_file:
+
+        where = {
+
+            "$and": [
+
+                {
+
+                    "source_file": source_file
+
+                },
+
+                where
+
+            ]
+
+        }
+
+    try:
+
+        results = image_collection.query(
+
+    query_embeddings=[clip_embedding],
+
+    where=where,
+
+    n_results=top_k,
+
+    include=[
+
+        "documents",
+
+        "metadatas",
+
+        "distances",
+
+        "embeddings"
+
+    ]
+
+)
+
+    except Exception as e:
+
+        print("IMAGE SEARCH FAILED")
+
+        print(e)
+
+        return [], [], []
+
+    documents = []
+
+    metadatas = []
+
+    scores = []
+
+    if (
+
+        results
+
+        and results.get("documents")
+
+        and len(results["documents"]) > 0
+
+    ):
+
+        for doc, meta, score, embedding in zip(
+
+            results["documents"][0],
+
+            results["metadatas"][0],
+
+            results["distances"][0],
+            results["embeddings"][0]
+
+        ):
+
+            meta["retrieval_type"] = "image"
+            meta["clip_embedding"] = embedding
+
+            documents.append(doc)
+
+            metadatas.append(meta)
+
+            scores.append(score)
+
+    return documents, metadatas, scores

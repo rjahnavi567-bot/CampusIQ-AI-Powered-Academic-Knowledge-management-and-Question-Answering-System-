@@ -38,28 +38,31 @@ def save_images(db, document_id, images):
     db.commit()
     print("Images saved:", len(images))
 
-
 def store_images(images, document_id):
     """
-    Store image metadata into ChromaDB.
-
+    Store all image embeddings into ChromaDB
+    using a bulk insert.
     """
-    
+
+    if not images:
+        print("No images to store.")
+        return
+
+    ids = []
+    documents = []
+    embeddings = []
+    metadatas = []
+
     for image in images:
-        print(
-            image["title"],
-            len(image["clip_embedding"])
+
+        if image.get("clip_embedding") is None:
+            continue
+
+        ids.append(
+            f"image_{document_id}_{image['image_hash']}"
         )
 
-
-        image_collection.add(
-
-            ids=[
-                f"image_{document_id}_{image['image_hash']}"
-            ],
-
-            documents=[
-(
+        documents.append(
 f"""
 IMAGE_HASH:
 {image.get("image_hash","")}
@@ -79,35 +82,33 @@ VISION:
 PAGE CONTEXT:
 {image.get("page_text","")}
 """
-)
-],
-
-            embeddings=[image["clip_embedding"]],
-            metadatas=[
-
-                {
-
-                    "document_id": document_id,
-
-                    "type": "image",
-
-                    "page_no": image["page_no"],
-
-                    "image_path": image["path"],
-
-                    "caption": image.get("caption", ""),
-
-                    "title": image.get("title", ""),
-
-                    "image_hash": image.get("image_hash", ""),
-
-                    "source_file": image.get("source_file", ""),
-
-                    "file_type": image.get("file_type", "")
-
-                }
-
-            ]
         )
 
-    print(f"Stored {len(images)} images.")
+        embeddings.append(
+            image["clip_embedding"]
+        )
+
+        metadatas.append(
+            {
+                "document_id": document_id,
+                "type": "image",
+                "page_no": image["page_no"],
+                "image_path": image["path"],
+                "caption": image.get("caption", ""),
+                "title": image.get("title", ""),
+                "image_hash": image.get("image_hash", ""),
+                "source_file": image.get("source_file", ""),
+                "file_type": image.get("file_type", "")
+            }
+        )
+
+    image_collection.add(
+        ids=ids,
+        documents=documents,
+        embeddings=embeddings,
+        metadatas=metadatas
+    )
+
+    print(
+        f"Stored {len(ids)} images."
+    )

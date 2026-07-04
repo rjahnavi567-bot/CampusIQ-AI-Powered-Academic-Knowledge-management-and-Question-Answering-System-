@@ -44,10 +44,26 @@ def retrieve(
     if where:
 
         image_results = image_collection.query(
-            query_texts=[question],
-            where=where,
-            n_results=8
-        )
+
+    query_embeddings=[clip_embedding],
+
+    n_results=top_k,
+
+    where=where,
+
+    include=[
+
+        "documents",
+
+        "metadatas",
+
+        "distances",
+
+        "embeddings"
+
+    ]
+
+)
 
     else:
 

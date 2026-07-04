@@ -1,7 +1,13 @@
 from fastapi import APIRouter
 import re
 
-from app.services.hybrid_retrieval_service import hybrid_retrieve
+from app.services.hybrid_retrieval_service import (
+
+    retrieve_text,
+
+    retrieve_images
+
+)
 from app.services.reranker_service import rerank_results
 from app.services.context_builder import build_context
 from app.services.groq_service import generate_answer
@@ -9,6 +15,11 @@ from app.database.connection import SessionLocal
 from app.database.models import QuestionHistory
 from app.schemas.ask_schema import AskRequest
 from app.database.models import DocumentImage
+from app.services.image_embedding_service import (
+    embed_text_for_image_search
+)
+
+from app.services.image_reranker_service import rerank_images
 router = APIRouter()
 
 
@@ -54,7 +65,11 @@ def ask(request: AskRequest):
     print("Selected Page :", page_no)
     print("=================================\n")
 
-    documents, metadatas, scores = hybrid_retrieve(
+    # =====================================================
+    # STEP 1 : Retrieve Text
+    # =====================================================
+
+    documents, metadatas, scores = retrieve_text(
 
     question=question,
 
@@ -62,9 +77,70 @@ def ask(request: AskRequest):
 
     source_file=source_file,
 
-    top_k=10
+    top_k=8
 
 )
+
+# =====================================================
+# STEP 2 : Collect Relevant Pages
+# =====================================================
+
+    candidate_pages = set()
+
+    for meta in metadatas:
+
+        page = meta.get("page_no")
+
+        if page is None:
+            continue
+
+        candidate_pages.add(page)
+
+        candidate_pages.add(page - 1)
+
+        candidate_pages.add(page + 1)
+
+    candidate_pages = [
+
+    p
+
+    for p in candidate_pages
+
+    if p >= 1
+
+]
+
+    print()
+
+    print("Candidate Pages :", sorted(candidate_pages))
+
+    print()
+
+# =====================================================
+# STEP 3 : Retrieve Images only from nearby pages
+# =====================================================
+
+    img_docs, img_meta, img_scores = retrieve_images(
+
+    question=question,
+
+    pages=candidate_pages,
+
+    source_file=source_file,
+
+    top_k=6
+
+)
+
+# =====================================================
+# STEP 4 : Merge
+# =====================================================
+
+    documents.extend(img_docs)
+
+    metadatas.extend(img_meta)
+
+    scores.extend(img_scores)
 
     print("\n========== HYBRID RESULTS ==========\n")
 
@@ -133,6 +209,22 @@ def ask(request: AskRequest):
     # =====================================
 
     top_chunks = ranked[:6]
+
+    # =====================================
+# Collect pages of top text chunks
+# =====================================
+
+    important_pages = set()
+
+    for chunk in top_chunks:
+
+       if chunk["metadata"].get("type") != "image":
+
+        important_pages.add(
+            chunk["metadata"].get("page_no")
+        )
+
+    print("\nImportant Pages :", important_pages)
     # -------------------------------------
 # Extract diagrams/images
 # -------------------------------------
@@ -140,17 +232,44 @@ def ask(request: AskRequest):
 # Separate image and text chunks
 # =====================================
 
-    image_chunks = [
-    chunk
-    for chunk in top_chunks
-    if chunk["metadata"].get("type") == "image"
-]
+    image_chunks = []
+
+    for chunk in ranked:
+
+        meta = chunk["metadata"]
+
+        if meta.get("type") != "image":
+           continue
+
+        if meta.get("page_no") in important_pages:
+
+           image_chunks.append(chunk)
+
+    print("Filtered Images :", len(image_chunks))
+    print()
+
+    print("Reranking Images...")
+
+    image_chunks = rerank_images(
+
+    question,
+
+    image_chunks
+
+)
+    image_chunks = image_chunks[:2]
+
+    print("Images after reranking :", len(image_chunks))
+
+    print()
 
     text_chunks = [
     chunk
     for chunk in top_chunks
     if chunk["metadata"].get("type") != "image"
 ]
+    # Sort image chunks by reranker score
+
 
 # Mix both text and image context
     combined_chunks = []
