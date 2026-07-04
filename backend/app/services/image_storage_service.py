@@ -25,15 +25,19 @@ def save_images(db, document_id, images):
 
     image_hash=image.get("image_hash", ""),
 
-    source_file=image.get("source_file", "")
-
-)
-        category=image.get("category", ""),
+    source_file=image.get("source_file", ""),
+    category=image.get("category", ""),
 
         classification_confidence=image.get(
     "classification_confidence",
     0.5
-),
+),confidence_score=image.get(
+    "confidence_score",
+    0
+)
+
+)
+        
 
         db.add(record)
     print("\nSaving image metadata...")
@@ -111,6 +115,17 @@ PAGE CONTEXT:
         "classification_confidence",
 
         0.5
+
+    )
+
+),
+"confidence_score": float(
+
+    image.get(
+
+        "confidence_score",
+
+        0
 
     )
 

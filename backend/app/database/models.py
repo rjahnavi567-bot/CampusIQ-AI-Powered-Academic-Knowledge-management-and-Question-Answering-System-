@@ -117,3 +117,5 @@ class DocumentImage(Base):
     category = Column(String(100))
 
     classification_confidence = Column(Float)
+    confidence_score = Column(Integer)
+    

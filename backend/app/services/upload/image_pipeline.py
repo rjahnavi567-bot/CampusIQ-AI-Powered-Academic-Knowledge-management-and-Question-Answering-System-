@@ -11,6 +11,7 @@ from app.services.image_extraction_service import (
     extract_image_file,
     extract_images
 )
+from app.services.groq_decision_service import should_use_groq
 from app.services.image_classifier_service import classify_image
 from app.services.figure_title_service import (
     extract_figure_title
@@ -33,7 +34,9 @@ from app.services.image_context_service import (
 from app.services.diagram_title_service import (
     generate_diagram_title
 )
-
+from app.services.image_confidence_service import (
+    calculate_confidence
+)
 # ---------------------------------------------------------
 # Duplicate Removal
 # ---------------------------------------------------------
@@ -228,8 +231,6 @@ def process_images(
 
 ]
 
-        caption = understanding["caption"].lower()
-
         if any(word in caption for word in reject_words):
 
             try:
@@ -293,25 +294,29 @@ def process_images(
 
     )
 
-        if needs_groq_vision(
-
+        complex_image = needs_groq_vision(
     image["caption"],
-
     image["ocr_text"]
+)
 
-):
+        use_groq = (
+    complex_image or
+    should_use_groq(image)
+)
+ 
+        if use_groq:
+
+            print("Running Groq Vision...")
 
             try:
 
                 image["vision"] = analyze_image(
-
             image["path"]
-
         )
 
             except Exception:
 
-                image["vision"] = ""
+               image["vision"] = ""
 
         else:
 
@@ -333,7 +338,6 @@ def process_images(
         image["category"] = classification["category"]
 
         image["classification_confidence"] = classification["confidence"]
-
         print(
 
     f"Category: {image['category']} "
@@ -342,6 +346,29 @@ def process_images(
 
 )
 
+
+        score, reasons = calculate_confidence(image)
+
+
+        image["confidence_score"] = score
+
+        image["confidence_reasons"] = ",".join(reasons)
+
+        print(
+
+    f"Confidence: {score} | {reasons}"
+
+)
+        if score < 0.45:
+
+            try:
+                os.remove(image["path"])
+            except:
+                pass
+
+            continue
+
+        
         image["source_file"] = source_file
 
         image["file_type"] = os.path.splitext(
