@@ -1,10 +1,4 @@
-from sqlalchemy import (
-    Column,
-    Integer,
-    String,
-    Text,
-    DateTime
-)
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Float
 from app.database.connection import Base
 from datetime import datetime
 class Chunk(Base):
@@ -120,3 +114,6 @@ class DocumentImage(Base):
     source_file = Column(
         String
     )
+    category = Column(String(100))
+
+    classification_confidence = Column(Float)

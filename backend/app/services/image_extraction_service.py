@@ -37,17 +37,16 @@ def extract_pdf_images(pdf_path, document_id):
         page = pdf.load_page(page_no)
 
         # =====================================================
-        # Render whole page
+        # Render page at higher resolution
         # =====================================================
 
-        pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
+        pix = page.get_pixmap(
+            matrix=fitz.Matrix(3, 3)
+        )
 
         page_path = os.path.join(
-
             output_folder,
-
             f"page_{page_no}.png"
-
         )
 
         pix.save(page_path)
@@ -57,12 +56,6 @@ def extract_pdf_images(pdf_path, document_id):
         # =====================================================
 
         images = page.get_images(full=True)
-
-        # =====================================================
-        # Embedded images first
-        # =====================================================
-
-        embedded_found = False
 
         for img in images:
 
@@ -77,91 +70,80 @@ def extract_pdf_images(pdf_path, document_id):
                 ext = base["ext"]
 
                 save_path = os.path.join(
-
-            output_folder,
-
-            f"embedded_{page_no}_{xref}.{ext}"
-
-        )
+                    output_folder,
+                    f"embedded_{page_no}_{xref}.{ext}"
+                )
 
                 with open(save_path, "wb") as f:
-
                     f.write(image_bytes)
 
                 image = Image.open(save_path)
 
                 width, height = image.size
 
-                # Ignore tiny icons
+                area = width * height
 
-                # Ignore tiny icons/logos but keep useful diagrams
-
-                if width < 250 or height < 250:
-
+                # Ignore tiny images
+                if area < 80000:
                     os.remove(save_path)
-
                     continue
 
-                # Ignore extremely thin decorative images
-
+                # Ignore decorative strips
                 if width / height > 8 or height / width > 8:
-
                     os.remove(save_path)
-
                     continue
-
-                embedded_found = True
 
                 extracted.append({
 
-            "path": save_path,
+                    "path": save_path,
 
-            "page_no": page_no + 1,
+                    "page_no": page_no + 1,
 
-            "source": "embedded"
+                    "source": "embedded",
 
-        })
+                    "bbox": None
+
+                })
 
             except Exception:
-
                 continue
-        
+
         # =====================================================
-        # If no embedded images exist
-        # then detect diagrams from page
+        # Detect diagrams from rendered page
+        # (Always run, even if embedded images exist)
         # =====================================================
 
-        if not embedded_found:
+        diagrams = detect_diagrams(page_path)
 
-            diagrams = detect_diagrams(page_path)
+        for i, diagram in enumerate(diagrams):
 
-            for i, diagram in enumerate(diagrams):
+            save_path = os.path.join(
 
-                save_path = os.path.join(
+                output_folder,
 
-            output_folder,
+                f"diagram_{page_no}_{i}.png"
 
-            f"diagram_{page_no}_{i}.png"
+            )
 
-        )
+            cv2.imwrite(
 
-                cv2.imwrite(
+                save_path,
 
-            save_path,
+                diagram["image"]
 
-            diagram["image"]
+            )
 
-        )
+            extracted.append({
 
-                extracted.append({
+                "path": save_path,
 
-            "path": save_path,
+                "page_no": page_no + 1,
 
-            "page_no": page_no + 1,
+                "source": "detected",
 
-            "source": "detected"
+                "bbox": diagram.get("bbox")
 
-        })
+            })
 
     return extracted
 
@@ -187,7 +169,6 @@ def extract_docx_images(file_path, document_id):
         if "image" in rel.target_ref:
 
             index += 1
-
             image_data = rel.target_part.blob
 
             path = os.path.join(
@@ -206,7 +187,11 @@ def extract_docx_images(file_path, document_id):
 
                 "path": path,
 
-                "page_no": 1
+                "page_no": 1,
+
+                "source": "embedded",
+
+                "bbox": None
 
             })
 
@@ -257,12 +242,15 @@ def extract_pptx_images(file_path, document_id):
 
                         "path": path,
 
-                        "page_no": slide_no + 1
+                        "page_no": slide_no + 1,
+
+                        "source": "embedded",
+
+                        "bbox": None
 
                     })
 
                 except Exception:
-
                     pass
 
     return extracted
@@ -280,7 +268,11 @@ def extract_image_file(file_path):
 
             "path": file_path,
 
-            "page_no": 1
+            "page_no": 1,
+
+            "source": "uploaded",
+
+            "bbox": None
 
         }
 

@@ -11,17 +11,20 @@ from app.services.image_extraction_service import (
     extract_image_file,
     extract_images
 )
-
+from app.services.image_classifier_service import classify_image
+from app.services.figure_title_service import (
+    extract_figure_title
+)
 from app.services.image_understanding_service import (
     understand_image
 )
-
+from app.services.image_complexity_service import needs_groq_vision
 from app.services.groq_vision_service import (
     analyze_image
 )
 
 from app.services.image_embedding_service import (
-    embed_image
+    embed_images,embed_image
 )
 
 from app.services.image_context_service import (
@@ -254,33 +257,90 @@ def process_images(
         # Academic Diagram Title
         # -----------------------------------
 
-        image["title"] = generate_diagram_title(
+        # -----------------------------------
+# Try extracting textbook figure title
+# -----------------------------------
+
+        page_text = get_page_text(
+
+    page_lookup,
+
+    image["page_no"]
+
+)
+
+        figure_title, confidence = extract_figure_title(
+
+    page_text
+
+)
+
+        if figure_title:
+
+            image["title"] = figure_title
+
+            print(
+        f"Figure title detected: {figure_title}"
+    )
+
+        else:
+
+            image["title"] = generate_diagram_title(
+
+        image["caption"],
+
+        image["ocr_text"]
+
+    )
+
+        if needs_groq_vision(
 
     image["caption"],
 
     image["ocr_text"]
 
-)
+):
 
-        try:
+            try:
 
-            image["vision"] = analyze_image(
+                image["vision"] = analyze_image(
 
-                image["path"]
+            image["path"]
 
-            )
+        )
 
-        except Exception:
+            except Exception:
+
+                image["vision"] = ""
+
+        else:
 
             image["vision"] = ""
 
-        image["page_text"] = get_page_text(
+        image["page_text"] = page_text
+        classification = classify_image(
 
-            page_lookup,
+    title=image["title"],
 
-            image["page_no"]
+    caption=image["caption"],
 
-        )
+    ocr=image["ocr_text"],
+
+    page_text=image["page_text"]
+
+)
+
+        image["category"] = classification["category"]
+
+        image["classification_confidence"] = classification["confidence"]
+
+        print(
+
+    f"Category: {image['category']} "
+
+    f"({image['classification_confidence']})"
+
+)
 
         image["source_file"] = source_file
 
@@ -330,23 +390,6 @@ def process_images(
 
             counter += 1
         try:
-
-            if image["path"] != new_path:
-
-                if os.path.exists(new_path):
-
-                    base = os.path.splitext(new_name)[0]
-
-                    new_name = (
-                f"{base}_{image_hash[:4]}"
-                f"{extension}"
-            )
-
-                    new_path = os.path.join(
-                os.path.dirname(image["path"]),
-                new_name
-            )
-
                 os.rename(
             image["path"],
             new_path
@@ -358,21 +401,6 @@ def process_images(
 
             print("Rename Error:", e)
 
-        # -----------------------------------------
-        # CLIP Embedding
-        # -----------------------------------------
-
-        try:
-
-            image["clip_embedding"] = embed_image(
-
-                image["path"]
-
-            )
-
-        except Exception:
-
-            image["clip_embedding"] = None
         
         duplicate = False
 
@@ -425,6 +453,45 @@ def process_images(
         if image.get("image_hash"):
 
             processed.append(image)
+    # -----------------------------------------
+# Batch CLIP Embeddings
+# -----------------------------------------
+
+    print("\nGenerating CLIP embeddings in batch...")
+
+    image_paths = [
+
+    image["path"]
+
+    for image in processed
+
+]
+
+    try:
+
+        embeddings = embed_images(image_paths)
+
+    except Exception:
+
+        embeddings = []
+
+        for path in image_paths:
+
+            try:
+
+                embeddings.append(
+                embed_image(path)
+            )
+
+            except Exception:
+
+                embeddings.append(None)
+
+    for image, embedding in zip(processed, embeddings):
+
+        image["clip_embedding"] = embedding
+
+    print(f"Generated {len(processed)} CLIP embeddings.")
   
 
     page_images = glob.glob(
