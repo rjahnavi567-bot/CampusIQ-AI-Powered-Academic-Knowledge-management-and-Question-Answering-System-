@@ -29,8 +29,56 @@ from app.services.image.image_embedding_batch_service import (
 from app.services.image.image_rename_service import (
     rename_image
 )
+from concurrent.futures import (
+    ThreadPoolExecutor,
+    as_completed
+)
+def process_image_worker(
+    image,
+    page_lookup,
+    source_file,
+    document_id
+):
+    """
+    Process one image.
 
+    Runs inside a worker thread.
+    """
 
+    if not os.path.exists(image["path"]):
+        return None
+
+    if not is_useful_image(image["path"]):
+
+        try:
+            os.remove(image["path"])
+        except:
+            pass
+
+        return None
+
+    image = process_single_image(
+        image,
+        page_lookup
+    )
+
+    if image is None:
+        return None
+
+    image["source_file"] = source_file
+
+    image["file_type"] = os.path.splitext(
+        source_file
+    )[1].lower()
+
+    image["document_id"] = document_id
+
+    image = rename_image(
+        image,
+        document_id
+    )
+
+    return image
 def process_images(
     file_path,
     document_id,
@@ -113,79 +161,52 @@ def process_images(
 
     processed = []
 
-    # ----------------------------------------
-    # Process Images
-    # ----------------------------------------
+    print("\nProcessing images in parallel...\n")
 
-    for image in images:
+    with ThreadPoolExecutor(
+    max_workers = min(4, os.cpu_count() or 1)
+) as executor:
 
-        if not os.path.exists(
-            image["path"]
-        ):
-            continue
+        futures = [
 
-        if not is_useful_image(
-            image["path"]
-        ):
+        executor.submit(
 
-            try:
-                os.remove(
-                    image["path"]
-                )
-            except:
-                pass
-
-            continue
-
-        image = process_single_image(
+            process_image_worker,
 
             image,
 
-            page_lookup
+            page_lookup,
 
-        )
-
-        if image is None:
-            continue
-
-        image["source_file"] = source_file
-
-        image["file_type"] = os.path.splitext(
-
-            source_file
-
-        )[1].lower()
-
-        image["document_id"] = document_id
-
-        image = rename_image(
-
-            image,
+            source_file,
 
             document_id
 
         )
 
+        for image in images
+
+    ]
+
+    for future in as_completed(futures):
+
+        image = future.result()
+
+        if image is None:
+            continue
+
         if is_duplicate(
-
             processed,
-
             image
-
         ):
 
             try:
-                os.remove(
-                    image["path"]
-                )
+                os.remove(image["path"])
             except:
                 pass
 
             continue
 
-        processed.append(
-            image
-        )
+        processed.append(image)
 
     # ----------------------------------------
     # Batch CLIP Embeddings

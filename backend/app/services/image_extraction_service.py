@@ -3,7 +3,9 @@ import fitz
 import cv2
 
 from PIL import Image
-
+from app.services.image.image_quality_service import (
+    is_good_embedded_image
+)
 from app.services.diagram_detector import detect_diagrams
 
 
@@ -31,6 +33,9 @@ def extract_pdf_images(pdf_path, document_id):
     output_folder = create_image_folder(document_id)
 
     extracted = []
+    embedded_count = 0
+    filtered_count = 0
+    diagram_count = 0
 
     for page_no in range(len(pdf)):
 
@@ -41,8 +46,8 @@ def extract_pdf_images(pdf_path, document_id):
         # =====================================================
 
         pix = page.get_pixmap(
-            matrix=fitz.Matrix(3, 3)
-        )
+    matrix=fitz.Matrix(2, 2)
+)
 
         page_path = os.path.join(
             output_folder,
@@ -77,33 +82,30 @@ def extract_pdf_images(pdf_path, document_id):
                 with open(save_path, "wb") as f:
                     f.write(image_bytes)
 
-                image = Image.open(save_path)
+                if not is_good_embedded_image(save_path):
+                    filtered_count += 1
 
-                width, height = image.size
-
-                area = width * height
-
-                # Ignore tiny images
-                if area < 80000:
                     os.remove(save_path)
+
                     continue
+                embedded_count += 1
 
-                # Ignore decorative strips
-                if width / height > 8 or height / width > 8:
-                    os.remove(save_path)
-                    continue
+                extracted.append(
 
-                extracted.append({
+    {
 
-                    "path": save_path,
+        "path": save_path,
 
-                    "page_no": page_no + 1,
+        "page_no": page_no + 1,
 
-                    "source": "embedded",
+        "source": "embedded",
 
-                    "bbox": None
+        "bbox": None
 
-                })
+    }
+
+)
+                
 
             except Exception:
                 continue
@@ -132,6 +134,7 @@ def extract_pdf_images(pdf_path, document_id):
                 diagram["image"]
 
             )
+            diagram_count += 1
 
             extracted.append({
 
@@ -144,6 +147,12 @@ def extract_pdf_images(pdf_path, document_id):
                 "bbox": diagram.get("bbox")
 
             })
+    print("\n========== Image Extraction ==========")
+    print(f"Embedded Images : {embedded_count}")
+    print(f"Filtered Images : {filtered_count}")
+    print(f"Detected Figures: {diagram_count}")
+    print(f"Total Images    : {len(extracted)}")
+    print("======================================\n")
 
     return extracted
 

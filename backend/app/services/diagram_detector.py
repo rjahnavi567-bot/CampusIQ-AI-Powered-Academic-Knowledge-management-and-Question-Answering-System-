@@ -1,24 +1,40 @@
 import cv2
 import numpy as np
-
+import math
 MIN_AREA = 35000
 
 MIN_WIDTH = 180
 
 MIN_HEIGHT = 180
+MAX_TEXT_DENSITY = 0.42
 
+MIN_GRAPHIC_DENSITY = 0.015
+
+MIN_COMPONENTS = 8
 
 def is_text_block(binary_crop):
-    """
-    Returns True if crop mostly contains text.
-    """
 
-    h_projection = np.sum(binary_crop > 0, axis=1)
+    h, w = binary_crop.shape
 
-    line_count = np.sum(h_projection > binary_crop.shape[1] * 0.35)
+    text_density = cv2.countNonZero(binary_crop) / (h * w)
 
-    return line_count > 12
+    projection = np.sum(binary_crop > 0, axis=1)
 
+    line_count = np.sum(
+
+        projection > w * 0.35
+
+    )
+
+    return (
+
+        text_density > MAX_TEXT_DENSITY
+
+        and
+
+        line_count > 10
+
+    )
 
 def has_graphics(binary_crop):
     """
@@ -51,6 +67,18 @@ def has_graphics(binary_crop):
 
     return graphics > 500
 
+
+def component_count(binary_crop):
+
+    num_labels, _, _, _ = cv2.connectedComponentsWithStats(
+
+        binary_crop,
+
+        connectivity=8
+
+    )
+
+    return num_labels
 
 def detect_diagrams(page_image_path):
 
@@ -140,14 +168,41 @@ def detect_diagrams(page_image_path):
         crop = original[y:y+h, x:x+w]
 
         crop_binary = binary[y:y+h, x:x+w]
+        components = component_count( crop_binary)
+
+        graphic_density = (
+
+        cv2.countNonZero(crop_binary)
+
+    /
+
+    (w * h)
+
+)
 
         # Ignore plain text paragraphs
 
         if is_text_block(crop_binary):
 
-            if not has_graphics(crop_binary):
+            if graphic_density > MAX_TEXT_DENSITY:
 
                 continue
+
+        if components < MIN_COMPONENTS:
+
+            continue
+
+        if (
+
+    not has_graphics(crop_binary)
+
+    and
+
+    graphic_density < MIN_GRAPHIC_DENSITY
+
+):
+
+            continue
 
         duplicate = False
 

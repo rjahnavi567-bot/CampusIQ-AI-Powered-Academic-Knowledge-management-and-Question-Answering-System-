@@ -7,7 +7,7 @@ from fastapi import HTTPException
 
 from app.database.connection import SessionLocal
 from app.database.models import Document
-
+from concurrent.futures import ThreadPoolExecutor
 from app.services.document_processor import extract_text
 from app.services.chunk_storage_service import save_chunks
 from app.services.text_storage_service import store_text_chunks
@@ -208,42 +208,41 @@ class UploadManager:
             # Process Images
             # ------------------------------------
 
-            print("Processing Images...")
+            print("\nStarting Text & Image Pipelines...")
 
-            images = process_images(
+            with ThreadPoolExecutor(max_workers=2) as executor:
 
-                file_path=file_path,
+                image_future = executor.submit(
 
-                document_id=document_id,
+        process_images,
 
-                pages=pages,
-                source_file=new_filename
+        file_path=file_path,
 
-            )
+        document_id=document_id,
 
-            print(
-                f"Images Found : {len(images)}"
-            )
+        pages=pages,
 
-            # ------------------------------------
-            # Text Pipeline
-            # ------------------------------------
+        source_file=new_filename
 
-            print("Creating semantic chunks...")
+    )
 
-            chunks, content_signature = process_text_pages(
+                text_future = executor.submit(
 
-                pages=pages,
+        process_text_pages,
 
-                filename=new_filename
+        pages=pages,
 
-            )
+        filename=new_filename
 
-            print(
+    )
 
-                f"Chunks Created : {len(chunks)}"
+                images = image_future.result()
 
-            )
+                chunks, content_signature = text_future.result()
+
+            print(f"Images Found : {len(images)}")
+
+            print(f"Chunks Created : {len(chunks)}")
 
             # ------------------------------------
             # Similarity Detection
