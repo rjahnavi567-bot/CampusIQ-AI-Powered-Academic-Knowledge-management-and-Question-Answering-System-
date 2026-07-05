@@ -61,12 +61,27 @@ def extract_pdf_images(pdf_path, document_id):
         # =====================================================
 
         images = page.get_images(full=True)
+        embedded_boxes = []
 
         for img in images:
 
             try:
 
                 xref = img[0]
+                rects = page.get_image_rects(xref)
+
+                for r in rects:
+
+                    embedded_boxes.append(
+
+        (
+            int(r.x0),
+            int(r.y0),
+            int(r.x1 - r.x0),
+            int(r.y1 - r.y0)
+        )
+
+    )
 
                 base = pdf.extract_image(xref)
 
@@ -115,7 +130,13 @@ def extract_pdf_images(pdf_path, document_id):
         # (Always run, even if embedded images exist)
         # =====================================================
 
-        diagrams = detect_diagrams(page_path)
+        diagrams = detect_diagrams(
+
+    page_path,
+
+    embedded_boxes
+
+)
 
         for i, diagram in enumerate(diagrams):
 

@@ -143,13 +143,6 @@ def detect_diagrams(
         15
 
     )
-    gray[:15, :] = 255
-
-    gray[-15:, :] = 255
-
-    gray[:, :15] = 255
-
-    gray[:, -15:] = 255
 
     kernel = cv2.getStructuringElement(
 
@@ -217,7 +210,7 @@ def detect_diagrams(
             if overlap_ratio(
         (x, y, w, h),
         box
-    ) > 0.40:
+    ) > 0.33:
 
                 skip = True
                 break
