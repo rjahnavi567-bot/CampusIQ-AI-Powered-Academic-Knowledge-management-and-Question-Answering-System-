@@ -1,3 +1,4 @@
+import os
 from app.services.image_embedding_service import (
     embed_images,
     embed_image
@@ -12,6 +13,17 @@ def generate_embeddings(images):
     ]
 
     try:
+        print()
+
+        print("Embedding Images:")
+
+        for img in image_paths:
+
+            print(
+        os.path.basename(img["path"])
+    )
+
+        print()
 
         embeddings = embed_images(image_paths)
 

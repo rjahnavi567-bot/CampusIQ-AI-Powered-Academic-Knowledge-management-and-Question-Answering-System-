@@ -72,11 +72,19 @@ def process_image_worker(
     )[1].lower()
 
     image["document_id"] = document_id
+    print(
+    "Before rename:",
+    os.path.basename(image["path"])
+)
 
     image = rename_image(
         image,
         document_id
     )
+    print(
+    "After rename:",
+    os.path.basename(image["path"])
+)
 
     return image
 def process_images(
@@ -145,7 +153,6 @@ def process_images(
     # ----------------------------------------
     # Remove duplicate extracted images
     # ----------------------------------------
-
     images = remove_duplicate_images(
         images
     )
@@ -186,6 +193,22 @@ def process_images(
         for image in images
 
     ]
+    print()
+
+    print("Images after AI filtering:")
+
+    for img in processed:
+
+        print(
+        os.path.basename(img["path"])
+    )
+
+    print(
+    f"Count = {len(processed)}"
+)
+
+    print()
+    
 
     for future in as_completed(futures):
 
@@ -200,6 +223,10 @@ def process_images(
         ):
 
             try:
+                print(
+    "Duplicate removed:",
+    os.path.basename(image["path"])
+)
                 os.remove(image["path"])
             except:
                 pass
@@ -207,6 +234,9 @@ def process_images(
             continue
 
         processed.append(image)
+        print(
+    f"Accepted: {os.path.basename(image['path'])}"
+)
 
     # ----------------------------------------
     # Batch CLIP Embeddings

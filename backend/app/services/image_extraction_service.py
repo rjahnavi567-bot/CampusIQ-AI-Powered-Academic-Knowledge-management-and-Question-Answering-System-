@@ -55,6 +55,7 @@ def extract_pdf_images(pdf_path, document_id):
         )
 
         pix.save(page_path)
+        
 
         # =====================================================
         # Extract embedded images
@@ -131,11 +132,8 @@ def extract_pdf_images(pdf_path, document_id):
         # =====================================================
 
         diagrams = detect_diagrams(
-
     page_path,
-
     embedded_boxes
-
 )
 
         for i, diagram in enumerate(diagrams):

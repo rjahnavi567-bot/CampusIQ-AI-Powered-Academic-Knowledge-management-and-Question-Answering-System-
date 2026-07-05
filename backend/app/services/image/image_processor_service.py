@@ -47,6 +47,9 @@ def process_single_image(image, page_lookup):
     caption = understanding["caption"].lower()
 
     if any(word in caption for word in REJECT_WORDS):
+        print(
+    f"Rejected {image['path']} : caption"
+)
 
         return None
 
@@ -54,6 +57,9 @@ def process_single_image(image, page_lookup):
     image["ocr_text"] = understanding["ocr_text"]
 
     if len(image["ocr_text"].split()) > 120:
+        print(
+    f"Rejected {image['path']} : OCR too much text"
+)
         return None
 
     image = build_metadata(
@@ -92,6 +98,9 @@ def process_single_image(image, page_lookup):
     image["confidence_reasons"] = ",".join(reasons)
 
     if score < 0.45:
+        print(
+    f"Rejected {image['path']} : confidence {score}"
+)
         return None
 
     cls = classify_image(

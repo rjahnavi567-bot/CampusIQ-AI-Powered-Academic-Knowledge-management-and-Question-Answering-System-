@@ -10,6 +10,10 @@ def save_images(db, document_id, images):
     """
 
     for image in images:
+        print(
+    "Saving:",
+    image["path"]
+)
 
         record = DocumentImage(
 
