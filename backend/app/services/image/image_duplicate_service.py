@@ -25,32 +25,17 @@ def remove_duplicate_images(images):
             unique.append(image)
 
     return unique
-
-
 def is_duplicate(processed, image):
 
     for old in processed:
 
-        same_title = (
-            old["title"].lower().strip()
-            ==
-            image["title"].lower().strip()
-        )
+        # Only exact duplicate images
+        if old.get("image_hash") == image.get("image_hash"):
 
-        same_hash = (
-            old["image_hash"]
-            ==
-            image["image_hash"]
-        )
+            print(
+                f"Duplicate removed (hash): {image['path']}"
+            )
 
-        if same_hash:
-            return True
-
-        if (
-            same_title
-            and
-            abs(old["page_no"] - image["page_no"]) <= 1
-        ):
             return True
 
     return False

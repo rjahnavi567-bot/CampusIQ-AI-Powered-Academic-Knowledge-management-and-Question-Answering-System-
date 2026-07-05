@@ -56,10 +56,28 @@ def process_single_image(image, page_lookup):
     image["caption"] = understanding["caption"]
     image["ocr_text"] = understanding["ocr_text"]
 
-    if len(image["ocr_text"].split()) > 120:
+    ocr_words = len(image["ocr_text"].split())
+
+    caption = image["caption"].lower()
+
+    if (
+    ocr_words > 300
+    and
+    (
+        "page of text" in caption
+        or
+        "document page" in caption
+        or
+        "printed text" in caption
+        or
+        "scanned page" in caption
+    )
+):
+
         print(
-    f"Rejected {image['path']} : OCR too much text"
-)
+        f"Rejected {image['path']} : text page ({ocr_words} words)"
+    )
+  
         return None
 
     image = build_metadata(
@@ -90,29 +108,39 @@ def process_single_image(image, page_lookup):
 
         image["vision"] = ""
 
+    # ---------------------------------------------------------
+# Classify image first
+# ---------------------------------------------------------
+
+    cls = classify_image(
+
+    title=image["title"],
+    caption=image["caption"],
+    ocr=image["ocr_text"],
+    page_text=image["page_text"]
+
+)
+
+    image["category"] = cls["category"]
+    image["classification_confidence"] = cls["confidence"]
+
+# ---------------------------------------------------------
+# Now confidence can use classifier confidence
+# ---------------------------------------------------------
+
     score, reasons = calculate_confidence(
-        image
-    )
+    image
+)
 
     image["confidence_score"] = score
     image["confidence_reasons"] = ",".join(reasons)
 
     if score < 0.45:
+
         print(
-    f"Rejected {image['path']} : confidence {score}"
-)
-        return None
-
-    cls = classify_image(
-
-        title=image["title"],
-        caption=image["caption"],
-        ocr=image["ocr_text"],
-        page_text=image["page_text"]
-
+        f"Rejected {image['path']} : confidence {score}"
     )
 
-    image["category"] = cls["category"]
-    image["classification_confidence"] = cls["confidence"]
+        return None
 
     return image
