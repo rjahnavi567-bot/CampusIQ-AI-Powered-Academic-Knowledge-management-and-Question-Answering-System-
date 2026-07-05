@@ -80,7 +80,32 @@ def component_count(binary_crop):
 
     return num_labels
 
-def detect_diagrams(page_image_path):
+def overlap_ratio(box1, box2):
+
+    x1, y1, w1, h1 = box1
+    x2, y2, w2, h2 = box2
+
+    left = max(x1, x2)
+    top = max(y1, y2)
+    right = min(x1 + w1, x2 + w2)
+    bottom = min(y1 + h1, y2 + h2)
+
+    if right <= left or bottom <= top:
+        return 0
+
+    inter = (right - left) * (bottom - top)
+
+    area1 = w1 * h1
+    area2 = w2 * h2
+
+    return inter / min(area1, area2)
+
+def detect_diagrams(
+    page_image_path,
+    embedded_boxes=None
+):
+    if embedded_boxes is None:
+        embedded_boxes = []
 
     image = cv2.imread(page_image_path)
 
@@ -88,11 +113,20 @@ def detect_diagrams(page_image_path):
         return []
 
     original = image.copy()
+    page_h, page_w = original.shape[:2]
+    page_area = page_w * page_h
 
     gray = cv2.cvtColor(
         image,
         cv2.COLOR_BGR2GRAY
     )
+    gray[:15, :] = 255
+
+    gray[-15:, :] = 255
+
+    gray[:, :15] = 255
+
+    gray[:, -15:] = 255
 
     binary = cv2.adaptiveThreshold(
 
@@ -109,12 +143,19 @@ def detect_diagrams(page_image_path):
         15
 
     )
+    gray[:15, :] = 255
+
+    gray[-15:, :] = 255
+
+    gray[:, :15] = 255
+
+    gray[:, -15:] = 255
 
     kernel = cv2.getStructuringElement(
 
         cv2.MORPH_RECT,
 
-        (9, 9)
+        (5, 5)
 
     )
 
@@ -124,7 +165,7 @@ def detect_diagrams(page_image_path):
 
         kernel,
 
-        iterations=2
+        iterations=1
 
     )
 
@@ -147,6 +188,10 @@ def detect_diagrams(page_image_path):
         x, y, w, h = cv2.boundingRect(contour)
 
         area = w * h
+        # Ignore page-sized contour
+
+        if area > page_area * 0.80:
+            continue
 
         if area < MIN_AREA:
             continue
@@ -163,6 +208,21 @@ def detect_diagrams(page_image_path):
             continue
 
         if aspect < 0.12:
+            continue
+
+        skip = False
+
+        for box in embedded_boxes:
+
+            if overlap_ratio(
+        (x, y, w, h),
+        box
+    ) > 0.40:
+
+                skip = True
+                break
+
+        if skip:
             continue
 
         crop = original[y:y+h, x:x+w]
@@ -243,5 +303,12 @@ def detect_diagrams(page_image_path):
             "bbox": (x, y, w, h)
 
         })
+    print(
+
+    f"Detected {len(diagrams)} diagram(s) "
+
+    f"from {page_image_path}"
+
+)
 
     return diagrams
