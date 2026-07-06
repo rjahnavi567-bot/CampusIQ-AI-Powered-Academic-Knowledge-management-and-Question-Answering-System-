@@ -20,7 +20,7 @@ def remove_duplicates(images):
 
     for image in images:
 
-        h = compute_hash(image["path"])
+        h = compute_hash(image.path)
 
         duplicate = False
 

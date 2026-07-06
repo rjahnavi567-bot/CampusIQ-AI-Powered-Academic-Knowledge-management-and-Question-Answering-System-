@@ -7,9 +7,7 @@ def process_ocr(images):
 
     def worker(img):
 
-        img["ocr_text"] = extract_ocr(
-            img["path"]
-        )
+        img.ocr_text = extract_ocr(img.path)
 
         return img
 

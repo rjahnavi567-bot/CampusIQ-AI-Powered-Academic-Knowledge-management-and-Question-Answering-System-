@@ -3,48 +3,59 @@ import os
 
 def build_metadata(image, page_context=""):
 
-    caption = image.get("caption", "").strip()
+    image.page_text = page_context
 
-    ocr = image.get("ocr_text", "").strip()
+    image.filename = os.path.basename(image.path)
 
-    metadata = {
+    search_parts = [
 
-        "page_no": image["page_no"],
+        image.caption.strip(),
 
-        "path": image["path"],
+        image.ocr_text.strip(),
 
-        "source_file": image.get("source_file", ""),
+        page_context.strip()
 
-        "caption": caption,
+    ]
 
-        "ocr_text": ocr,
+    image.search_text = "\n".join(
 
-        "page_context": page_context,
+    part
 
-        "category": image.get("category", ""),
+    for part in [
 
-        "image_hash": image.get("image_hash", ""),
+        image.caption,
 
-        "filename": os.path.basename(image["path"])
+        image.ocr_text,
 
-    }
+        image.page_context,
 
-    metadata["search_text"] = "\n".join(
+        image.category
 
-        part
+    ]
 
-        for part in [
+    if part
 
-            caption,
+)
 
-            ocr,
+    return image
 
+
+def build_all_metadata(images, page_lookup):
+
+    print("\nBuilding metadata...")
+
+    for image in images:
+
+        page_context = page_lookup.get(
+            image.page_no,
+            ""
+        )
+
+        build_metadata(
+            image,
             page_context
+        )
 
-        ]
+    print("Metadata completed.")
 
-        if part
-
-    )
-
-    return metadata
+    return images

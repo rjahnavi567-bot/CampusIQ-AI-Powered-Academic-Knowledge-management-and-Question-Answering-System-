@@ -9,15 +9,15 @@ def caption_images(images):
 
         try:
 
-            img["caption"] = generate_caption(
-                img["path"]
+            img.caption = generate_caption(
+                img.path
             )
 
         except Exception as e:
 
             print(e)
 
-            img["caption"] = ""
+            img.caption= ""
 
         return img
 

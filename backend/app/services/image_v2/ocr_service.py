@@ -30,7 +30,6 @@ def extract_ocr(image_path):
                     txt = line[1][0].strip()
 
                     if txt:
-
                         text.append(txt)
 
                 except Exception:
@@ -50,3 +49,34 @@ def extract_ocr(image_path):
         print("OCR Error:", e)
 
         return ""
+
+
+# -----------------------------------
+# NEW FUNCTION
+# -----------------------------------
+
+def run_ocr(images):
+
+    print("\nRunning OCR...")
+
+    for image in images:
+
+        try:
+
+            image.ocr_text = extract_ocr(
+                image.path
+            )
+
+        except Exception as e:
+
+            print(
+                f"OCR failed: {image.path}"
+            )
+
+            print(e)
+
+            image.ocr_text = ""
+
+    print("OCR completed.")
+
+    return images

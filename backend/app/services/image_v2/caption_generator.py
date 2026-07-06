@@ -17,13 +17,13 @@ def generate_caption(image_path):
     ).to(DEVICE)
 
     output = model.generate(
-    **inputs,
-    max_new_tokens=40,
-    num_beams=5,
-    repetition_penalty=1.3,
-    length_penalty=1.0,
-    early_stopping=True
-)
+        **inputs,
+        max_new_tokens=40,
+        num_beams=5,
+        repetition_penalty=1.3,
+        length_penalty=1.0,
+        early_stopping=True
+    )
 
     caption = processor.decode(
         output[0],

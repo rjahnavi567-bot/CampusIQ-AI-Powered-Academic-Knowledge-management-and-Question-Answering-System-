@@ -1,37 +1,51 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
 class ImageCandidate:
+
     path: str
     page_no: int
-
-    category: str
-
-    bbox: tuple
 
     width: int
     height: int
 
+    bbox: tuple = None
+
     source: str = "layout"
 
+    category: str = "figure"
+
+    image_type: str = ""
+
+    area: int = 0
+
     caption: str = ""
+
     ocr_text: str = ""
+
     title: str = ""
+
     vision: str = ""
 
-    clip_embedding = None
+    page_text: str = ""
 
-    image_hash = ""
+    page_context: str = ""
 
-    confidence_score = 0
+    search_text: str = ""
 
-    classification_confidence = 0
+    clip_embedding: list = field(default_factory=list)
 
-    page_text = ""
+    image_hash: str = ""
 
-    source_file = ""
+    confidence_score: float = 0.0
 
-    file_type = ""
+    classification_confidence: float = 0.0
 
-    document_id = None
+    source_file: str = ""
+
+    file_type: str = ""
+
+    filename: str = ""
+
+    document_id: int = None

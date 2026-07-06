@@ -2,13 +2,18 @@ import os
 
 from app.services.image_v2.extractor import ImageExtractor
 
+from app.services.image_v2.duplicate_filter import remove_duplicates
 
+from app.services.image_v2.caption_service import caption_images
+from app.services.image_v2.image_classifier_service import classify_images
+from app.services.image_v2.ocr_service import run_ocr
+from app.services.image_v2.classifier import classify_image
+from app.services.image_v2.metadata_builder import build_all_metadata
+from app.services.image_v2.embedding_pipeline import generate_embeddings
 def process_images_v2(
-
         file_path,
-
-        document_id
-
+        document_id,
+        page_lookup
 ):
 
     extension = os.path.splitext(
@@ -30,43 +35,35 @@ def process_images_v2(
         document_id
 
     )
+    images = extractor.extract(file_path)
 
-    images = extractor.extract(
+    print(f"Candidates: {len(images)}")
 
-        file_path
+    print("\nRunning Duplicate Removal...")
+    images = remove_duplicates(images)
 
-    )
+    print(f"Remaining Images : {len(images)}")
+    images = caption_images(images)
 
-    print()
+    print("\nGenerating BLIP Captions...")
+    images = caption_images(images)
 
-    print("="*60)
+    print("\nRunning OCR...")
+    images = run_ocr(images)
+    page_lookup = {}
 
-    print("STAGE 1")
+    print("\nBuilding Metadata...")
+    images = build_all_metadata(
+    images,
+    page_lookup
+)
 
-    print("="*60)
+    print("\nGenerating CLIP Embeddings...")
+    images = generate_embeddings(images)
+    images = classify_image(images)
+    images = classify_images(images)
+    
 
-    print()
-
-    print(
-
-        "Candidates Found:",
-
-        len(images)
-
-    )
-
-    for img in images:
-
-        print(
-
-            img.source,
-
-            img.page_no,
-
-            os.path.basename(img.path)
-
-        )
-
-    print()
+    print("\nPipeline Complete")
 
     return images

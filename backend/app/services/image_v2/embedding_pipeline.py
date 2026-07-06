@@ -7,9 +7,9 @@ def generate_embeddings(images):
 
     def worker(img):
 
-        img["clip_embedding"] = embed_image(
+        img.clip_embedding = embed_image(
 
-            img["path"]
+            img.path
 
         )
 
