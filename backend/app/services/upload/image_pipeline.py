@@ -33,6 +33,9 @@ from concurrent.futures import (
     ThreadPoolExecutor,
     as_completed
 )
+from app.services.image.academic_figure_detector import (
+    is_academic_figure
+)
 def process_image_worker(
     image,
     page_lookup,
@@ -49,7 +52,26 @@ def process_image_worker(
         return None
 
     if not is_useful_image(image["path"]):
+        print(f"Rejected by useful filter: {os.path.basename(image['path'])}")
+        try:
+            os.remove(image["path"])
+        except:
+            pass
 
+        return None
+
+        # ------------------------------------------
+# Academic Figure Filter
+# ------------------------------------------
+    
+    if not is_academic_figure(image["path"]):
+
+        print(
+         "Rejected (Not Academic Figure):",
+        os.path.basename(image["path"])
+    )
+
+        
         try:
             os.remove(image["path"])
         except:
@@ -63,6 +85,7 @@ def process_image_worker(
     )
 
     if image is None:
+        print(f"Rejected by AI: {os.path.basename(image['path'])}")
         return None
 
     image["source_file"] = source_file
@@ -156,6 +179,7 @@ def process_images(
     images = remove_duplicate_images(
         images
     )
+    print(f"After duplicate removal: {len(images)}")
 
     print()
 
@@ -165,11 +189,12 @@ def process_images(
     )
 
     print()
-
     processed = []
-
     print("\nProcessing images in parallel...\n")
 
+    
+
+    
     with ThreadPoolExecutor(
     max_workers = min(4, os.cpu_count() or 1)
 ) as executor:
@@ -195,21 +220,6 @@ def process_images(
     ]
     print()
 
-    print("Images after AI filtering:")
-
-    for img in processed:
-
-        print(
-        os.path.basename(img["path"])
-    )
-
-    print(
-    f"Count = {len(processed)}"
-)
-
-    print()
-    
-
     for future in as_completed(futures):
 
         image = future.result()
@@ -234,9 +244,18 @@ def process_images(
             continue
 
         processed.append(image)
+        print(f"Accepted Images: {len(processed)}")
         print(
     f"Accepted: {os.path.basename(image['path'])}"
 )
+    print("\nImages after AI filtering:\n")
+
+    for img in processed:
+
+        print(os.path.basename(img["path"]))
+
+    print(f"Count = {len(processed)}")
+        
 
     # ----------------------------------------
     # Batch CLIP Embeddings
@@ -276,5 +295,7 @@ def process_images(
                 os.remove(img)
             except:
                 pass
+
+    print(f"Processing: {os.path.basename(image['path'])}")
 
     return processed

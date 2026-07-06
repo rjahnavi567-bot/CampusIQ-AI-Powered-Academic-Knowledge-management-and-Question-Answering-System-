@@ -1,15 +1,31 @@
-from app.services.chroma_service import text_collection
+from app.services.image_v2.metadata_builder import build_metadata
 
-results = text_collection.get(
-    include=["metadatas"]
+sample = {
+
+    "page_no": 124,
+
+    "path": "page_124.png",
+
+    "caption": "data integration diagram",
+
+    "ocr_text": "Data cleaning Data integration",
+
+    "category": "figure",
+
+    "image_hash": "123"
+
+}
+
+meta = build_metadata(
+
+    sample,
+
+    "This chapter explains preprocessing and data cleaning."
+
 )
 
-files = set()
+print(meta)
 
-for meta in results["metadatas"]:
-    files.add(meta["source_file"])
+print()
 
-print("\nFILES INSIDE CHROMADB\n")
-
-for f in sorted(files):
-    print(f)
+print(meta["search_text"])

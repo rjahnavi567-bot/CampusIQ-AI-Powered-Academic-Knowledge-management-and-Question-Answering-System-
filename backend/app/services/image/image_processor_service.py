@@ -46,12 +46,26 @@ def process_single_image(image, page_lookup):
 
     caption = understanding["caption"].lower()
 
-    if any(word in caption for word in REJECT_WORDS):
-        print(
-    f"Rejected {image['path']} : caption"
-)
+# Reject only when caption clearly indicates a text page
+    TEXT_PAGE_WORDS = [
+    "page of text",
+    "text document",
+    "printed text",
+    "document page",
+    "scanned page"
+]
 
-        return None
+    if any(word in caption for word in TEXT_PAGE_WORDS):
+
+        ocr_words = len(understanding["ocr_text"].split())
+
+        if ocr_words > 300:
+
+            print(
+            f"Rejected {image['path']} : text page"
+        )
+
+            return None
 
     image["caption"] = understanding["caption"]
     image["ocr_text"] = understanding["ocr_text"]
@@ -131,14 +145,33 @@ def process_single_image(image, page_lookup):
     score, reasons = calculate_confidence(
     image
 )
+    print("\n--------------------------------------")
+    print("Image :", image["path"])
+    print("Title :", image["title"])
+    print("Category :", image["category"])
+    print("Classifier :", image["classification_confidence"])
+    print("Confidence :", score)
+    print("Reasons :", reasons)
+    print("--------------------------------------")
 
     image["confidence_score"] = score
     image["confidence_reasons"] = ",".join(reasons)
 
-    if score < 0.45:
+    if score < 0.35:
 
         print(
         f"Rejected {image['path']} : confidence {score}"
+    )
+        print(
+
+        f"Reason -> confidence={score}"
+
+    )
+
+        print(
+
+        f"Reasons -> {reasons}"
+
     )
 
         return None

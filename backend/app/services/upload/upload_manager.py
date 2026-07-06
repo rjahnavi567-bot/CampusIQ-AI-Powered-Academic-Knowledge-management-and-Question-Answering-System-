@@ -43,7 +43,7 @@ from app.services.upload.image_pipeline import (
 from app.services.upload.response_builder import (
     build_upload_response
 )
-
+from app.services.image_v2.image_pipeline_v2 import process_images_v2
 
 class UploadManager:
 
@@ -214,15 +214,11 @@ class UploadManager:
 
                 image_future = executor.submit(
 
-        process_images,
+        process_images_v2,
 
         file_path=file_path,
 
-        document_id=document_id,
-
-        pages=pages,
-
-        source_file=new_filename
+        document_id=document_id
 
     )
 
@@ -243,6 +239,23 @@ class UploadManager:
             print(f"Images Found : {len(images)}")
 
             print(f"Chunks Created : {len(chunks)}")
+            print("\n========== STAGE 1 OUTPUT ==========\n")
+
+            for img in images:
+
+                print("----------------------------------")
+                print("Source :", img.source)
+                print("Page   :", img.page_no)
+                print("Path   :", img.path)
+                print("Size   :", f"{img.width} x {img.height}")
+                print("Area   :", img.area)
+
+            print("\nTotal Extracted :", len(images))
+
+            return {
+    "message": "Stage 1 Extraction Complete",
+    "images_found": len(images)
+}
 
             # ------------------------------------
             # Similarity Detection

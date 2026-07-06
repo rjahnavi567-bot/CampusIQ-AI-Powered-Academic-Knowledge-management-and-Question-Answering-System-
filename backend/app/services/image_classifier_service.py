@@ -137,7 +137,7 @@ def classify_image(
 
     best_category = "Generic Diagram"
 
-    confidence = 0.50
+    confidence = 0.60
 
     if max(scores.values()) > 0:
 

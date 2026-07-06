@@ -7,7 +7,7 @@ def calculate_confidence(image):
 
     title = image.get("title", "")
 
-    if len(title) > 8:
+    if title:
         score += 0.20
         reasons.append("title")
 

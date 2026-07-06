@@ -1,9 +1,23 @@
-from app.services.clip_service import create_image_embedding
+import os
 
-embedding = create_image_embedding(
-    "uploads/images/88/pdf_24_0.jpeg"
+from app.services.image_v2.clip_service import embed_image
+
+folder = "layout_output"
+
+files = sorted(os.listdir(folder))
+
+path = os.path.join(
+
+    folder,
+
+    files[0]
+
 )
+
+embedding = embed_image(path)
 
 print(len(embedding))
 
-print(embedding[:10])
+print()
+
+print(embedding[:20])

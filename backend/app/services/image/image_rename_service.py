@@ -61,6 +61,8 @@ def rename_image(image, document_id):
     )
 
     counter = 1
+    if image["path"] == new_path:
+        return image
 
     while os.path.exists(new_path):
 
