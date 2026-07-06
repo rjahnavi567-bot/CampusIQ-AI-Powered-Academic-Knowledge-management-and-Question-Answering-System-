@@ -41,6 +41,16 @@ def keep_image(path):
 
     if white_ratio > MAX_WHITE_RATIO:
         return False
+    
+    aspect_ratio = max(w / h, h / w)
+
+    if aspect_ratio > 6:
+        return False
+    
+    blur = cv2.Laplacian(gray, cv2.CV_64F).var()
+
+    if blur < 25:
+        return False
 
     edges = cv2.Canny(
         gray,
@@ -68,3 +78,29 @@ def keep_image(path):
         return False
 
     return True
+
+def filter_images(images):
+    """
+    Filters ImageCandidate objects.
+    """
+
+    filtered = []
+
+    for image in images:
+
+        if keep_image(image.path):
+            filtered.append(image)
+
+        else:
+            try:
+                import os
+
+                if os.path.exists(image.path):
+                    os.remove(image.path)
+
+            except Exception:
+                pass
+
+    print(f"Quality Filter : {len(filtered)} images kept")
+
+    return filtered

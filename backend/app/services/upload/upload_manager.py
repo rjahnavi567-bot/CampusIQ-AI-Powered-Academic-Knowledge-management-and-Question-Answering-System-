@@ -35,11 +35,6 @@ from app.services.upload.title_generator import (
 from app.services.upload.text_pipeline import (
     process_text_pages
 )
-
-from app.services.upload.image_pipeline import (
-    process_images
-)
-
 from app.services.upload.response_builder import (
     build_upload_response
 )
@@ -148,15 +143,16 @@ class UploadManager:
             # Extract Text
             # ------------------------------------
 
-            print("Extracting text...")
-
             pages = extract_text(
                 file_path
             )
+            page_lookup = {}
 
-            print(
-                f"Pages Extracted : {len(pages)}"
-            )
+            for page in pages:
+
+                page_lookup[page["page_no"]] = page["text"]
+
+           
 
             # ------------------------------------
             # Generate Better Title
@@ -214,13 +210,15 @@ class UploadManager:
 
                 image_future = executor.submit(
 
-        process_images_v2,
+    process_images_v2,
 
-        file_path=file_path,
+    file_path=file_path,
 
-        document_id=document_id
+    document_id=document_id,
 
-    )
+    page_lookup=page_lookup
+
+)
 
                 text_future = executor.submit(
 
@@ -235,27 +233,28 @@ class UploadManager:
                 images = image_future.result()
 
                 chunks, content_signature = text_future.result()
+                print("\n" + "=" * 70)
+                print("IMAGE PIPELINE V2 OUTPUT")
+                print("=" * 70)
 
-            print(f"Images Found : {len(images)}")
+                for i, img in enumerate(images, start=1):
 
-            print(f"Chunks Created : {len(chunks)}")
-            print("\n========== STAGE 1 OUTPUT ==========\n")
+                    print(f"\nImage {i}")
 
-            for img in images:
+                    print(f"Page          : {img.page_no}")
 
-                print("----------------------------------")
-                print("Source :", img.source)
-                print("Page   :", img.page_no)
-                print("Path   :", img.path)
-                print("Size   :", f"{img.width} x {img.height}")
-                print("Area   :", img.area)
+                    print(f"Category      : {img.category}")
 
-            print("\nTotal Extracted :", len(images))
+                    print(f"Caption       : {img.caption}")
 
-            return {
-    "message": "Stage 1 Extraction Complete",
-    "images_found": len(images)
-}
+                    print(f"OCR           : {img.ocr_text[:120]}")
+
+                    print(f"Embedding Dim : {len(img.clip_embedding)}")
+
+                    print(f"Path          : {img.path}")
+
+                    print("\nTotal Images :", len(images))
+            
 
             # ------------------------------------
             # Similarity Detection

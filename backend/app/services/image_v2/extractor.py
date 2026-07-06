@@ -3,8 +3,6 @@ import fitz
 import cv2
 import numpy as np
 
-from PIL import Image
-
 from .models import ImageCandidate
 
 
@@ -14,64 +12,61 @@ class ImageExtractor:
 
         self.document_id = document_id
 
-        self.output = f"uploads/images/{document_id}"
+        self.output_dir = f"uploads/images/{document_id}"
 
-        os.makedirs(self.output, exist_ok=True)
+        os.makedirs(self.output_dir, exist_ok=True)
 
-    #############################################################
+    ###########################################################
 
     def extract(self, pdf_path):
 
         pdf = fitz.open(pdf_path)
 
-        images = []
+        results = []
 
-        for page_no in range(len(pdf)):
+        for page_index in range(len(pdf)):
 
-            page = pdf.load_page(page_no)
+            page = pdf.load_page(page_index)
 
-            images.extend(
-
+            results.extend(
                 self.extract_embedded_images(
-
                     pdf,
                     page,
-                    page_no
+                    page_index
                 )
-
             )
 
-            images.extend(
-
-                self.extract_vector_figures(
-
+            results.extend(
+                self.extract_vector_images(
                     page,
-                    page_no
+                    page_index
                 )
-
             )
 
-        return images
+        pdf.close()
 
-    #############################################################
+        print(f"\nTotal extracted : {len(results)}")
+
+        return results
+    
+        ###########################################################
 
     def extract_embedded_images(
-
-            self,
-            pdf,
-            page,
-            page_no
+        self,
+        pdf,
+        page,
+        page_index
     ):
 
         candidates = []
 
-        images = page.get_images(full=True)
-
         seen = set()
 
-        for img in images:
+        images = page.get_images(full=True)
 
-            xref = img[0]
+        for image in images:
+
+            xref = image[0]
 
             if xref in seen:
                 continue
@@ -88,29 +83,32 @@ class ImageExtractor:
 
             ext = base["ext"]
 
-            data = base["image"]
+            image_bytes = base["image"]
 
             filename = os.path.join(
 
-                self.output,
+                self.output_dir,
 
-                f"embedded_{page_no}_{xref}.{ext}"
+                f"embedded_{page_index}_{xref}.{ext}"
 
             )
 
             with open(filename, "wb") as f:
 
-                f.write(data)
+                f.write(image_bytes)
 
-            image = cv2.imread(filename)
+            img = cv2.imread(filename)
 
-            if image is None:
+            if img is None:
 
-                os.remove(filename)
+                try:
+                    os.remove(filename)
+                except:
+                    pass
 
                 continue
 
-            h, w = image.shape[:2]
+            h, w = img.shape[:2]
 
             candidates.append(
 
@@ -118,54 +116,51 @@ class ImageExtractor:
 
                     path=filename,
 
-                    page_no=page_no + 1,
-
-                    source="embedded",
-
-                    bbox=None,
+                    page_no=page_index + 1,
 
                     width=w,
 
                     height=h,
 
-                    area=w*h,
+                    area=w * h,
 
-                    document_id=self.document_id,
+                    source="embedded",
 
-                    image_type="embedded"
+                    image_type="embedded",
+
+                    document_id=self.document_id
 
                 )
 
             )
 
         return candidates
+    
+        ###########################################################
 
-    #############################################################
-
-    def extract_vector_figures(
-
-            self,
-            page,
-            page_no
+    def extract_vector_images(
+        self,
+        page,
+        page_index
     ):
+
+        candidates = []
 
         drawings = page.get_drawings()
 
         if not drawings:
 
-            return []
+            return candidates
 
         pix = page.get_pixmap(
-
-            matrix=fitz.Matrix(3,3)
-
+            matrix=fitz.Matrix(3, 3)
         )
 
         page_image = os.path.join(
 
-            self.output,
+            self.output_dir,
 
-            f"page_{page_no}.png"
+            f"page_{page_index}.png"
 
         )
 
@@ -175,99 +170,74 @@ class ImageExtractor:
 
         if image is None:
 
-            return []
+            return candidates
 
         gray = cv2.cvtColor(
-
             image,
-
             cv2.COLOR_BGR2GRAY
-
         )
 
         binary = cv2.threshold(
-
             gray,
-
             240,
-
             255,
-
             cv2.THRESH_BINARY_INV
-
         )[1]
 
         kernel = cv2.getStructuringElement(
-
             cv2.MORPH_RECT,
-
-            (5,5)
-
+            (5, 5)
         )
 
         binary = cv2.dilate(
-
             binary,
-
             kernel,
-
             iterations=2
-
         )
 
-        contours,_ = cv2.findContours(
-
+        contours, _ = cv2.findContours(
             binary,
-
             cv2.RETR_EXTERNAL,
-
             cv2.CHAIN_APPROX_SIMPLE
-
         )
 
-        candidates=[]
+        idx = 0
 
-        idx=0
+        page_area = image.shape[0] * image.shape[1]
 
-        page_area=image.shape[0]*image.shape[1]
+        for contour in contours:
 
-        for c in contours:
+            x, y, w, h = cv2.boundingRect(contour)
 
-            x,y,w,h=cv2.boundingRect(c)
+            area = w * h
 
-            area=w*h
-
-            if area<40000:
+            if area < 10000:
                 continue
 
-            if area>page_area*0.85:
+            if area > page_area * 0.98:
                 continue
 
-            crop=image[y:y+h,x:x+w]
+            crop = image[y:y+h, x:x+w]
 
-            save=os.path.join(
+            filename = os.path.join(
 
-                self.output,
+                self.output_dir,
 
-                f"vector_{page_no}_{idx}.png"
+                f"vector_{page_index}_{idx}.png"
 
             )
 
-            cv2.imwrite(save,crop)
+            cv2.imwrite(filename, crop)
 
-            idx+=1
+            idx += 1
 
             candidates.append(
 
                 ImageCandidate(
 
-                    path=save,
+                    path=filename,
 
-                    page_no=page_no+1,
-
-                    source="vector",
-
-                    bbox=(x,y,w,h),
+                    page_no=page_index + 1,
 
                     width=w,
 
@@ -275,20 +245,21 @@ class ImageExtractor:
 
                     area=area,
 
-                    document_id=self.document_id,
+                    bbox=(x, y, w, h),
 
-                    image_type="vector"
+                    source="vector",
+
+                    image_type="vector",
+
+                    document_id=self.document_id
 
                 )
 
             )
 
         try:
-
             os.remove(page_image)
-
         except:
-
             pass
 
         return candidates

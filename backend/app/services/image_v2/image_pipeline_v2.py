@@ -8,6 +8,7 @@ from app.services.image_v2.caption_service import caption_images
 from app.services.image_v2.image_classifier_service import classify_images
 from app.services.image_v2.ocr_service import run_ocr
 from app.services.image_v2.classifier import classify_image
+from app.services.image_v2.quality_filter import (keep_image, filter_images)
 from app.services.image_v2.metadata_builder import build_all_metadata
 from app.services.image_v2.embedding_pipeline import generate_embeddings
 def process_images_v2(
@@ -36,34 +37,35 @@ def process_images_v2(
 
     )
     images = extractor.extract(file_path)
+    print(f"Extracted : {len(images)}")
 
-    print(f"Candidates: {len(images)}")
-
-    print("\nRunning Duplicate Removal...")
     images = remove_duplicates(images)
+    print(f"After duplicate removal : {len(images)}")
+    images = filter_images(images)
 
-    print(f"Remaining Images : {len(images)}")
+    print("Quality filter:", len(images))
+    images = classify_images(images)
+
+    print("Classification completed.")
+    for img in images:
+
+        print(
+        img.path,
+        img.width,
+        img.height
+    )
     images = caption_images(images)
+    print("Caption completed.")
 
-    print("\nGenerating BLIP Captions...")
-    images = caption_images(images)
-
-    print("\nRunning OCR...")
     images = run_ocr(images)
-    page_lookup = {}
-
-    print("\nBuilding Metadata...")
+    print("OCR completed.")
     images = build_all_metadata(
     images,
     page_lookup
 )
-
-    print("\nGenerating CLIP Embeddings...")
+    print("Metadata completed.")
     images = generate_embeddings(images)
-    images = classify_image(images)
-    images = classify_images(images)
-    
-
+    print("Embedding completed.")
     print("\nPipeline Complete")
 
     return images

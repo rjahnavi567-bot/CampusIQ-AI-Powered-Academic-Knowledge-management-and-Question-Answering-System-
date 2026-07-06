@@ -35,7 +35,7 @@ def remove_duplicates(images):
 
         hashes.append(h)
 
-        image["phash"] = str(h)
+        image.image_hash = str(h)
 
         accepted.append(image)
 

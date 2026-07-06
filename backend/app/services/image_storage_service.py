@@ -1,7 +1,9 @@
 from app.database.models import DocumentImage
 from app.services.chroma_service import image_collection
-from app.services.image_embedding_service import embed_image
 import os
+
+from app.database.models import DocumentImage
+from app.services.chroma_service import image_collection
 
 
 def save_images(db, document_id, images):
@@ -9,144 +11,147 @@ def save_images(db, document_id, images):
     Save image metadata into MySQL.
     """
 
-    for image in images:
-        print(
-    "Saving:",
-    image["path"]
-)
-
-        record = DocumentImage(
-
-    document_id=document_id,
-
-    image_path=image["path"],
-
-    page_no=image["page_no"],
-
-    caption=image.get("caption", ""),
-
-    title=image.get("title", ""),
-
-    image_hash=image.get("image_hash", ""),
-
-    source_file=image.get("source_file", ""),
-    category=image.get("category", ""),
-
-        classification_confidence=image.get(
-    "classification_confidence",
-    0.5
-),confidence_score=image.get(
-    "confidence_score",
-    0
-)
-
-)
-        
-
-        db.add(record)
     print("\nSaving image metadata...")
 
     for image in images:
-        print(image["path"])
+
+        print("Saving:", image.path)
+
+        record = DocumentImage(
+
+            document_id=document_id,
+
+            image_path=image.path,
+
+            page_no=image.page_no,
+
+            caption=image.caption,
+
+            title=image.title,
+
+            image_hash=image.image_hash,
+
+            source_file=image.source_file,
+
+            category=image.category,
+
+            classification_confidence=image.classification_confidence,
+
+            confidence_score=image.confidence_score
+
+        )
+
+        db.add(record)
 
     db.commit()
-    print("Images saved:", len(images))
 
+    print(f"Images saved: {len(images)}")
 def store_images(images, document_id):
     """
-    Store all image embeddings into ChromaDB
-    using a bulk insert.
+    Store image embeddings into ChromaDB.
     """
 
     if not images:
+
         print("No images to store.")
+
         return
 
     ids = []
+
     documents = []
+
     embeddings = []
+
     metadatas = []
 
     for image in images:
 
-        if image.get("clip_embedding") is None:
+        if not image.clip_embedding:
+
             continue
 
         ids.append(
-            f"image_{document_id}_{image['image_hash']}"
+
+            f"image_{document_id}_{image.image_hash}"
+
         )
 
         documents.append(
+
 f"""
 IMAGE_HASH:
-{image.get("image_hash","")}
+{image.image_hash}
 
 TITLE:
-{image.get("title","")}
+{image.title}
 
 CAPTION:
-{image.get("caption","")}
+{image.caption}
 
 OCR:
-{image.get("ocr_text","")}
+{image.ocr_text}
 
 VISION:
-{image.get("vision","")}
+{image.vision}
 
 PAGE CONTEXT:
-{image.get("page_text","")}
+{image.page_context}
 """
         )
 
         embeddings.append(
-            image["clip_embedding"]
+
+            image.clip_embedding
+
         )
 
         metadatas.append(
+
             {
+
                 "document_id": document_id,
+
                 "type": "image",
-                "page_no": image["page_no"],
-                "image_path": image["path"],
-                "caption": image.get("caption", ""),
-                "title": image.get("title", ""),
-                "category": image.get("category", ""),
 
-"classification_confidence": float(
+                "page_no": image.page_no,
 
-    image.get(
+                "image_path": image.path,
 
-        "classification_confidence",
+                "caption": image.caption,
 
-        0.5
+                "title": image.title,
 
-    )
+                "category": image.category,
 
-),
-"confidence_score": float(
+                "classification_confidence": float(
+                    image.classification_confidence
+                ),
 
-    image.get(
+                "confidence_score": float(
+                    image.confidence_score
+                ),
 
-        "confidence_score",
+                "image_hash": image.image_hash,
 
-        0
+                "source_file": image.source_file,
 
-    )
+                "file_type": image.file_type
 
-),
-                "image_hash": image.get("image_hash", ""),
-                "source_file": image.get("source_file", ""),
-                "file_type": image.get("file_type", "")
             }
+
         )
 
     image_collection.add(
+
         ids=ids,
+
         documents=documents,
+
         embeddings=embeddings,
+
         metadatas=metadatas
+
     )
 
-    print(
-        f"Stored {len(ids)} images."
-    )
+    print(f"Stored {len(ids)} images.")
