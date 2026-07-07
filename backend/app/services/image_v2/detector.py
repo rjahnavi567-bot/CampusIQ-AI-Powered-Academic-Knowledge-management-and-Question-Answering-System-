@@ -19,11 +19,7 @@ KEEP_CLASSES = {
 }
 
 
-def detect_layout(image_path):
-
-    image = cv2.imread(image_path)
-
-    h, w = image.shape[:2]
+def detect_layout(image):
 
     results = MODEL.predict(
 
@@ -59,32 +55,15 @@ def detect_layout(image_path):
 
             )
 
+            crop = image[y1:y2, x1:x2]
+
             boxes.append(
-
-                {
-
-                    "category": label,
-
-                    "bbox": (
-
-                        x1,
-
-                        y1,
-
-                        x2,
-
-                        y2
-
-                    ),
-
-                    "confidence": float(
-
-                        box.conf.item()
-
-                    )
-
-                }
-
-            )
+{
+    "category": label,
+    "bbox": (x1, y1, x2, y2),
+    "confidence": float(box.conf.item()),
+    "crop": crop
+}
+)
 
     return boxes

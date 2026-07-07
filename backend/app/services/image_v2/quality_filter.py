@@ -1,27 +1,64 @@
+import os
 import cv2
 import numpy as np
 
 
-MIN_AREA = 50000
+# ---------------------------------------------------------
+# Technical Validation Thresholds
+# ---------------------------------------------------------
 
-MIN_WIDTH = 180
-MIN_HEIGHT = 180
+MIN_WIDTH = 40
+MIN_HEIGHT = 40
 
-MAX_TEXT_RATIO = 0.55
+MIN_AREA = 1600
 
-MAX_WHITE_RATIO = 0.96
+MAX_WHITE_RATIO = 0.998
+MAX_BLACK_RATIO = 0.998
 
-MIN_EDGE_RATIO = 0.004
+MIN_BLUR = 3
 
 
-def keep_image(path):
+# ---------------------------------------------------------
+# Categories that bypass almost all heuristic filtering
+# ---------------------------------------------------------
 
-    img = cv2.imread(path)
+PROTECTED_CATEGORIES = {
+
+    "diagram",
+    "illustration",
+    "flowchart",
+    "chart",
+    "graph",
+    "medical image",
+    "microscope image",
+    "equipment",
+    "device",
+    "person",
+    "animal",
+    "map",
+    "table",
+    "equation",
+    "book cover"
+
+}
+
+
+############################################################
+
+def keep_image(image):
+
+    if not os.path.exists(image.path):
+        return False
+
+    img = cv2.imread(image.path)
 
     if img is None:
         return False
 
     h, w = img.shape[:2]
+
+    if h == 0 or w == 0:
+        return False
 
     if w < MIN_WIDTH:
         return False
@@ -32,75 +69,102 @@ def keep_image(path):
     if w * h < MIN_AREA:
         return False
 
+    ##########################################################
+    # Protected categories
+    ##########################################################
+
+    category = image.category.lower()
+
+    if category in PROTECTED_CATEGORIES:
+
+        return True
+
+    ##########################################################
+    # Remaining images undergo light validation
+    ##########################################################
+
     gray = cv2.cvtColor(
+
         img,
+
         cv2.COLOR_BGR2GRAY
+
     )
 
-    white_ratio = np.mean(gray > 245)
+    ##########################################################
+    # Completely white image
+    ##########################################################
+
+    white_ratio = np.mean(gray > 250)
 
     if white_ratio > MAX_WHITE_RATIO:
         return False
-    
-    aspect_ratio = max(w / h, h / w)
 
-    if aspect_ratio > 6:
+    ##########################################################
+    # Completely black image
+    ##########################################################
+
+    black_ratio = np.mean(gray < 5)
+
+    if black_ratio > MAX_BLACK_RATIO:
         return False
-    
-    blur = cv2.Laplacian(gray, cv2.CV_64F).var()
 
-    if blur < 25:
-        return False
+    ##########################################################
+    # Completely blurred / empty crop
+    ##########################################################
 
-    edges = cv2.Canny(
+    blur = cv2.Laplacian(
+
         gray,
-        100,
-        200
-    )
 
-    edge_ratio = np.count_nonzero(edges) / edges.size
+        cv2.CV_64F
 
-    if edge_ratio < MIN_EDGE_RATIO:
-        return False
+    ).var()
 
-    binary = cv2.adaptiveThreshold(
-        gray,
-        255,
-        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-        cv2.THRESH_BINARY_INV,
-        25,
-        15
-    )
-
-    text_ratio = np.count_nonzero(binary) / binary.size
-
-    if text_ratio > MAX_TEXT_RATIO:
+    if blur < MIN_BLUR:
         return False
 
     return True
 
-def filter_images(images):
-    """
-    Filters ImageCandidate objects.
-    """
 
-    filtered = []
+############################################################
+
+def filter_images(images):
+
+    print("\n========== QUALITY FILTER ==========")
+
+    kept = []
+
+    removed = 0
 
     for image in images:
 
-        if keep_image(image.path):
-            filtered.append(image)
+        try:
 
-        else:
-            try:
-                import os
+            if keep_image(image):
 
-                if os.path.exists(image.path):
-                    os.remove(image.path)
+                kept.append(image)
 
-            except Exception:
-                pass
+            else:
 
-    print(f"Quality Filter : {len(filtered)} images kept")
+                removed += 1
 
-    return filtered
+                try:
+
+                    if os.path.exists(image.path):
+
+                        os.remove(image.path)
+
+                except Exception:
+                    pass
+
+        except Exception:
+
+            removed += 1
+
+    print(f"Input Images : {len(images)}")
+    print(f"Kept         : {len(kept)}")
+    print(f"Removed      : {removed}")
+    print("====================================\n")
+
+    return kept

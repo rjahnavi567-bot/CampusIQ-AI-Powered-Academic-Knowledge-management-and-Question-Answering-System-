@@ -7,40 +7,95 @@ from app.services.image_v2.clip_model import (
     DEVICE
 )
 
+
+# -------------------------------------------------------
+# Categories used for routing
+# -------------------------------------------------------
+
 LABELS = [
+
+    # Photographs
     "photograph",
-    "table",
-    "chart",
+    "person",
+    "animal",
+    "building",
+    "natural scene",
+
+    # Diagrams
     "flowchart",
-    "network diagram",
+    "block diagram",
     "architecture diagram",
-    "equation",
-    "graph",
+    "network diagram",
+    "uml diagram",
+    "electrical circuit",
+    "mechanical diagram",
+
+    # Charts
+    "line graph",
     "bar chart",
     "pie chart",
-    "line chart",
     "scatter plot",
-    "document",
+    "histogram",
+
+    # Tables
+    "table",
+
+    # Mathematics
+    "equation",
+    "mathematical formula",
+
+    # Maps
+    "map",
+
+    # UI
     "user interface screenshot",
+
+    # Scientific
+    "microscope image",
+    "medical image",
+
+    # Logos
     "logo",
-    "map"
+
+    # Books
+    "book cover",
+
+    # Document-like
+    "text page",
+    "paragraph",
+
+    # Generic
+    "illustration",
+    "icon"
 ]
 
+
+# -------------------------------------------------------
+# Classifier
+# -------------------------------------------------------
 
 def classify_image(image_path):
 
     image = Image.open(image_path).convert("RGB")
 
     inputs = processor(
+
         text=LABELS,
+
         images=image,
+
         return_tensors="pt",
+
         padding=True
+
     )
 
     inputs = {
+
         k: v.to(DEVICE)
+
         for k, v in inputs.items()
+
     }
 
     with torch.no_grad():
@@ -51,4 +106,8 @@ def classify_image(image_path):
 
     index = probs.argmax().item()
 
-    return LABELS[index], probs[0][index].item()
+    label = LABELS[index]
+
+    confidence = probs[0][index].item()
+
+    return label, confidence

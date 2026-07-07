@@ -65,7 +65,7 @@ def store_images(images, document_id):
 
     metadatas = []
 
-    for image in images:
+    for index, image in enumerate(images):
 
         if not image.clip_embedding:
 
@@ -73,9 +73,9 @@ def store_images(images, document_id):
 
         ids.append(
 
-            f"image_{document_id}_{image.image_hash}"
+    f"image_{document_id}_page_{image.page_no}_{index}"
 
-        )
+)
 
         documents.append(
 

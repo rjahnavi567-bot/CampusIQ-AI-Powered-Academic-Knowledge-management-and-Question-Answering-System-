@@ -1,90 +1,108 @@
-import os
-
-import fitz
-
 import cv2
-
-import numpy as np
-
 from paddleocr import PPStructure
 
 
+# ---------------------------------------------------
+# PPStructure Layout Detector
+# ---------------------------------------------------
+
 layout_engine = PPStructure(
-    show_log=False,
     layout=True,
     table=False,
-    ocr=False
+    ocr=False,
+    show_log=False
 )
 
 
-def detect_figures(pdf_path, output_folder):
+# ---------------------------------------------------
+# Detect Figure Regions
+# ---------------------------------------------------
 
-    os.makedirs(output_folder, exist_ok=True)
+def detect_figures(page_image):
+    """
+    Stage-2
 
-    doc = fitz.open(pdf_path)
+    Input
+    -----
+    page_image : numpy.ndarray (BGR)
 
-    figures = []
+    Output
+    ------
+    [
+        {
+            "bbox": (x1,y1,x2,y2),
+            "category": "figure",
+            "confidence": 0.98,
+            "source": "ppstructure"
+        }
+    ]
+    """
 
-    for page_index in range(len(doc)):
+    # PPStructure expects RGB image
+    rgb = cv2.cvtColor(
+        page_image,
+        cv2.COLOR_BGR2RGB
+    )
 
-        page = doc.load_page(page_index)
+    try:
+        results = layout_engine(rgb)
 
-        pix = page.get_pixmap(
-            matrix=fitz.Matrix(2,2)
-        )
+    except Exception as e:
 
-        image = np.frombuffer(
-            pix.samples,
-            dtype=np.uint8
-        ).reshape(
-            pix.height,
-            pix.width,
-            pix.n
-        )
+        print("PPStructure Error :", e)
 
-        if pix.n == 4:
+        return []
 
-            image = cv2.cvtColor(
-                image,
-                cv2.COLOR_RGBA2RGB
+    detections = []
+
+    for item in results:
+
+        # Keep only figures
+        if item.get("type") != "figure":
+            continue
+
+        try:
+
+            x1, y1, x2, y2 = map(
+                int,
+                item["bbox"]
             )
 
-        result = layout_engine(image)
-
-        figure_no = 0
-
-        for item in result:
-
-            if item["type"] != "figure":
+            # Ignore invalid boxes
+            if x2 <= x1 or y2 <= y1:
                 continue
 
-            x1,y1,x2,y2 = map(int,item["bbox"])
+            detections.append(
 
-            crop = image[y1:y2,x1:x2]
+                {
 
-            if crop.size == 0:
-                continue
+                    "bbox": (
+                        x1,
+                        y1,
+                        x2,
+                        y2
+                    ),
 
-            filename = os.path.join(
+                    "category": "figure",
 
-                output_folder,
+                    "confidence": float(
+                        item.get(
+                            "score",
+                            1.0
+                        )
+                    ),
 
-                f"page_{page_index+1}_figure_{figure_no}.png"
+                    "source": "ppstructure"
+
+                }
 
             )
 
-            cv2.imwrite(filename,crop)
+        except Exception:
+            continue
 
-            figures.append({
+    print(
+        f"PPStructure detected {len(detections)} figure(s)."
+    )
 
-                "page_no":page_index+1,
-
-                "path":filename,
-
-                "bbox":[x1,y1,x2,y2]
-
-            })
-
-            figure_no +=1
-
-    return figures
+    return detections

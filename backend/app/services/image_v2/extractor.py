@@ -1,10 +1,12 @@
 import os
 import fitz
-import cv2
-import numpy as np
 
-from .models import ImageCandidate
-
+from .page_renderer import render_page
+from .layout_detector import detect_figures
+from .region_detector import detect_regions
+from .region_fusion import fuse_regions
+from .crop_service import crop_regions
+from .validator.validator import PipelineValidator
 
 class ImageExtractor:
 
@@ -13,253 +15,116 @@ class ImageExtractor:
         self.document_id = document_id
 
         self.output_dir = f"uploads/images/{document_id}"
+        
 
-        os.makedirs(self.output_dir, exist_ok=True)
+        os.makedirs(
+            self.output_dir,
+            exist_ok=True
+        )
+        self.validator = PipelineValidator(
+    self.output_dir
+)
 
-    ###########################################################
+    ############################################################
 
     def extract(self, pdf_path):
 
         pdf = fitz.open(pdf_path)
 
-        results = []
+        candidates = []
 
         for page_index in range(len(pdf)):
 
+            print("\n========================================")
+            print(f"Processing Page {page_index + 1}")
+            print("========================================")
+
+            ####################################################
+            # Stage 1 : Render Page
+            ####################################################
+
             page = pdf.load_page(page_index)
 
-            results.extend(
-                self.extract_embedded_images(
-                    pdf,
-                    page,
-                    page_index
-                )
+            page_image = render_page(page)
+
+            ####################################################
+            # Stage 2 : PPStructure Layout Detection
+            ####################################################
+
+            layout_regions = detect_figures(page_image)
+
+            print(
+                f"PPStructure Regions : {len(layout_regions)}"
             )
 
-            results.extend(
-                self.extract_vector_images(
-                    page,
-                    page_index
-                )
+            ####################################################
+            # Stage 3 : Region Detection
+            ####################################################
+
+            region_boxes = detect_regions(page_image)
+
+            print(
+                f"OpenCV Regions      : {len(region_boxes)}"
             )
+
+            ####################################################
+            # Stage 4 : Region Fusion
+            ####################################################
+
+            detections = fuse_regions(
+                layout_regions,
+                region_boxes
+            )
+
+            print(
+                f"Final Regions       : {len(detections)}"
+            )
+            ####################################################
+# Stage 5.5 : Pipeline Validator
+####################################################
+
+            self.validator.validate(
+
+    page_no=page_index + 1,
+
+    page_image=page_image,
+
+    layout_boxes=layout_regions,
+
+    region_boxes=region_boxes,
+
+    fusion_boxes=detections
+
+)
+
+            ####################################################
+            # Stage 5 : Crop Extraction
+            ####################################################
+
+            page_candidates = crop_regions(
+
+                page_image=page_image,
+
+                page_no=page_index + 1,
+
+                detections=detections,
+
+                output_dir=self.output_dir,
+
+                document_id=self.document_id
+
+            )
+
+            print(
+                f"Crops Saved         : {len(page_candidates)}"
+            )
+
+            candidates.extend(page_candidates)
 
         pdf.close()
 
-        print(f"\nTotal extracted : {len(results)}")
-
-        return results
-    
-        ###########################################################
-
-    def extract_embedded_images(
-        self,
-        pdf,
-        page,
-        page_index
-    ):
-
-        candidates = []
-
-        seen = set()
-
-        images = page.get_images(full=True)
-
-        for image in images:
-
-            xref = image[0]
-
-            if xref in seen:
-                continue
-
-            seen.add(xref)
-
-            try:
-
-                base = pdf.extract_image(xref)
-
-            except:
-
-                continue
-
-            ext = base["ext"]
-
-            image_bytes = base["image"]
-
-            filename = os.path.join(
-
-                self.output_dir,
-
-                f"embedded_{page_index}_{xref}.{ext}"
-
-            )
-
-            with open(filename, "wb") as f:
-
-                f.write(image_bytes)
-
-            img = cv2.imread(filename)
-
-            if img is None:
-
-                try:
-                    os.remove(filename)
-                except:
-                    pass
-
-                continue
-
-            h, w = img.shape[:2]
-
-            candidates.append(
-
-                ImageCandidate(
-
-                    path=filename,
-
-                    page_no=page_index + 1,
-
-                    width=w,
-
-                    height=h,
-
-                    area=w * h,
-
-                    source="embedded",
-
-                    image_type="embedded",
-
-                    document_id=self.document_id
-
-                )
-
-            )
-
-        return candidates
-    
-        ###########################################################
-
-    def extract_vector_images(
-        self,
-        page,
-        page_index
-    ):
-
-        candidates = []
-
-        drawings = page.get_drawings()
-
-        if not drawings:
-
-            return candidates
-
-        pix = page.get_pixmap(
-            matrix=fitz.Matrix(3, 3)
-        )
-
-        page_image = os.path.join(
-
-            self.output_dir,
-
-            f"page_{page_index}.png"
-
-        )
-
-        pix.save(page_image)
-
-        image = cv2.imread(page_image)
-
-        if image is None:
-
-            return candidates
-
-        gray = cv2.cvtColor(
-            image,
-            cv2.COLOR_BGR2GRAY
-        )
-
-        binary = cv2.threshold(
-            gray,
-            240,
-            255,
-            cv2.THRESH_BINARY_INV
-        )[1]
-
-        kernel = cv2.getStructuringElement(
-            cv2.MORPH_RECT,
-            (5, 5)
-        )
-
-        binary = cv2.dilate(
-            binary,
-            kernel,
-            iterations=2
-        )
-
-        contours, _ = cv2.findContours(
-            binary,
-            cv2.RETR_EXTERNAL,
-            cv2.CHAIN_APPROX_SIMPLE
-        )
-
-        idx = 0
-
-        page_area = image.shape[0] * image.shape[1]
-
-        for contour in contours:
-
-            x, y, w, h = cv2.boundingRect(contour)
-
-            area = w * h
-
-            if area < 10000:
-                continue
-
-            if area > page_area * 0.98:
-                continue
-
-            crop = image[y:y+h, x:x+w]
-
-            filename = os.path.join(
-
-                self.output_dir,
-
-                f"vector_{page_index}_{idx}.png"
-
-            )
-
-            cv2.imwrite(filename, crop)
-
-            idx += 1
-
-            candidates.append(
-
-                ImageCandidate(
-
-                    path=filename,
-
-                    page_no=page_index + 1,
-
-                    width=w,
-
-                    height=h,
-
-                    area=area,
-
-                    bbox=(x, y, w, h),
-
-                    source="vector",
-
-                    image_type="vector",
-
-                    document_id=self.document_id
-
-                )
-
-            )
-
-        try:
-            os.remove(page_image)
-        except:
-            pass
+        print("\n========================================")
+        print(f"TOTAL IMAGES EXTRACTED : {len(candidates)}")
+        print("========================================\n")
 
         return candidates

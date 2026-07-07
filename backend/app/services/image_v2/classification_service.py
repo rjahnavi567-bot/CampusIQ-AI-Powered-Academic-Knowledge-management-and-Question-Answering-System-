@@ -3,31 +3,34 @@ from concurrent.futures import ThreadPoolExecutor
 from app.services.image_v2.classifier import classify_image
 
 
+def worker(image):
+
+    try:
+
+        label, confidence = classify_image(
+
+            image.path
+
+        )
+
+        image.category = label
+
+        image.classification_confidence = confidence
+
+    except Exception as e:
+
+        print(e)
+
+        image.category = "unknown"
+
+        image.classification_confidence = 0.0
+
+    return image
+
+
 def classify_images(images):
 
-    def worker(img):
-
-        try:
-
-            label, score = classify_image(
-
-                img.path
-
-            )
-
-            img.category = label
-
-            img.classification_confidence = score
-
-        except Exception as e:
-
-            print(e)
-
-            img.category = "unknown"
-
-            img.classification_confidence = 0
-
-        return img
+    print("\nRunning CLIP Classification...")
 
     with ThreadPoolExecutor(max_workers=2) as executor:
 
@@ -42,5 +45,7 @@ def classify_images(images):
             )
 
         )
+
+    print("Classification completed.")
 
     return images
