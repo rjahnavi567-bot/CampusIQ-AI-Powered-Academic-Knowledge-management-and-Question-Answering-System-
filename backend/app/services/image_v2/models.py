@@ -62,3 +62,20 @@ class ImageCandidate:
     orientation: str = ""
 
     resolution: tuple = (0, 0)
+    # --------------------------------------------------
+# Quality Metrics
+# --------------------------------------------------
+
+    blur_score: float = 0.0
+
+    noise_score: float = 0.0
+
+    white_ratio: float = 0.0
+
+    black_ratio: float = 0.0
+
+    edge_density: float = 0.0
+
+    is_empty: bool = False
+
+    background_only: bool = False

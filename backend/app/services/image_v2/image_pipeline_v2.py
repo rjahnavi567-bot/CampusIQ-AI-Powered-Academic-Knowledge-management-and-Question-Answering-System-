@@ -10,7 +10,7 @@ from app.services.image_v2.image_classifier_service import classify_images
 
 from app.services.image_v2.caption_service import caption_images
 from app.services.image_v2.ocr_service import run_ocr
-
+from app.services.image_v2.quality_analyzer import analyze_quality
 from app.services.image_v2.metadata_builder import build_all_metadata
 from app.services.image_v2.embedding_pipeline import generate_embeddings
 from app.services.image_v2.semantic_filter import filter_semantic
@@ -51,6 +51,13 @@ def process_images_v2(
 )
 
     print(f"Metadata : {len(images)}")
+    print("\n==============================")
+    print("STAGE 2 : IMAGE QUALITY")
+    print("==============================")
+
+    images = analyze_quality(images)
+
+    print(f"Quality : {len(images)}")
 
 
     print("\n==============================")
