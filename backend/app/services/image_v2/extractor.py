@@ -6,8 +6,18 @@ from .layout_detector import detect_figures
 from .region_detector import detect_regions
 from .region_fusion import fuse_regions
 from .crop_service import crop_regions
-from .validator.validator import PipelineValidator
+from .sliding_window_detector import detect_window_figures
+from .visual_object_detector import detect_visual_objects
+from .visual_object_filter import filter_visual_objects
+from .visual_object_merger import merge_visual_objects
 
+from .final_detection_fusion import final_fusion
+
+from .crop_service import crop_regions
+from .validator.validator import PipelineValidator
+from .sliding_window_detector import generate_windows
+from .sliding_window_detector import detect_window_figures
+from .sliding_window_fusion import merge_window_detections
 class ImageExtractor:
 
     def __init__(self, document_id):
@@ -48,79 +58,93 @@ class ImageExtractor:
             page_image = render_page(page)
 
             ####################################################
-            # Stage 2 : PPStructure Layout Detection
-            ####################################################
+# Stage 2 : PPStructure
+####################################################
 
             layout_regions = detect_figures(page_image)
 
-            print(
-                f"PPStructure Regions : {len(layout_regions)}"
-            )
-
-            ####################################################
-            # Stage 3 : Region Detection
-            ####################################################
+####################################################
+# Stage 3 : Region Detector
+####################################################
 
             region_boxes = detect_regions(page_image)
 
-            print(
-                f"OpenCV Regions      : {len(region_boxes)}"
-            )
-
-            ####################################################
-            # Stage 4 : Region Fusion
-            ####################################################
-
-            detections = fuse_regions(
-                layout_regions,
-                region_boxes
-            )
-
-            print(
-                f"Final Regions       : {len(detections)}"
-            )
-            ####################################################
-# Stage 5.5 : Pipeline Validator
+####################################################
+# Stage 4 : Region Fusion
 ####################################################
 
-            self.validator.validate(
-
-    page_no=page_index + 1,
-
-    page_image=page_image,
-
-    layout_boxes=layout_regions,
-
-    region_boxes=region_boxes,
-
-    fusion_boxes=detections
-
+            regions = fuse_regions(
+    layout_regions,
+    region_boxes
 )
 
-            ####################################################
-            # Stage 5 : Crop Extraction
-            ####################################################
+####################################################
+# Stage 5 : Sliding Window Detector
+####################################################
+
+            window_detections = detect_window_figures(
+    page_image
+)
+
+####################################################
+# Stage 5.6 : Visual Object Detector
+####################################################
+
+            visual_objects = detect_visual_objects(
+    page_image
+)
+
+####################################################
+# Stage 5.6.2 : Visual Object Filter
+####################################################
+
+            visual_objects = filter_visual_objects(
+    page_image,
+    visual_objects
+)
+
+####################################################
+# Stage 5.6.3 : Merge Visual Objects
+####################################################
+
+            visual_objects = merge_visual_objects(
+    visual_objects
+)
+
+####################################################
+# Stage 5.6.4 : Final Fusion
+####################################################
+
+            all_detections = final_fusion(
+    regions,
+    window_detections,
+    visual_objects
+)
+
+####################################################
+# Stage 6 : Crop Service
+####################################################
 
             page_candidates = crop_regions(
 
-                page_image=page_image,
+    page_image=page_image,
 
-                page_no=page_index + 1,
+    page_no=page_index + 1,
 
-                detections=detections,
+    detections=all_detections,
 
-                output_dir=self.output_dir,
+    output_dir=self.output_dir,
 
-                document_id=self.document_id
+    document_id=self.document_id
 
-            )
-
-            print(
-                f"Crops Saved         : {len(page_candidates)}"
-            )
+)
 
             candidates.extend(page_candidates)
-
+        print(f"PPStructure: {len(layout_regions)}")
+        print(f"Region Detector: {len(region_boxes)}")
+        print(f"Sliding Window: {len(window_detections)}")
+        print(f"Visual Objects: {len(visual_objects)}")
+        print(f"Final Detections: {len(all_detections)}")
         pdf.close()
 
         print("\n========================================")

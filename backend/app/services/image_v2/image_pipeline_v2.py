@@ -14,7 +14,7 @@ from app.services.image_v2.ocr_service import run_ocr
 from app.services.image_v2.metadata_builder import build_all_metadata
 from app.services.image_v2.embedding_pipeline import generate_embeddings
 from app.services.image_v2.semantic_filter import filter_semantic
-
+from app.services.image_v2.metadata_analyzer import analyze_metadata
 def process_images_v2(
     file_path,
     document_id,
@@ -41,6 +41,16 @@ def process_images_v2(
 
 
     print(f"Extracted : {len(images)}")
+    print("\n==============================")
+    print("STAGE 1 : IMAGE METADATA")
+    print("==============================")
+
+    images = analyze_metadata(
+    images,
+    page_lookup
+)
+
+    print(f"Metadata : {len(images)}")
 
 
     print("\n==============================")

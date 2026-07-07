@@ -49,3 +49,16 @@ class ImageCandidate:
     filename: str = ""
 
     document_id: int = None
+    # --------------------------------------------------
+# Metadata Analyzer (Stage 1)
+# --------------------------------------------------
+
+    aspect_ratio: float = 0.0
+
+    file_size: int = 0
+
+    page_ratio: float = 0.0
+
+    orientation: str = ""
+
+    resolution: tuple = (0, 0)
