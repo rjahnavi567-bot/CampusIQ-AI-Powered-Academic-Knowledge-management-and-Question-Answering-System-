@@ -1,4 +1,5 @@
 import os
+from .duplicate_scorer import score_duplicates
 from .image_encoder import encode_images
 from app.services.image_v2.extractor import ImageExtractor
 from .duplicate_detector import detect_exact_duplicates
@@ -19,8 +20,19 @@ from .duplicate_detector import (
     detect_exact_duplicates,
     detect_similar_duplicates
 )
+from .decision_engine import decide_images
+from .useful_score import compute_useful_scores
+from .vision_scorer import score_vision
+from .layout_scorer import score_layout
+from .ocr_scorer import score_ocr
+from .quality_scorer import score_quality
+from .metadata_scorer import score_metadata
+from .decision_initializer import initialize_decision
+from .vision_score_saver import save_vision_scores
+from .similarity_classifier import classify_images
 from .text_encoder import encode_prompts
 from .clip_model1 import (model,processor)
+from .hard_rules import apply_hard_rules
 from .clip_model import (MODEL,PREPROCESS,TOKENIZER,DEVICE)
 from .vision_classifier import initialize_classifier
 def process_images_v2(
@@ -138,22 +150,110 @@ def process_images_v2(
     print(
     f"Text Embeddings : {len(text_embeddings)}"
 )
+    print("\n==============================")
+    print("STAGE 6.4 : COMPUTE SIMILARITIES")
+    print("==============================")
+
+    images = classify_images(
+    images,
+    text_embeddings
+)
+
+    print(
+    f"Vision : {len(images)}"
+)
+    print("\n==============================")
+    print("STAGE 6.5 : SAVE VISION SCORES")
+    print("==============================")
+
+    images = save_vision_scores(images)
+
+    print(
+
+    f"Vision Scores : {len(images)}"
+
+)
+    print("\n==============================")
+    print("STAGE 7.1 : DECISION MODEL")
+    print("==============================")
+
+    images = initialize_decision(images)
+
+    print(
+    f"Decision Model : {len(images)}"
+)
+    
+    print("\n==============================")
+    print("STAGE 7.2 : HARD RULES")
+    print("==============================")
+
+    images = apply_hard_rules(images)
+
+    print(f"Hard Rules : {len(images)}")
+    print("\n==============================")
+    print("STAGE 7.3.1 : METADATA SCORE")
+    print("==============================")
+
+    images = score_metadata(images)
+
+    print(f"Metadata Score : {len(images)}")
+    print("\n==============================")
+    print("STAGE 7.3.2 : QUALITY SCORE")
+    print("==============================")
+
+    images = score_quality(images)
+
+    print(f"Quality Score : {len(images)}")
+    print("\n==============================")
+    print("STAGE 7.3.3 : OCR SCORE")
+    print("==============================")
+
+    images = score_ocr(images)
+
+    print(f"OCR Score : {len(images)}")
+    print("\n==============================")
+    print("STAGE 7.3.4 : LAYOUT SCORE")
+    print("==============================")
+
+    images = score_layout(images)
+
+    print(f"Layout Score : {len(images)}")
+    print("\n==============================")
+    print("STAGE 7.3.5 : VISION SCORE")
+    print("==============================")
+
+    images = score_vision(images)
+
+    print(f"Vision Score : {len(images)}")
+    print("\n==============================")
+    print("STAGE 7.3.6 : DUPLICATE SCORE")
+    print("==============================")
+
+    images = score_duplicates(images)
+
+    print(f"Duplicate Score : {len(images)}")
+    print("\n==============================")
+    print("STAGE 7.4 : USEFUL SCORE")
+    print("==============================")
+
+    images = compute_useful_scores(images)
+
+    print(f"Useful Score : {len(images)}")
+    print("\n==============================")
+    print("STAGE 7.5 : FINAL DECISION")
+    print("==============================")
+
+    images = decide_images(images)
+
+    print(f"Decision : {len(images)}")
+    
 
 
     print("\n==============================")
     print("STAGE 2 : FIGURE FILTER")
     print("==============================")
-    print("\nBefore Figure Filter")
-
-    for img in images:
-        print(img.path)
 
     images = filter_figures(images)
-
-    print("\nAfter Figure Filter")
-
-    for img in images:
-        print(img.path)
 
     print(f"Remaining : {len(images)}")
 
@@ -161,17 +261,7 @@ def process_images_v2(
     print("\n==============================")
     print("STAGE 3 : DUPLICATE REMOVAL")
     print("==============================")
-    print("\nBEforeDuplicate Filter")
-
-    for img in images:
-        print(img.path)
-
-
     images = remove_duplicates(images)
-    print("\After Duplicate Filter")
-
-    for img in images:
-        print(img.path)
 
 
     print(f"Remaining : {len(images)}")
@@ -179,19 +269,9 @@ def process_images_v2(
     print("\n==============================")
     print("STAGE 5 : CLIP CLASSIFICATION")
     print("==============================")
-    print("\Before Clip Filter")
-
-    for img in images:
-        print(img.path)
 
 
     images = classify_images(images)
-    print("\After clip Filter")
-
-    for img in images:
-        print(img.path)
-
-
     print("\n==============================")
     print("STAGE 8 : SEMANTIC FILTER")
     print("==============================")
