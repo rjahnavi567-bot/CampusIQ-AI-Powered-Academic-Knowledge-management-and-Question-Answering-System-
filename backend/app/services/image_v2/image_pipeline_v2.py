@@ -1,13 +1,13 @@
 import os
 
 from app.services.image_v2.extractor import ImageExtractor
-
+from .duplicate_detector import detect_exact_duplicates
 from app.services.image_v2.basic_crop_validator import filter_figures
 from app.services.image_v2.duplicate_filter import remove_duplicates
 from app.services.image_v2.quality_filter import filter_images
-
+from app.services.image_v2.layout_metadata import analyze_layout
 from app.services.image_v2.image_classifier_service import classify_images
-
+from .ocr_metadata import compute_ocr_metadata
 from app.services.image_v2.caption_service import caption_images
 from app.services.image_v2.ocr_service import run_ocr
 from app.services.image_v2.quality_analyzer import analyze_quality
@@ -58,6 +58,36 @@ def process_images_v2(
     images = analyze_quality(images)
 
     print(f"Quality : {len(images)}")
+    print("\n==============================")
+    print("STAGE 3 : OCR METADATA")
+    print("==============================")
+
+    images = compute_ocr_metadata(images)
+    print(type(images))
+    print(len(images))
+
+    print(type(images[0]))
+
+
+    print(f"OCR Metadata : {len(images)}")
+    print("\n==============================")
+    print("STAGE 4 : LAYOUT ANALYZER")
+    print("==============================")
+
+    images = analyze_layout(images)
+
+    print(f"Layout : {len(images)}")
+    ####################################################
+# Stage 5 : Exact Duplicate Detector
+####################################################
+
+    print("\n==============================")
+    print("STAGE 5 : EXACT DUPLICATE")
+    print("==============================")
+
+    images = detect_exact_duplicates(images)
+
+    print(f"Remaining Images : {len(images)}")
 
 
     print("\n==============================")
