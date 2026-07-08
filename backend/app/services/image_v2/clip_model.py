@@ -1,18 +1,18 @@
-from transformers import CLIPProcessor
-from transformers import CLIPModel
+import torch
+import open_clip
 
-MODEL_NAME = "openai/clip-vit-base-patch32"
 
-DEVICE = "cpu"
+print("\nLoading CLIP Model...")
 
-processor = CLIPProcessor.from_pretrained(
-    MODEL_NAME
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+
+MODEL, _, PREPROCESS = open_clip.create_model_and_transforms(
+    "ViT-B-32",
+    pretrained="laion2b_s34b_b79k"
 )
 
-model = CLIPModel.from_pretrained(
-    MODEL_NAME
-)
+MODEL = MODEL.to(DEVICE)
 
-model.to(DEVICE)
+TOKENIZER = open_clip.get_tokenizer("ViT-B-32")
 
-model.eval()
+print(f"CLIP Loaded on {DEVICE}")

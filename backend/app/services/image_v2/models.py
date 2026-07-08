@@ -132,7 +132,7 @@ class ImageCandidate:
 
     md5_hash: str = ""
 
-    perceptual_hash: str = ""
+    perceptual_hash =None
 
     is_duplicate: bool = False
 

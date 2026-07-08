@@ -1,7 +1,7 @@
 from PIL import Image
 import torch
 
-from app.services.image_v2.clip_model import (
+from app.services.image_v2.clip_model1 import (
     model,
     processor,
     DEVICE

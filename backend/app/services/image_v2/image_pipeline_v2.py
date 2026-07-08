@@ -1,5 +1,5 @@
 import os
-
+from .image_encoder import encode_images
 from app.services.image_v2.extractor import ImageExtractor
 from .duplicate_detector import detect_exact_duplicates
 from app.services.image_v2.basic_crop_validator import filter_figures
@@ -15,6 +15,14 @@ from app.services.image_v2.metadata_builder import build_all_metadata
 from app.services.image_v2.embedding_pipeline import generate_embeddings
 from app.services.image_v2.semantic_filter import filter_semantic
 from app.services.image_v2.metadata_analyzer import analyze_metadata
+from .duplicate_detector import (
+    detect_exact_duplicates,
+    detect_similar_duplicates
+)
+from .text_encoder import encode_prompts
+from .clip_model1 import (model,processor)
+from .clip_model import (MODEL,PREPROCESS,TOKENIZER,DEVICE)
+from .vision_classifier import initialize_classifier
 def process_images_v2(
     file_path,
     document_id,
@@ -88,6 +96,48 @@ def process_images_v2(
     images = detect_exact_duplicates(images)
 
     print(f"Remaining Images : {len(images)}")
+    ####################################################
+# Stage 5.2 : Similar Duplicate Detector
+####################################################
+
+    print("\n==============================")
+    print("STAGE 5.2 : SIMILAR DUPLICATE")
+    print("==============================")
+
+    images = detect_similar_duplicates(images)
+
+    print(f"Remaining Images : {len(images)}")
+    ####################################################
+# Stage 6.1 : Vision Classifier Initialization
+####################################################
+
+    print("\n==============================")
+    print("STAGE 6.1 : LOAD CLIP")
+    print("==============================")
+
+    initialize_classifier()
+    ##################################################
+# Stage 6.2
+##################################################
+
+    print("\n==============================")
+    print("STAGE 6.2 : IMAGE ENCODER")
+    print("==============================")
+
+    images = encode_images(images)
+    print(type(images[0].clip_embedding))
+    print(len(images[0].clip_embedding))
+
+    print(f"Embeddings : {len(images)}")
+    print("\n==============================")
+    print("STAGE 6.3 : TEXT ENCODER")
+    print("==============================")
+
+    text_embeddings = encode_prompts()
+
+    print(
+    f"Text Embeddings : {len(text_embeddings)}"
+)
 
 
     print("\n==============================")
