@@ -98,5 +98,29 @@ def decide_images(images):
             f"{image.decision_reason}"
 
         )
+    print("\nSample Decisions")
+
+    for image in images[:5]:
+
+        print(
+        f"""
+Page {image.page_no}
+
+Metadata  : {image.metadata_score:.3f}
+Quality   : {image.quality_score:.3f}
+OCR       : {image.ocr_score:.3f}
+Layout    : {image.layout_score:.3f}
+Vision    : {image.vision_score:.3f}
+Duplicate : {image.duplicate_score:.3f}
+
+Useful    : {image.useful_score:.3f}
+
+HardReject: {image.hard_reject}
+
+Keep      : {image.keep_image}
+
+Reason    : {image.decision_reason}
+"""
+    )
 
     return images
