@@ -1,36 +1,46 @@
 import torch
 
 from transformers import (
-    AutoModelForCausalLM,
-    AutoProcessor
+    AutoProcessor,
+    AutoModelForCausalLM
 )
 
 MODEL_NAME = "microsoft/Florence-2-base-ft"
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
-print("\n==============================")
-print("LOADING FLORENCE-2")
-print("==============================")
+processor = None
+model = None
 
-processor = AutoProcessor.from_pretrained(
-    MODEL_NAME,
-    trust_remote_code=True
-)
 
-model = AutoModelForCausalLM.from_pretrained(
-    MODEL_NAME,
-    trust_remote_code=True
-)
+def load_florence():
 
-model.to(DEVICE)
+    global processor
+    global model
 
-model.eval()
+    if processor is not None and model is not None:
+        return processor, model
 
-print()
+    print("\n==============================")
+    print("LOADING FLORENCE-2")
+    print("==============================")
 
-print("Florence Loaded Successfully")
+    processor = AutoProcessor.from_pretrained(
+        MODEL_NAME,
+        trust_remote_code=True
+    )
 
-print(f"Device : {DEVICE}")
+    model = AutoModelForCausalLM.from_pretrained(
+        MODEL_NAME,
+        trust_remote_code=True
+    )
 
-print(f"Model  : {MODEL_NAME}")
+    model.to(DEVICE)
+    model.eval()
+
+    print()
+    print("Florence Loaded Successfully")
+    print(f"Device : {DEVICE}")
+    print(f"Model  : {MODEL_NAME}")
+
+    return processor, model

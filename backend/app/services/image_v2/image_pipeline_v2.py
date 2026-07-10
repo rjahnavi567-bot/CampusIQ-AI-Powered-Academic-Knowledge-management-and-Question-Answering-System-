@@ -7,7 +7,6 @@ from app.services.image_v2.basic_crop_validator import filter_figures
 from app.services.image_v2.duplicate_filter import remove_duplicates
 from app.services.image_v2.quality_filter import filter_images
 from app.services.image_v2.layout_metadata import analyze_layout
-from app.services.image_v2.image_classifier_service import classify_images
 from .ocr_metadata import compute_ocr_metadata
 from app.services.image_v2.caption_service import caption_images
 from app.services.image_v2.ocr_service import run_ocr
@@ -20,21 +19,20 @@ from .duplicate_detector import (
     detect_exact_duplicates,
     detect_similar_duplicates
 )
+from .vision_scorer import score_vision
+from .hard_rules import apply_hard_rules
 from .decision_engine import decide_images
 from .useful_score import compute_useful_scores
-from .vision_scorer import score_vision
 from .layout_scorer import score_layout
 from .ocr_scorer import score_ocr
 from .quality_scorer import score_quality
 from .metadata_scorer import score_metadata
 from .decision_initializer import initialize_decision
-from .vision_score_saver import save_vision_scores
-from .similarity_classifier import classify_images
-from .text_encoder import encode_prompts
-from .clip_model1 import (model,processor)
-from .hard_rules import apply_hard_rules
-from .clip_model import (MODEL,PREPROCESS,TOKENIZER,DEVICE)
-from .vision_classifier import initialize_classifier
+from .florence.florence_loader import load_florence
+
+from .florence.florence_caption import generate_captions
+
+from .florence.semantic_classifier import classify_images
 def process_images_v2(
     file_path,
     document_id,
@@ -119,60 +117,37 @@ def process_images_v2(
     images = detect_similar_duplicates(images)
 
     print(f"Remaining Images : {len(images)}")
-    ####################################################
-# Stage 6.1 : Vision Classifier Initialization
-####################################################
+    #######################################
+# Stage 6.1
+#######################################
 
     print("\n==============================")
-    print("STAGE 6.1 : LOAD CLIP")
+    print("STAGE 6.1 : LOAD FLORENCE")
     print("==============================")
 
-    initialize_classifier()
-    ##################################################
+    load_florence()
+    #######################################
 # Stage 6.2
-##################################################
+#######################################
 
     print("\n==============================")
-    print("STAGE 6.2 : IMAGE ENCODER")
+    print("STAGE 6.2 : GENERATE CAPTIONS") 
     print("==============================")
 
-    images = encode_images(images)
-    print(type(images[0].clip_embedding))
-    print(len(images[0].clip_embedding))
+    images = generate_captions(images)
 
-    print(f"Embeddings : {len(images)}")
+    print(f"Captions : {len(images)}")
+    #######################################
+# Stage 6.3
+#######################################
+
     print("\n==============================")
-    print("STAGE 6.3 : TEXT ENCODER")
+    print("STAGE 6.3 : SEMANTIC CLASSIFIER")
     print("==============================")
 
-    text_embeddings = encode_prompts()
+    images = classify_images(images)
 
-    print(
-    f"Text Embeddings : {len(text_embeddings)}"
-)
-    print("\n==============================")
-    print("STAGE 6.4 : COMPUTE SIMILARITIES")
-    print("==============================")
-
-    images = classify_images(
-    images,
-    text_embeddings
-)
-
-    print(
-    f"Vision : {len(images)}"
-)
-    print("\n==============================")
-    print("STAGE 6.5 : SAVE VISION SCORES")
-    print("==============================")
-
-    images = save_vision_scores(images)
-
-    print(
-
-    f"Vision Scores : {len(images)}"
-
-)
+    print(f"Semantic : {len(images)}")
     print("\n==============================")
     print("STAGE 7.1 : DECISION MODEL")
     print("==============================")

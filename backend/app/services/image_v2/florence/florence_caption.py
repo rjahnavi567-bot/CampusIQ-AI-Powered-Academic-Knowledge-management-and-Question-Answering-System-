@@ -1,14 +1,12 @@
 from PIL import Image
 
 import torch
-
 from .florence_loader import (
-    model,
-    processor,
+    load_florence,
     DEVICE
 )
-
-def generate_description(image_path):
+processor, model = load_florence()
+def generate_captions(image_path):
 
     image = Image.open(image_path).convert("RGB")
 
