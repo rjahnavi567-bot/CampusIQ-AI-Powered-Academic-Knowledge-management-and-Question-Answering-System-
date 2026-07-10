@@ -10,75 +10,154 @@ from .clip_model import (
 # Vision Categories
 # --------------------------------------------------
 
-PROMPTS = [
+PROMPTS = {
 
-    "a diagram",
+    "diagram": [
 
-    "a flowchart",
+        "an engineering diagram",
+        "a computer science diagram",
+        "a software architecture diagram",
+        "a block diagram",
+        "a workflow diagram",
+        "a labeled diagram",
+        "a textbook illustration",
+        "a textbook figure"
 
-    "a graph",
+    ],
 
-    "a chart",
+    "flowchart": [
 
-    "a table",
+        "a process flowchart"
 
-    "a photograph",
+    ],
 
-    "a person",
+    "graph": [
 
-    "a logo",
+        "a line graph",
+        "a scatter plot",
+        "a histogram"
 
-    "an icon",
+    ],
 
-    "a paragraph of text",
+    "chart": [
 
-    "a page full of text",
+        "a pie chart",
+        "a bar chart"
 
-    "a handwritten note",
+    ],
 
-    "a screenshot",
+    "table": [
 
-    "a microscope image",
+        "a data table",
+        "a comparison table"
 
-    "a medical image",
+    ],
 
-    "a chemical structure",
+    "equation": [
 
-    "a mathematical equation"
+        "a mathematical equation",
+        "a formula sheet"
 
-]
+    ],
+
+    "photo": [
+
+        "a real world photograph",
+        "a laboratory photograph",
+        "an equipment photograph"
+
+    ],
+
+    "chemical": [
+
+        "a chemistry diagram",
+        "a chemical structure"
+
+    ],
+
+    "medical": [
+
+        "a microscope image",
+        "a medical illustration"
+
+    ],
+
+    "paragraph": [
+
+        "a paragraph of text",
+        "a page full of text"
+
+    ],
+
+    "heading": [
+
+        "a heading"
+
+    ],
+
+    "logo": [
+
+        "a company logo"
+
+    ],
+
+    "icon": [
+
+        "a decorative icon"
+
+    ],
+
+    "watermark": [
+
+        "a watermark"
+
+    ],
+
+    "handwritten": [
+
+        "a handwritten note"
+
+    ],
+
+    "screenshot": [
+
+        "a software screenshot"
+
+    ]
+}
 
 # --------------------------------------------------
 # Encode Prompts
 # --------------------------------------------------
-
 def encode_prompts():
 
     print("\n==============================")
     print("TEXT ENCODER")
     print("==============================")
 
-    tokens = TOKENIZER(PROMPTS)
+    category_embeddings = {}
 
-    tokens = tokens.to(DEVICE)
+    total_prompts = 0
 
-    with torch.no_grad():
+    for category, prompt_list in PROMPTS.items():
 
-        features = MODEL.encode_text(tokens)
+        tokens = TOKENIZER(prompt_list).to(DEVICE)
 
-    features = features / features.norm(
-        dim=-1,
-        keepdim=True
-    )
+        with torch.no_grad():
 
-    prompt_embeddings = {}
+            features = MODEL.encode_text(tokens)
 
-    for prompt, embedding in zip(PROMPTS, features):
+        features = features / features.norm(
+            dim=-1,
+            keepdim=True
+        )
 
-        prompt_embeddings[prompt] = embedding.cpu()
+        category_embeddings[category] = features.cpu()
+
+        total_prompts += len(prompt_list)
 
     print()
+    print(f"Encoded {total_prompts} prompts")
+    print(f"Categories : {len(category_embeddings)}")
 
-    print(f"Encoded {len(prompt_embeddings)} prompts")
-
-    return prompt_embeddings
+    return category_embeddings

@@ -24,54 +24,54 @@ def classify_images(images, prompt_embeddings):
 
         scores = {}
 
-        best_prompt = ""
+        best_category = ""
         best_score = -1.0
 
-        ##################################################
-        # Compare against every prompt
-        ##################################################
+        for category, embeddings in prompt_embeddings.items():
 
-        for prompt, prompt_vector in prompt_embeddings.items():
+            similarities = F.cosine_similarity(
 
-            similarity = F.cosine_similarity(
-                image_vector.unsqueeze(0),
-                prompt_vector.unsqueeze(0)
-            ).item()
+        image_vector.unsqueeze(0),
 
-            scores[prompt] = round(similarity, 4)
+        embeddings,
 
-            if similarity > best_score:
+        dim=1
 
-                best_score = similarity
-                best_prompt = prompt
+    )
 
-        ##################################################
-        # Save results
-        ##################################################
+            category_score = similarities.max().item()
+
+            scores[category] = round(category_score, 4)
+
+            if category_score > best_score:
+
+                best_score = category_score
+                best_category = category
 
         image.vision_scores = scores
 
-        image.vision_class = best_prompt
+        image.vision_class = best_category
 
-        image.vision_confidence = round(
-            best_score,
-            4
-        )
-
+        image.vision_confidence = round(best_score, 4)
     print(f"Vision classified : {len(images)}")
 
-    print("\nSample Predictions\n")
+    print("\n==============================")
+    print("TOP CATEGORY SCORES")
+    print("==============================")
 
     for image in images[:5]:
 
-        print(
+        print(f"\nPage {image.page_no}")
+        print(f"Image : {image.path}")
 
-            f"Page {image.page_no} | "
+        ranked = sorted(
+        image.vision_scores.items(),
+        key=lambda x: x[1],
+        reverse=True
+    )
 
-            f"{image.vision_class:20}"
+        for category, score in ranked:
 
-            f"{image.vision_confidence:.3f}"
-
-        )
+            print(f"{category:15} {score:.3f}")
 
     return images

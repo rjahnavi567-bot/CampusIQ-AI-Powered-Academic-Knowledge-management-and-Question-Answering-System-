@@ -10,64 +10,62 @@ def save_vision_scores(images):
 
     mapping = {
 
-        "a diagram": "diagram_score",
+    "diagram": "diagram_score",
 
-        "a flowchart": "flowchart_score",
+    "flowchart": "flowchart_score",
 
-        "a graph": "graph_score",
+    "graph": "graph_score",
 
-        "a chart": "chart_score",
+    "chart": "chart_score",
 
-        "a table": "table_score",
+    "table": "table_score",
 
-        "a photograph": "photo_score",
+    "photo": "photo_score",
 
-        "a person": "person_score",
+    "equation": "equation_score",
 
-        "a logo": "logo_score",
+    "chemical": "chemical_score",
 
-        "an icon": "icon_score",
+    "medical": "medical_score",
 
-        "a paragraph of text": "paragraph_score",
+    "paragraph": "paragraph_score",
 
-        "a page full of text": "text_page_score",
+    "heading": "paragraph_score",
 
-        "a handwritten note": "handwritten_score",
+    "logo": "logo_score",
 
-        "a screenshot": "screenshot_score",
+    "icon": "icon_score",
 
-        "a microscope image": "microscope_score",
+    "watermark": "logo_score",
 
-        "a medical image": "medical_score",
+    "handwritten": "handwritten_score",
 
-        "a chemical structure": "chemical_score",
+    "screenshot": "screenshot_score",
 
-        "a mathematical equation": "equation_score"
-
-    }
+}
 
     for image in images:
 
         if not image.vision_scores:
             continue
 
-        for prompt, attribute in mapping.items():
+        for category, attribute in mapping.items():
 
             setattr(
 
-                image,
+        image,
 
-                attribute,
+        attribute,
 
-                image.vision_scores.get(
+        image.vision_scores.get(
 
-                    prompt,
+            category,
 
-                    0.0
+            0.0
 
-                )
+        )
 
-            )
+    )
 
     print(f"Vision scores saved : {len(images)}")
 

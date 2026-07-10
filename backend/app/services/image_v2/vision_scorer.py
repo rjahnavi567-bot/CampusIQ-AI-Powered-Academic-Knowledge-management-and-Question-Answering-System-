@@ -90,14 +90,9 @@ def compute_vision_score(image):
 
     useless = max(negative)
 
-    ####################################################
-    # Final vision score
-    ####################################################
-
-    score = useful - useless
+    score = useful - 0.25 * useless
 
     score = max(score, 0)
-
     score = min(score, 1)
 
     image.vision_score = round(score, 3)

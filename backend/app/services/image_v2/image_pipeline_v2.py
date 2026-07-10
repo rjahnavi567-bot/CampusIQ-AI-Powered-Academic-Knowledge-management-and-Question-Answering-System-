@@ -291,19 +291,10 @@ def process_images_v2(
     print("\n==============================")
     print("STAGE 4 : QUALITY FILTER")
     print("==============================")
-    print("\nBefore quality Filter")
-
-    for img in images:
-        print(img.path)
-
+    
 
     images = filter_images(images)
-    print("\After quality Filter")
-
-    for img in images:
-        print(img.path)
-
-
+    
     print(f"Remaining : {len(images)}")
 
 
