@@ -42,6 +42,10 @@ class ImageCandidate:
 
     caption: str = ""
 
+# Florence-2 detailed caption
+    florence_caption: str = ""
+    semantic_scores: dict = field(default_factory=dict)
+
     title: str = ""
 
     ocr_text: str = ""

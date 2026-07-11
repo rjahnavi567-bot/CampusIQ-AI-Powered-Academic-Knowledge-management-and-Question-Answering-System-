@@ -19,6 +19,7 @@ from .duplicate_detector import (
     detect_exact_duplicates,
     detect_similar_duplicates
 )
+from .florence.semantic_analyzer import analyze_semantics
 from .vision_scorer import score_vision
 from .hard_rules import apply_hard_rules
 from .decision_engine import decide_images
@@ -140,6 +141,30 @@ def process_images_v2(
     #######################################
 # Stage 6.3
 #######################################
+    print(f"Captions : {len(images)}")
+
+    print("\n==============================")
+    print("CAPTION SAMPLE")
+    print("==============================")
+
+    for image in images[:10]:
+
+        print(f"\nPage {image.page_no}")
+        print(image.path)
+        print(image.florence_caption)
+    #######################################
+# Stage 6.4
+#######################################
+
+    print("\n==============================")
+    print("STAGE 6.4 : SEMANTIC ANALYZER")
+    print("==============================")
+
+    images = analyze_semantics(images)
+
+    print(f"Semantic : {len(images)}")
+
+    return images
 
     print("\n==============================")
     print("STAGE 6.3 : SEMANTIC CLASSIFIER")
@@ -221,9 +246,10 @@ def process_images_v2(
     images = decide_images(images)
 
     print(f"Decision : {len(images)}")
+    return images
     
 
-
+"""
     print("\n==============================")
     print("STAGE 2 : FIGURE FILTER")
     print("==============================")
@@ -318,3 +344,4 @@ def process_images_v2(
     print("==============================")
 
     return images
+"""
