@@ -100,6 +100,11 @@ def score_background(image):
 # --------------------------------------------------
 
 def compute_quality_score(image):
+    if image.hard_reject:
+
+        image.quality_score = 0.0
+
+        return image
 
     blur = score_blur(image)
 

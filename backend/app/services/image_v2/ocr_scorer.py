@@ -107,6 +107,11 @@ def score_bullets(image):
 # --------------------------------------------------
 
 def compute_ocr_score(image):
+    if image.hard_reject:
+
+        image.ocr_score = 0.0
+
+        return image
 
     word = score_word_count(image)
 

@@ -97,6 +97,12 @@ def score_aspect_ratio(image):
 # --------------------------------------------------
 
 def compute_metadata_score(image):
+    if image.hard_reject:
+
+       image.metadata_score = 0.0
+
+       return image
+    
 
     resolution = score_resolution(image)
 

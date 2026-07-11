@@ -83,23 +83,6 @@ def score_lines(image):
     return total / GOOD_LINES
 
 
-# --------------------------------------------------
-# Semantic Layout Score
-# --------------------------------------------------
-
-def score_semantic_layout(image):
-
-    return max(
-
-        image.diagram_score,
-
-        image.table_score,
-
-        image.chart_score,
-
-        image.photo_score
-
-    )
 
 
 # --------------------------------------------------
@@ -107,6 +90,11 @@ def score_semantic_layout(image):
 # --------------------------------------------------
 
 def compute_layout_score(image):
+    if image.hard_reject:
+
+        image.layout_score = 0.0
+
+        return image
 
     layout = score_layout_type(image)
 
@@ -116,27 +104,23 @@ def compute_layout_score(image):
 
     lines = score_lines(image)
 
-    semantic = score_semantic_layout(image)
-
     image.layout_score = round(
 
-        (
+    (
 
-            layout +
+        layout +
 
-            components +
+        components +
 
-            contours +
+        contours +
 
-            lines +
+        lines
 
-            semantic
+    ) / 4,
 
-        ) / 5,
+    3
 
-        3
-
-    )
+)
 
     return image
 

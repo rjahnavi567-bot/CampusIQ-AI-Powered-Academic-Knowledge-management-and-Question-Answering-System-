@@ -18,7 +18,13 @@ from .florence.semantic_decision import semantic_decision
 from .florence.context_analyzer import analyze_context
 
 from .decision_initializer import initialize_decision
+from .hard_rules import apply_hard_rules
 
+from .metadata_scorer import score_metadata
+from .quality_scorer import score_quality
+from .ocr_scorer import score_ocr
+from .layout_scorer import score_layout
+from .florence_scorer import score_vision
 
 def process_images_v2(
     file_path,
@@ -197,6 +203,104 @@ def process_images_v2(
     images = initialize_decision(images)
 
     print(f"Initialized : {len(images)}")
+    ####################################################
+# Stage 7.2
+####################################################
+
+    print("\n==============================")
+    print("STAGE 7.2 : HARD RULES")
+    print("==============================")
+
+    images = apply_hard_rules(images)
+
+    print(f"After Hard Rules : {len(images)}") 
+
+####################################################
+# Stage 7.3 : Metadata Score
+####################################################
+
+    print("\n==============================")
+    print("STAGE 7.3 : METADATA SCORE")
+    print("==============================")
+
+    images = score_metadata(images)
+
+    print(f"Metadata Scored : {len(images)}")
+
+
+####################################################
+# Stage 7.4 : Quality Score
+####################################################
+
+    print("\n==============================")
+    print("STAGE 7.4 : QUALITY SCORE")
+    print("==============================")
+
+    images = score_quality(images)
+
+    print(f"Quality Scored : {len(images)}")
+
+
+####################################################
+# Stage 7.5 : OCR Score
+####################################################
+
+    print("\n==============================")
+    print("STAGE 7.5 : OCR SCORE")
+    print("==============================")
+
+    images = score_ocr(images)
+
+    print(f"OCR Scored : {len(images)}")
+
+
+####################################################
+# Stage 7.6 : Layout Score
+####################################################
+
+    print("\n==============================")
+    print("STAGE 7.6 : LAYOUT SCORE")
+    print("==============================")
+
+    images = score_layout(images)
+
+    print(f"Layout Scored : {len(images)}")
+
+
+####################################################
+# Stage 7.7 : Florence Score
+####################################################
+
+    print("\n==============================")
+    print("STAGE 7.7 : FLORENCE SCORE")
+    print("==============================")
+
+    images = score_vision(images)
+
+    print(f"Florence Scored : {len(images)}")
+
+
+####################################################
+# Stage 7 Summary
+####################################################
+
+    print("\n==============================")
+    print("STAGE 7 SUMMARY")
+    print("==============================")
+
+    for image in images[:10]:
+
+        print(
+        f"Page {image.page_no:3} | "
+        f"Metadata={image.metadata_score:.2f} | "
+        f"Quality={image.quality_score:.2f} | "
+        f"OCR={image.ocr_score:.2f} | "
+        f"Layout={image.layout_score:.2f} | "
+        f"Vision={image.vision_score:.2f} | "
+        f"HardReject={image.hard_reject}"
+    )
+
+
 
     ####################################################
     # Pipeline Complete (Current Stage)
