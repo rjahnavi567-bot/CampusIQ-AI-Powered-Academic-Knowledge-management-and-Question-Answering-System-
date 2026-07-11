@@ -165,6 +165,29 @@ class ImageCandidate:
     vision_class: str = ""
 
     vision_confidence: float = 0.0
+    # Stage 6.4 : Caption Reasoning
+
+    reason_type: str = ""
+
+    reason_subject: str = "general"
+
+    reason_useful: bool = False
+
+    reason_contains_text: bool = False
+
+    reason_confidence: float = 0.0
+
+    reason_explanation: str = ""
+    reason: str = ""
+
+    semantic_decision: str = "UNKNOWN"
+
+    keep_votes: int = 0
+    context_score: float = 0.0
+
+    remove_votes: int = 0
+    importance_score: float = 0.0
+    semantic_categories: list = field(default_factory=list)
 
     # --------------------------------------------------
     # Saved Vision Scores

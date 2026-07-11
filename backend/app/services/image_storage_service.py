@@ -29,7 +29,7 @@ def save_images(db, document_id, images):
 
             title=image.title,
 
-            image_hash=image.image_hash,
+            image_hash=image.md5_hash,
 
             source_file=image.source_file,
 
@@ -80,8 +80,11 @@ def store_images(images, document_id):
         documents.append(
 
 f"""
-IMAGE_HASH:
-{image.image_hash}
+MD5_HASH:
+{image.md5_hash}
+
+PERCEPTUAL_HASH:
+{image.perceptual_hash}
 
 TITLE:
 {image.title}
@@ -132,7 +135,9 @@ PAGE CONTEXT:
                     image.confidence_score
                 ),
 
-                "image_hash": image.image_hash,
+                "md5_hash": image.md5_hash,
+
+"perceptual_hash": image.perceptual_hash,
 
                 "source_file": image.source_file,
 

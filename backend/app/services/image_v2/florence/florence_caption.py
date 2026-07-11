@@ -1,15 +1,30 @@
-from PIL import Image
-import torch
 
+from concurrent.futures import ThreadPoolExecutor
+from PIL import Image
 from .florence_loader import (
     load_florence,
     DEVICE
 )
+import torch
+import os
+torch.set_num_threads(os.cpu_count())
+BATCH_SIZE = 8
+def load_image(path):
+    """
+    Loads a single image.
+    """
 
-processor, model = load_florence()
+    try:
+        return Image.open(path).convert("RGB")
 
+    except Exception:
 
-def generate_captions(images):
+        return None
+def generate_captions(
+    images,
+    processor,
+    model
+):
 
     print("\n==============================")
     print("FLORENCE CAPTION GENERATOR")
@@ -17,57 +32,128 @@ def generate_captions(images):
 
     total = len(images)
 
-    for index, image in enumerate(images, start=1):
+    for start in range(0, total, BATCH_SIZE):
 
-        try:
+        batch = images[start:start + BATCH_SIZE]
 
-            pil_image = Image.open(image.path).convert("RGB")
+        #
+        # Load images in parallel
+        #
 
-            task = "<MORE_DETAILED_CAPTION>"
+        with ThreadPoolExecutor(max_workers=4) as executor:
 
-            inputs = processor(
-                text=task,
-                images=pil_image,
-                return_tensors="pt"
+            pil_images = list(
+                executor.map(
+                    lambda x: load_image(x.path),
+                    batch
+                )
             )
 
-            inputs = {
-                k: v.to(DEVICE)
-                for k, v in inputs.items()
-            }
+        #
+        # Remove failed images
+        #
 
-            with torch.no_grad():
+        valid = []
 
-                generated_ids = model.generate(
-                    input_ids=inputs["input_ids"],
-                    pixel_values=inputs["pixel_values"],
-                    max_new_tokens=128,
-                    num_beams=3,
-                    do_sample=False
-                )
+        valid_images = []
 
-            generated_text = processor.batch_decode(
-                generated_ids,
-                skip_special_tokens=False
-            )[0]
+        for img_obj, pil in zip(batch, pil_images):
+
+            if pil is not None:
+
+                valid.append(pil)
+
+                valid_images.append(img_obj)
+
+            else:
+
+                img_obj.florence_caption = ""
+
+        if len(valid) == 0:
+            continue
+
+        #
+        # Florence prompt
+        #
+
+        task = "<MORE_DETAILED_CAPTION>"
+
+        inputs = processor(
+
+            text=[task] * len(valid),
+
+            images=valid,
+
+            return_tensors="pt",
+
+            padding=True
+
+        )
+
+        inputs = {
+
+            k: v.to(DEVICE)
+
+            for k, v in inputs.items()
+
+        }
+
+        #
+        # Generate captions
+        #
+
+        with torch.no_grad():
+
+            generated_ids = model.generate(
+
+                input_ids=inputs["input_ids"],
+
+                pixel_values=inputs["pixel_values"],
+
+                max_new_tokens=64,
+
+                num_beams=1,
+
+                do_sample=False
+
+            )
+
+        decoded = processor.batch_decode(
+
+            generated_ids,
+
+            skip_special_tokens=False
+
+        )
+
+        #
+        # Parse captions
+        #
+
+        for img_obj, pil, text in zip(
+
+            valid_images,
+
+            valid,
+
+            decoded
+
+        ):
 
             parsed = processor.post_process_generation(
-                generated_text,
+
+                text,
+
                 task=task,
-                image_size=pil_image.size
+
+                image_size=pil.size
+
             )
 
-            image.florence_caption = parsed.get(task, "")
+            img_obj.florence_caption = parsed.get(task, "")
 
-        except Exception as e:
+        end = min(start + BATCH_SIZE, total)
 
-            image.florence_caption = ""
-
-            print(f"Caption failed : {image.path}")
-            print(e)
-
-        if index % 25 == 0 or index == total:
-
-            print(f"Captioned {index}/{total}")
+        print(f"Captioned {end}/{total}")
 
     return images

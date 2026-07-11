@@ -1,39 +1,25 @@
 import os
-from .duplicate_scorer import score_duplicates
-from .image_encoder import encode_images
+
 from app.services.image_v2.extractor import ImageExtractor
-from .duplicate_detector import detect_exact_duplicates
-from app.services.image_v2.basic_crop_validator import filter_figures
-from app.services.image_v2.duplicate_filter import remove_duplicates
-from app.services.image_v2.quality_filter import filter_images
-from app.services.image_v2.layout_metadata import analyze_layout
+
+from .metadata_analyzer import analyze_metadata
+from .quality_analyzer import analyze_quality
 from .ocr_metadata import compute_ocr_metadata
-from app.services.image_v2.caption_service import caption_images
-from app.services.image_v2.ocr_service import run_ocr
-from app.services.image_v2.quality_analyzer import analyze_quality
-from app.services.image_v2.metadata_builder import build_all_metadata
-from app.services.image_v2.embedding_pipeline import generate_embeddings
-from app.services.image_v2.semantic_filter import filter_semantic
-from app.services.image_v2.metadata_analyzer import analyze_metadata
+from .layout_metadata import analyze_layout
+
 from .duplicate_detector import (
     detect_exact_duplicates,
     detect_similar_duplicates
 )
-from .florence.semantic_analyzer import analyze_semantics
-from .vision_scorer import score_vision
-from .hard_rules import apply_hard_rules
-from .decision_engine import decide_images
-from .useful_score import compute_useful_scores
-from .layout_scorer import score_layout
-from .ocr_scorer import score_ocr
-from .quality_scorer import score_quality
-from .metadata_scorer import score_metadata
-from .decision_initializer import initialize_decision
+
 from .florence.florence_loader import load_florence
-
 from .florence.florence_caption import generate_captions
+from .florence.semantic_decision import semantic_decision
+from .florence.context_analyzer import analyze_context
 
-from .florence.semantic_classifier import classify_images
+from .decision_initializer import initialize_decision
+
+
 def process_images_v2(
     file_path,
     document_id,
@@ -47,29 +33,39 @@ def process_images_v2(
             "Stage-1 currently supports PDF only."
         )
 
+    ####################################################
+    # Stage 1 : Extraction
+    ####################################################
+
     print("\n==============================")
     print("STAGE 1 : IMAGE EXTRACTION")
     print("==============================")
 
     extractor = ImageExtractor(document_id)
+
     images = extractor.extract(file_path)
-    print("\After extract Filter")
-
-    for img in images:
-        print(img.path)
-
 
     print(f"Extracted : {len(images)}")
+
+    ####################################################
+    # Stage 1.2 : Metadata
+    ####################################################
+
     print("\n==============================")
-    print("STAGE 1 : IMAGE METADATA")
+    print("STAGE 1.2 : IMAGE METADATA")
     print("==============================")
 
     images = analyze_metadata(
-    images,
-    page_lookup
-)
+        images,
+        page_lookup
+    )
 
     print(f"Metadata : {len(images)}")
+
+    ####################################################
+    # Stage 2 : Quality
+    ####################################################
+
     print("\n==============================")
     print("STAGE 2 : IMAGE QUALITY")
     print("==============================")
@@ -77,18 +73,23 @@ def process_images_v2(
     images = analyze_quality(images)
 
     print(f"Quality : {len(images)}")
+
+    ####################################################
+    # Stage 3 : OCR Metadata
+    ####################################################
+
     print("\n==============================")
     print("STAGE 3 : OCR METADATA")
     print("==============================")
 
     images = compute_ocr_metadata(images)
-    print(type(images))
-    print(len(images))
-
-    print(type(images[0]))
-
 
     print(f"OCR Metadata : {len(images)}")
+
+    ####################################################
+    # Stage 4 : Layout
+    ####################################################
+
     print("\n==============================")
     print("STAGE 4 : LAYOUT ANALYZER")
     print("==============================")
@@ -96,20 +97,22 @@ def process_images_v2(
     images = analyze_layout(images)
 
     print(f"Layout : {len(images)}")
+
     ####################################################
-# Stage 5 : Exact Duplicate Detector
-####################################################
+    # Stage 5.1 : Exact Duplicate
+    ####################################################
 
     print("\n==============================")
-    print("STAGE 5 : EXACT DUPLICATE")
+    print("STAGE 5.1 : EXACT DUPLICATE")
     print("==============================")
 
     images = detect_exact_duplicates(images)
 
-    print(f"Remaining Images : {len(images)}")
+    print(f"Remaining : {len(images)}")
+
     ####################################################
-# Stage 5.2 : Similar Duplicate Detector
-####################################################
+    # Stage 5.2 : Similar Duplicate
+    ####################################################
 
     print("\n==============================")
     print("STAGE 5.2 : SIMILAR DUPLICATE")
@@ -117,231 +120,90 @@ def process_images_v2(
 
     images = detect_similar_duplicates(images)
 
-    print(f"Remaining Images : {len(images)}")
-    #######################################
-# Stage 6.1
-#######################################
+    print(f"Remaining : {len(images)}")
+
+    ####################################################
+    # Stage 6.1 : Load Florence
+    ####################################################
 
     print("\n==============================")
     print("STAGE 6.1 : LOAD FLORENCE")
     print("==============================")
 
-    load_florence()
-    #######################################
-# Stage 6.2
-#######################################
+    processor, model = load_florence()
+
+    ####################################################
+    # Stage 6.2 : Caption Generation
+    ####################################################
 
     print("\n==============================")
-    print("STAGE 6.2 : GENERATE CAPTIONS") 
+    print("STAGE 6.2 : GENERATE CAPTIONS")
     print("==============================")
 
-    images = generate_captions(images)
+    images = generate_captions(
+        images,
+        processor,
+        model
+    )
 
-    print(f"Captions : {len(images)}")
-    #######################################
-# Stage 6.3
-#######################################
-    print(f"Captions : {len(images)}")
+    print(f"Captioned : {len(images)}")
+
+    ####################################################
+    # Caption Sample
+    ####################################################
 
     print("\n==============================")
     print("CAPTION SAMPLE")
     print("==============================")
 
-    for image in images[:10]:
+    for image in images[:3]:
 
         print(f"\nPage {image.page_no}")
         print(image.path)
         print(image.florence_caption)
-    #######################################
-# Stage 6.4
-#######################################
+
+    ####################################################
+    # Stage 6.5 : Semantic Decision
+    ####################################################
 
     print("\n==============================")
-    print("STAGE 6.4 : SEMANTIC ANALYZER")
+    print("STAGE 6.5 : SEMANTIC DECISION")
     print("==============================")
 
-    images = analyze_semantics(images)
+    images = semantic_decision(images)
 
-    print(f"Semantic : {len(images)}")
+    print(f"Semantic Decision : {len(images)}")
 
-    return images
+    ####################################################
+    # Stage 6.6 : Context Analyzer
+    ####################################################
 
     print("\n==============================")
-    print("STAGE 6.3 : SEMANTIC CLASSIFIER")
+    print("STAGE 6.6 : CONTEXT ANALYZER")
     print("==============================")
 
-    images = classify_images(images)
+    images = analyze_context(images)
 
-    print(f"Semantic : {len(images)}")
+    print(f"Context : {len(images)}")
+
+    ####################################################
+    # Stage 7.1 : Decision Initializer
+    ####################################################
+
     print("\n==============================")
-    print("STAGE 7.1 : DECISION MODEL")
+    print("STAGE 7.1 : DECISION INITIALIZER")
     print("==============================")
 
     images = initialize_decision(images)
 
-    print(
-    f"Decision Model : {len(images)}"
-)
-    
-    print("\n==============================")
-    print("STAGE 7.2 : HARD RULES")
-    print("==============================")
+    print(f"Initialized : {len(images)}")
 
-    images = apply_hard_rules(images)
-
-    print(f"Hard Rules : {len(images)}")
-    print("\n==============================")
-    print("STAGE 7.3.1 : METADATA SCORE")
-    print("==============================")
-
-    images = score_metadata(images)
-
-    print(f"Metadata Score : {len(images)}")
-    print("\n==============================")
-    print("STAGE 7.3.2 : QUALITY SCORE")
-    print("==============================")
-
-    images = score_quality(images)
-
-    print(f"Quality Score : {len(images)}")
-    print("\n==============================")
-    print("STAGE 7.3.3 : OCR SCORE")
-    print("==============================")
-
-    images = score_ocr(images)
-
-    print(f"OCR Score : {len(images)}")
-    print("\n==============================")
-    print("STAGE 7.3.4 : LAYOUT SCORE")
-    print("==============================")
-
-    images = score_layout(images)
-
-    print(f"Layout Score : {len(images)}")
-    print("\n==============================")
-    print("STAGE 7.3.5 : VISION SCORE")
-    print("==============================")
-
-    images = score_vision(images)
-
-    print(f"Vision Score : {len(images)}")
-    print("\n==============================")
-    print("STAGE 7.3.6 : DUPLICATE SCORE")
-    print("==============================")
-
-    images = score_duplicates(images)
-
-    print(f"Duplicate Score : {len(images)}")
-    print("\n==============================")
-    print("STAGE 7.4 : USEFUL SCORE")
-    print("==============================")
-
-    images = compute_useful_scores(images)
-
-    print(f"Useful Score : {len(images)}")
-    print("\n==============================")
-    print("STAGE 7.5 : FINAL DECISION")
-    print("==============================")
-
-    images = decide_images(images)
-
-    print(f"Decision : {len(images)}")
-    return images
-    
-
-"""
-    print("\n==============================")
-    print("STAGE 2 : FIGURE FILTER")
-    print("==============================")
-
-    images = filter_figures(images)
-
-    print(f"Remaining : {len(images)}")
-
+    ####################################################
+    # Pipeline Complete (Current Stage)
+    ####################################################
 
     print("\n==============================")
-    print("STAGE 3 : DUPLICATE REMOVAL")
-    print("==============================")
-    images = remove_duplicates(images)
-
-
-    print(f"Remaining : {len(images)}")
-
-    print("\n==============================")
-    print("STAGE 5 : CLIP CLASSIFICATION")
-    print("==============================")
-
-
-    images = classify_images(images)
-    print("\n==============================")
-    print("STAGE 8 : SEMANTIC FILTER")
-    print("==============================")
-
-    images = filter_semantic(images)
-
-    print(f"Remaining : {len(images)}")
-    
-    for image in images:
-
-        print(
-            f"Page {image.page_no:3} | "
-            f"{image.category:25} | "
-            f"{image.classification_confidence:.3f}"
-        )
-
-    print("\n==============================")
-    print("STAGE 4 : QUALITY FILTER")
-    print("==============================")
-    
-
-    images = filter_images(images)
-    
-    print(f"Remaining : {len(images)}")
-
-
-
-    print("\n==============================")
-    print("STAGE 6 : IMAGE CAPTIONING")
-    print("==============================")
-
-    images = caption_images(images)
-
-    print("Caption completed.")
-
-
-    print("\n==============================")
-    print("STAGE 7 : OCR")
-    print("==============================")
-
-    images = run_ocr(images)
-
-    print("OCR completed.")
-
-
-    print("\n==============================")
-    print("STAGE 8 : METADATA")
-    print("==============================")
-
-    images = build_all_metadata(
-        images,
-        page_lookup
-    )
-
-    print("Metadata completed.")
-
-
-    print("\n==============================")
-    print("STAGE 9 : CLIP EMBEDDING")
-    print("==============================")
-
-    images = generate_embeddings(images)
-
-    print("Embedding completed.")
-
-
-    print("\n==============================")
-    print("PIPELINE COMPLETE")
+    print("IMAGE PIPELINE COMPLETE")
     print("==============================")
 
     return images
-"""
