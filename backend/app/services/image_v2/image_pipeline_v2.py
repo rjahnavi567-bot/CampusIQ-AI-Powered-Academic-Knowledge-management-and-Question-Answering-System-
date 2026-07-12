@@ -25,7 +25,8 @@ from .quality_scorer import score_quality
 from .ocr_scorer import score_ocr
 from .layout_scorer import score_layout
 from .florence_scorer import score_vision
-
+from .early_reject_filter import filter_images
+from .decision.decision_engine import decide_images
 def process_images_v2(
     file_path,
     document_id,
@@ -105,11 +106,11 @@ def process_images_v2(
     print(f"Layout : {len(images)}")
 
     ####################################################
-    # Stage 5.1 : Exact Duplicate
+    # Stage 6.1 : Exact Duplicate
     ####################################################
 
     print("\n==============================")
-    print("STAGE 5.1 : EXACT DUPLICATE")
+    print("STAGE 6.1 : EXACT DUPLICATE")
     print("==============================")
 
     images = detect_exact_duplicates(images)
@@ -117,33 +118,44 @@ def process_images_v2(
     print(f"Remaining : {len(images)}")
 
     ####################################################
-    # Stage 5.2 : Similar Duplicate
+    # Stage 6.2 : Similar Duplicate
     ####################################################
 
     print("\n==============================")
-    print("STAGE 5.2 : SIMILAR DUPLICATE")
+    print("STAGE 6.2 : SIMILAR DUPLICATE")
     print("==============================")
 
     images = detect_similar_duplicates(images)
 
     print(f"Remaining : {len(images)}")
+    ####################################################
+# Stage 6.3 : Early Reject
+####################################################
+
+    print("\n==============================")
+    print("STAGE 6.3 : EARLY FILTER")
+    print("==============================")
+
+    images = filter_images(images)
+
+    print(f"Remaining : {len(images)}")
 
     ####################################################
-    # Stage 6.1 : Load Florence
+    # Stage 6.4 : Load Florence
     ####################################################
 
     print("\n==============================")
-    print("STAGE 6.1 : LOAD FLORENCE")
+    print("STAGE 6.4 : LOAD FLORENCE")
     print("==============================")
 
     processor, model = load_florence()
 
     ####################################################
-    # Stage 6.2 : Caption Generation
+    # Stage 6.5 : Caption Generation
     ####################################################
 
     print("\n==============================")
-    print("STAGE 6.2 : GENERATE CAPTIONS")
+    print("STAGE 6.5 : GENERATE CAPTIONS")
     print("==============================")
 
     images = generate_captions(
@@ -169,11 +181,11 @@ def process_images_v2(
         print(image.florence_caption)
 
     ####################################################
-    # Stage 6.5 : Semantic Decision
+    # Stage 6.6 : Semantic Decision
     ####################################################
 
     print("\n==============================")
-    print("STAGE 6.5 : SEMANTIC DECISION")
+    print("STAGE 6.6 : SEMANTIC DECISION")
     print("==============================")
 
     images = semantic_decision(images)
@@ -181,11 +193,11 @@ def process_images_v2(
     print(f"Semantic Decision : {len(images)}")
 
     ####################################################
-    # Stage 6.6 : Context Analyzer
+    # Stage 6.7 : Context Analyzer
     ####################################################
 
     print("\n==============================")
-    print("STAGE 6.6 : CONTEXT ANALYZER")
+    print("STAGE 6.7 : CONTEXT ANALYZER")
     print("==============================")
 
     images = analyze_context(images)
@@ -203,17 +215,6 @@ def process_images_v2(
     images = initialize_decision(images)
 
     print(f"Initialized : {len(images)}")
-    ####################################################
-# Stage 7.2
-####################################################
-
-    print("\n==============================")
-    print("STAGE 7.2 : HARD RULES")
-    print("==============================")
-
-    images = apply_hard_rules(images)
-
-    print(f"After Hard Rules : {len(images)}") 
 
 ####################################################
 # Stage 7.3 : Metadata Score
@@ -278,6 +279,17 @@ def process_images_v2(
     images = score_vision(images)
 
     print(f"Florence Scored : {len(images)}")
+    ####################################################
+# Stage 7.8 : Hard Rules
+####################################################
+
+    print("\n==============================")
+    print("STAGE 7.8 : HARD RULES")
+    print("==============================")
+
+    images = apply_hard_rules(images)
+
+    print(f"Hard Rules Completed : {len(images)}")
 
 
 ####################################################
@@ -299,6 +311,18 @@ def process_images_v2(
         f"Vision={image.vision_score:.2f} | "
         f"HardReject={image.hard_reject}"
     )
+    ####################################################
+# Stage 8 : Decision Engine
+####################################################
+
+    print("\n==============================")
+    print("STAGE 8 : DECISION ENGINE")
+    print("==============================")
+
+    images = decide_images(images)
+
+    print(f"Decision Engine Completed : {len(images)}")
+
 
 
 

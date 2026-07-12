@@ -3,6 +3,7 @@ import json
 import shutil
 import time
 import traceback
+import fitz
 from fastapi import HTTPException
 
 from app.database.connection import SessionLocal
@@ -205,6 +206,40 @@ class UploadManager:
             # ------------------------------------
 
             print("\nStarting Text & Image Pipelines...")
+            ####################################################
+# Build Page Lookup
+####################################################
+
+
+
+            pdf = fitz.open(file_path)
+
+            page_lookup = {}
+
+            for page_index, page in enumerate(pdf, start=1):
+
+                page_lookup[page_index] = {
+
+        "width": page.rect.width,
+        "height": page.rect.height
+
+    }
+
+            pdf.close()
+
+            print("\nPage Lookup Built")
+
+            for page_no in list(page_lookup.keys())[:5]:
+
+                print(
+
+        f"Page {page_no} : "
+
+        f"{page_lookup[page_no]['width']} x "
+
+        f"{page_lookup[page_no]['height']}"
+
+    )
 
             with ThreadPoolExecutor(max_workers=2) as executor:
 
