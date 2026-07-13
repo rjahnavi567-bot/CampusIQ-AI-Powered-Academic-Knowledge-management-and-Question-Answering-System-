@@ -39,13 +39,13 @@ from .embedding_validator import validate_embeddings
 from .vector_storage import store_vectors
 
 from .vector_verifier import verify_vectors
-
+from .context.context_pipeline import build_contexts
 def process_images_v2(
     file_path,
     document_id,
-    page_lookup
+    page_lookup,
+    page_text_lookup
 ):
-
     extension = os.path.splitext(file_path)[1].lower()
 
     if extension != ".pdf":
@@ -435,6 +435,7 @@ def process_images_v2(
     images = verify_vectors(images)
 
     print(f"Verified : {len(images)}")
+    
 
 
 

@@ -8,11 +8,6 @@ import os
 client = chromadb.PersistentClient(
     path="./chroma_db"
 )
-try:
-    client.delete_collection("academic_images")
-except:
-    pass
-
 collection = client.get_or_create_collection(
     name="academic_images"
 )

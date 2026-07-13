@@ -152,6 +152,11 @@ class UploadManager:
             for page in pages:
 
                 page_lookup[page["page_no"]] = page["text"]
+            page_text_lookup = {}
+
+            for page in pages:
+
+                page_text_lookup[page["page_no"]] = page["paragraphs"]
 
            
 
@@ -251,7 +256,9 @@ class UploadManager:
 
     document_id=document_id,
 
-    page_lookup=page_lookup
+    page_lookup=page_lookup,
+
+    page_text_lookup=page_text_lookup
 
 )
 
@@ -429,15 +436,11 @@ class UploadManager:
 
             )
 
-            # ------------------------------------
-            # Store Image Embeddings
-            # ------------------------------------
-
-                print("Uploading image embeddings to Chroma...")
                 print("Saving image metadata...")
+
                 save_images(db, document_id, images)
-                print("Uploading image embeddings...")
-                store_images(images, document_id)
+
+                print("Image vectors already stored in Stage 10.3")
             except Exception:
 
                 # Delete document

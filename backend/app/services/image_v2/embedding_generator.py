@@ -24,6 +24,20 @@ def get_embedding_model():
 
     return _model
 
+# --------------------------------------------------
+# Generate Query Embedding
+# --------------------------------------------------
+
+def generate_query_embedding(query: str):
+
+    model = get_embedding_model()
+
+    vector = model.encode(
+        query,
+        normalize_embeddings=True
+    )
+
+    return vector.tolist()
 
 # --------------------------------------------------
 # Generate Embedding for One Image
