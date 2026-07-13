@@ -28,7 +28,7 @@ STOPWORDS = {
 
     "it", "its",
 
-    "be"
+    "be","page","pag","figure","fig","img"
 
 }
 
@@ -59,24 +59,16 @@ def tokenize(text):
 def extract_keywords(image):
 
     caption = getattr(
-
-        image,
-
-        "clean_caption",
-
-        ""
-
-    )
+    image,
+    "cleaned_caption",
+    ""
+)
 
     ocr = getattr(
-
-        image,
-
-        "clean_ocr",
-
-        ""
-
-    )
+    image,
+    "cleaned_ocr",
+    ""
+)
 
     combined = caption + " " + ocr
 

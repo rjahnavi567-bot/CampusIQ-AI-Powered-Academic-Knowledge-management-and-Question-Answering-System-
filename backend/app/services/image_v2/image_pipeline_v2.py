@@ -34,6 +34,12 @@ from .stage9.metadata_normalizer import normalize_all_metadata
 from .stage9.keyword_extractor import extract_all_keywords
 from .stage9.search_text_builder import build_all_search_text
 
+from .embedding_generator import generate_embeddings
+from .embedding_validator import validate_embeddings
+from .vector_storage import store_vectors
+
+from .vector_verifier import verify_vectors
+
 def process_images_v2(
     file_path,
     document_id,
@@ -384,6 +390,51 @@ def process_images_v2(
     images = build_all_search_text(images)
 
     print(f"Search Text Built : {len(images)}")
+    ####################################################
+# Stage 10.1 : Embedding Generator
+####################################################
+
+    print("\n==============================")
+    print("STAGE 10.1 : EMBEDDING GENERATOR")
+    print("==============================")
+
+    images = generate_embeddings(images)
+
+    print(f"Embeddings Generated : {len(images)}")
+    ####################################################
+# Stage 10.2 : Embedding Validator
+####################################################
+
+    print("\n==============================")
+    print("STAGE 10.2 : EMBEDDING VALIDATOR")
+    print("==============================")
+
+    images = validate_embeddings(images)
+
+    print(f"Validated : {len(images)}")
+
+    ####################################################
+# Stage 10.3 : Vector Storage
+####################################################
+
+    print("\n==============================")
+    print("STAGE 10.3 : VECTOR STORAGE")
+    print("==============================")
+
+    images = store_vectors(images)
+
+    print(f"Stored : {len(images)}")
+    ####################################################
+# Stage 10.4 : Vector Verification
+####################################################
+
+    print("\n==============================")
+    print("STAGE 10.4 : VECTOR VERIFIER")
+    print("==============================")
+
+    images = verify_vectors(images)
+
+    print(f"Verified : {len(images)}")
 
 
 

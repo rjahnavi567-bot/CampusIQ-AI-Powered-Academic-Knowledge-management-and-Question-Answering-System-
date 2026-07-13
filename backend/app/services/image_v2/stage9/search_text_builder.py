@@ -7,16 +7,16 @@
 def build_search_text(image):
 
     caption = getattr(
-        image,
-        "clean_caption",
-        ""
-    )
+    image,
+    "cleaned_caption",
+    ""
+)
 
     ocr = getattr(
-        image,
-        "clean_ocr",
-        ""
-    )
+    image,
+    "cleaned_ocr",
+    ""
+)
 
     keywords = getattr(
         image,
