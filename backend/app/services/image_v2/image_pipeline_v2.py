@@ -27,6 +27,13 @@ from .layout_scorer import score_layout
 from .florence_scorer import score_vision
 from .early_reject_filter import filter_images
 from .decision.decision_engine import decide_images
+
+from .stage9.caption_cleaner import clean_captions
+from .stage9.ocr_cleaner import clean_ocrs
+from .stage9.metadata_normalizer import normalize_all_metadata
+from .stage9.keyword_extractor import extract_all_keywords
+from .stage9.search_text_builder import build_all_search_text
+
 def process_images_v2(
     file_path,
     document_id,
@@ -322,7 +329,61 @@ def process_images_v2(
     images = decide_images(images)
 
     print(f"Decision Engine Completed : {len(images)}")
+    ####################################################
+# Stage 9.1 : Caption Cleaner
+####################################################
 
+    print("\n==============================")
+    print("STAGE 9.1 : CAPTION CLEANER")
+    print("==============================")
+
+    images = clean_captions(images)
+
+    print(f"Caption Cleaner Completed : {len(images)}")
+    ####################################################
+# Stage 9.2 : OCR Cleaner
+####################################################
+
+    print("\n==============================")
+    print("STAGE 9.2 : OCR CLEANER")
+    print("==============================")
+
+    images = clean_ocrs(images)
+
+    print(f"OCR Cleaner Completed : {len(images)}")
+    ####################################################
+# Stage 9.3 : Metadata Normalizer
+####################################################
+
+    print("\n==============================")
+    print("STAGE 9.3 : METADATA NORMALIZER")
+    print("==============================")
+
+    images = normalize_all_metadata(images)
+
+    print(f"Metadata Normalized : {len(images)}") 
+    ####################################################
+# Stage 9.4 : Keyword Extractor
+####################################################
+
+    print("\n==============================")
+    print("STAGE 9.4 : KEYWORD EXTRACTOR")
+    print("==============================")
+
+    images = extract_all_keywords(images)
+
+    print(f"Keywords Extracted : {len(images)}")
+    ####################################################
+# Stage 9.5 : Search Text Builder
+####################################################
+
+    print("\n==============================")
+    print("STAGE 9.5 : SEARCH TEXT")
+    print("==============================")
+
+    images = build_all_search_text(images)
+
+    print(f"Search Text Built : {len(images)}")
 
 
 
