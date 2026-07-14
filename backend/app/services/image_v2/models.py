@@ -62,6 +62,7 @@ class ImageCandidate:
     # Embeddings
     # --------------------------------------------------
 
+    text_embedding: list = field(default_factory=list)
     clip_embedding: list = field(default_factory=list)
 
     # ==================================================

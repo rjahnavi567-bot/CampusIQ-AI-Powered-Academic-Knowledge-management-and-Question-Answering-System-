@@ -1,10 +1,10 @@
 from app.database.models import DocumentImage
 from app.services.chroma_service import image_collection
-import os
 
-from app.database.models import DocumentImage
-from app.services.chroma_service import image_collection
 
+# ==========================================================
+# SAVE IMAGE METADATA TO MYSQL
+# ==========================================================
 
 def save_images(db, document_id, images):
     """
@@ -15,7 +15,7 @@ def save_images(db, document_id, images):
 
     for image in images:
 
-        print("Saving:", image.path)
+        print(f"Saving : {image.path}")
 
         record = DocumentImage(
 
@@ -29,7 +29,7 @@ def save_images(db, document_id, images):
 
             title=image.title,
 
-            image_hash=image.md5_hash,
+            image_hash=str(image.md5_hash),
 
             source_file=image.source_file,
 
@@ -45,10 +45,17 @@ def save_images(db, document_id, images):
 
     db.commit()
 
-    print(f"Images saved: {len(images)}")
+    print(f"Images saved : {len(images)}")
+
+
+# ==========================================================
+# STORE IMAGE TEXT EMBEDDINGS INTO CHROMADB
+# ==========================================================
+
 def store_images(images, document_id):
     """
-    Store image embeddings into ChromaDB.
+    Store IMAGE TEXT embeddings (384-d BGE)
+    into ChromaDB for semantic retrieval.
     """
 
     if not images:
@@ -58,27 +65,25 @@ def store_images(images, document_id):
         return
 
     ids = []
-
     documents = []
-
     embeddings = []
-
     metadatas = []
 
     for index, image in enumerate(images):
 
-        if not image.clip_embedding:
-
+        # Skip invalid embeddings
+        if (
+            not hasattr(image, "text_embedding")
+            or image.text_embedding is None
+            or len(image.text_embedding) != 384
+        ):
             continue
 
         ids.append(
-
-    f"image_{document_id}_page_{image.page_no}_{index}"
-
-)
+            f"image_{document_id}_page_{image.page_no}_{index}"
+        )
 
         documents.append(
-
 f"""
 MD5_HASH:
 {image.md5_hash}
@@ -98,54 +103,58 @@ OCR:
 VISION:
 {image.vision}
 
-PAGE CONTEXT:
+PAGE_CONTEXT:
 {image.page_context}
+
+SEARCH_TEXT:
+{image.search_text}
 """
         )
 
+        # Store BGE embedding (384)
         embeddings.append(
-
-            image.clip_embedding
-
+            image.text_embedding
         )
 
-        metadatas.append(
+        metadatas.append({
 
-            {
+            "document_id": document_id,
 
-                "document_id": document_id,
+            "type": "image",
 
-                "type": "image",
+            "page_no": image.page_no,
 
-                "page_no": image.page_no,
+            "image_path": image.path,
 
-                "image_path": image.path,
+            "caption": image.caption,
 
-                "caption": image.caption,
+            "title": image.title,
 
-                "title": image.title,
+            "category": image.category,
 
-                "category": image.category,
+            "classification_confidence": float(
+                image.classification_confidence
+            ),
 
-                "classification_confidence": float(
-                    image.classification_confidence
-                ),
+            "confidence_score": float(
+                image.confidence_score
+            ),
 
-                "confidence_score": float(
-                    image.confidence_score
-                ),
+            "md5_hash": str(image.md5_hash),
 
-                "md5_hash": image.md5_hash,
+            "perceptual_hash": str(image.perceptual_hash),
 
-"perceptual_hash": image.perceptual_hash,
+            "source_file": image.source_file,
 
-                "source_file": image.source_file,
+            "file_type": image.file_type
 
-                "file_type": image.file_type
+        })
 
-            }
+    if len(ids) == 0:
 
-        )
+        print("No valid text embeddings found.")
+
+        return
 
     image_collection.add(
 
@@ -159,4 +168,10 @@ PAGE CONTEXT:
 
     )
 
-    print(f"Stored {len(ids)} images.")
+    print("\n==============================")
+    print("STAGE 10.3 : CHROMADB STORAGE")
+    print("==============================")
+    print(f"Stored Images : {len(ids)}")
+    print("Embedding Type : BGE Text")
+    print("Dimension      : 384")
+    print("==============================")

@@ -1,71 +1,39 @@
-import math
-
-
 # --------------------------------------------------
-# Validate One Embedding
+# Validate One Image
 # --------------------------------------------------
-
-EXPECTED_DIMENSION = 384
-
 
 def validate_embedding(image):
 
-    image.embedding_valid = True
-    image.embedding_error = ""
+    # -------------------------------
+    # CLIP Validation
+    # -------------------------------
 
-    embedding = getattr(image, "embedding", [])
+    clip_ok = (
+        hasattr(image, "clip_embedding")
+        and image.clip_embedding is not None
+        and len(image.clip_embedding) == 512
+    )
 
-    # -------------------------
-    # Empty embedding
-    # -------------------------
+    # -------------------------------
+    # Text Validation
+    # -------------------------------
 
-    if embedding is None or len(embedding) == 0:
+    text_ok = (
+        hasattr(image, "text_embedding")
+        and image.text_embedding is not None
+        and len(image.text_embedding) == 384
+    )
 
-        image.embedding_valid = False
-        image.embedding_error = "Empty embedding"
+    image.clip_valid = clip_ok
+    image.text_valid = text_ok
 
-        return image
-
-    # -------------------------
-    # Wrong dimension
-    # -------------------------
-
-    if len(embedding) != EXPECTED_DIMENSION:
-
-        image.embedding_valid = False
-        image.embedding_error = (
-
-            f"Dimension {len(embedding)}"
-
-        )
-
-        return image
-
-    # -------------------------
-    # NaN / Infinite values
-    # -------------------------
-
-    for value in embedding:
-
-        if math.isnan(value):
-
-            image.embedding_valid = False
-            image.embedding_error = "NaN value"
-
-            return image
-
-        if math.isinf(value):
-
-            image.embedding_valid = False
-            image.embedding_error = "Infinite value"
-
-            return image
+    image.embedding_valid = clip_ok and text_ok
 
     return image
 
 
 # --------------------------------------------------
-# Validate All Images
+# Batch Validation
 # --------------------------------------------------
 
 def validate_embeddings(images):
@@ -74,36 +42,37 @@ def validate_embeddings(images):
     print("STAGE 10.2 : EMBEDDING VALIDATOR")
     print("==============================")
 
-    valid = 0
-    invalid = 0
+    valid_images = []
+
+    clip_success = 0
+    text_success = 0
 
     for image in images:
 
-        validate_embedding(image)
+        image = validate_embedding(image)
+
+        if image.clip_valid:
+            clip_success += 1
+
+        if image.text_valid:
+            text_success += 1
 
         if image.embedding_valid:
+            valid_images.append(image)
 
-            valid += 1
+    print(f"Total Images : {len(images)}")
+    print(f"CLIP Valid   : {clip_success}")
+    print(f"BGE Valid    : {text_success}")
+    print(f"Images Kept  : {len(valid_images)}")
 
-        else:
+    print("\nSample Validation\n")
 
-            invalid += 1
-
-    print(f"Valid   : {valid}")
-    print(f"Invalid : {invalid}")
-
-    print("\nSamples\n")
-
-    for image in images[:5]:
+    for image in valid_images[:5]:
 
         print(
-
             f"Page {image.page_no} | "
-
-            f"Valid={image.embedding_valid} | "
-
-            f"{image.embedding_error}"
-
+            f"CLIP={len(image.clip_embedding)} | "
+            f"BGE={len(image.text_embedding)}"
         )
 
-    return images
+    return valid_images

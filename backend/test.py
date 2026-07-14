@@ -1,52 +1,14 @@
-from app.services.retrieval.hybrid_retrieval_service import hybrid_retrieve
-from app.services.retrieval.unified.result_builder import build_results
-from app.services.retrieval.unified.result_fusion import fuse_results
+from app.services.retrieval.image.clip_image_search import retrieve_clip_images
 
-# -------------------------------------
-# Query
-# -------------------------------------
-
-query = "microprogram sequencer"
-
-# -------------------------------------
-# Retrieve
-# -------------------------------------
-
-documents, metadatas, scores = hybrid_retrieve(
-    question=query,
-    top_k=20
+results = retrieve_clip_images(
+    question="Explain the pipeline diagram",
+    top_k=5
 )
 
-# -------------------------------------
-# Build Result Objects
-# -------------------------------------
+print()
 
-results = build_results(
-    documents,
-    metadatas,
-    scores
-)
+print("Returned:", len(results))
 
-# -------------------------------------
-# Fuse & Rank
-# -------------------------------------
+for r in results:
 
-results = fuse_results(
-    results,
-    top_k=10
-)
-
-# -------------------------------------
-# Display
-# -------------------------------------
-
-print("\n========== FINAL RESULTS ==========\n")
-
-for i, item in enumerate(results, start=1):
-
-    print(f"Rank {i}")
-    print("Type :", item["metadata"]["retrieval_type"])
-    print("Score:", round(item["score"], 3))
-    print("Page :", item["metadata"].get("page_no"))
-    print(item["document"][:200])
-    print("-" * 50)
+    print(r["metadata"]["page_no"], r["score"])

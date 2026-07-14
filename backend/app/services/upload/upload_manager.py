@@ -40,7 +40,14 @@ from app.services.upload.response_builder import (
     build_upload_response
 )
 from app.services.image_v2.image_pipeline_v2 import process_images_v2
+from app.services.image_storage_service import (
+    save_images,
+    store_images as store_text_embeddings
+)
 
+from app.services.image_v2.image_vector_store import (
+    store_images as store_clip_embeddings
+)
 class UploadManager:
 
     def upload(self, file):
@@ -443,7 +450,18 @@ class UploadManager:
 
                 save_images(db, document_id, images)
 
-                print("Image vectors already stored in Stage 10.3")
+                print("\nStoring text image embeddings...")
+
+                store_text_embeddings(
+    images,
+    document_id
+)
+
+                print("\nStoring CLIP image embeddings...")
+
+                store_clip_embeddings(
+    images
+)
             except Exception:
 
                 # Delete document

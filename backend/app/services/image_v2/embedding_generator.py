@@ -1,81 +1,83 @@
-from sentence_transformers import SentenceTransformer
-
-
-# --------------------------------------------------
-# Load Embedding Model (Singleton)
-# --------------------------------------------------
-
-_model = None
-
-
-def get_embedding_model():
-
-    global _model
-
-    if _model is None:
-
-        print("Loading Image Embedding Model...")
-
-        _model = SentenceTransformer(
-
-    "BAAI/bge-small-en-v1.5"
-
+from app.services.image_embedding_service import (
+    embed_image,
+    embed_text_for_image_search
 )
 
-    return _model
+from app.services.image_models.text_model import (
+    generate_text_embedding
+)
+
 
 # --------------------------------------------------
 # Generate Query Embedding
 # --------------------------------------------------
 
 def generate_query_embedding(query: str):
+    """
+    Generate CLIP text embedding for image retrieval.
+    Used during image search.
+    """
 
-    model = get_embedding_model()
+    return embed_text_for_image_search(query)
 
-    vector = model.encode(
-        query,
-        normalize_embeddings=True
-    )
-
-    return vector.tolist()
 
 # --------------------------------------------------
-# Generate Embedding for One Image
+# Generate Embeddings for One Image
 # --------------------------------------------------
 
-def generate_embedding(image, model):
+def generate_embedding(image):
+    """
+    Generates BOTH:
 
-    text = getattr(
+    1. CLIP Image Embedding (512)
+    2. BGE Text Embedding (384)
+    """
 
-        image,
+    # ---------------------------------
+    # CLIP Image Embedding
+    # ---------------------------------
 
-        "search_text",
+    try:
 
-        ""
+        image.clip_embedding = embed_image(image.path)
 
-    )
+    except Exception as e:
 
-    if text.strip() == "":
+        print(f"CLIP embedding failed : {image.path}")
 
-        image.embedding = []
+        print(e)
 
-        return image
+        image.clip_embedding = []
 
-    vector = model.encode(
+    # ---------------------------------
+    # BGE Text Embedding
+    # ---------------------------------
 
-        text,
+    text = getattr(image, "search_text", "").strip()
 
-        normalize_embeddings=True
+    if text:
 
-    )
+        try:
 
-    image.embedding = vector.tolist()
+            image.text_embedding = generate_text_embedding(text)
+
+        except Exception as e:
+
+            print(f"BGE embedding failed : {image.path}")
+
+            print(e)
+
+            image.text_embedding = []
+
+    else:
+
+        image.text_embedding = []
 
     return image
 
 
 # --------------------------------------------------
-# Batch
+# Batch Embedding Generation
 # --------------------------------------------------
 
 def generate_embeddings(images):
@@ -84,31 +86,27 @@ def generate_embeddings(images):
     print("STAGE 10.1 : EMBEDDING GENERATOR")
     print("==============================")
 
-    model = get_embedding_model()
-
     for image in images:
 
-        generate_embedding(
-
-            image,
-
-            model
-
-        )
+        generate_embedding(image)
 
     print(f"Embeddings Generated : {len(images)}")
 
-    print("\nSamples\n")
+    print("\nSample Embeddings\n")
 
     for image in images[:5]:
+
+        clip_dim = len(image.clip_embedding) if image.clip_embedding else 0
+
+        text_dim = len(image.text_embedding) if image.text_embedding else 0
 
         print(
 
             f"Page {image.page_no} | "
 
-            f"Embedding Dimension = "
+            f"CLIP = {clip_dim} | "
 
-            f"{len(image.embedding)}"
+            f"BGE = {text_dim}"
 
         )
 

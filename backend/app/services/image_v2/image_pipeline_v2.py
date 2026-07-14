@@ -400,7 +400,6 @@ def process_images_v2(
 
     images = generate_embeddings(images)
 
-    print(f"Embeddings Generated : {len(images)}")
     ####################################################
 # Stage 10.2 : Embedding Validator
 ####################################################
@@ -416,14 +415,7 @@ def process_images_v2(
     ####################################################
 # Stage 10.3 : Vector Storage
 ####################################################
-
-    print("\n==============================")
-    print("STAGE 10.3 : VECTOR STORAGE")
-    print("==============================")
-
-    images = store_vectors(images)
-
-    print(f"Stored : {len(images)}")
+    print("Image vectors already stored in Stage 10.3 in upload_manager")
     ####################################################
 # Stage 10.4 : Vector Verification
 ####################################################
