@@ -156,9 +156,12 @@ class UploadManager:
 
             for page in pages:
 
-                page_text_lookup[page["page_no"]] = page["paragraphs"]
+                page_no = page["page_no"]
 
-           
+                if page_no not in page_text_lookup:
+                    page_text_lookup[page_no] = ""
+
+                page_text_lookup[page_no] += "\n" + page["text"]
 
             # ------------------------------------
             # Generate Better Title

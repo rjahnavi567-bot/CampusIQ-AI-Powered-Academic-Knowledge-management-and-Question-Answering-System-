@@ -6,7 +6,6 @@ from app.api.stats_api import router as stats_router
 from app.api.search_api import router as search_router
 from app.api.search_api import router as search_router
 from app.api.chunks_api import router as chunks_router
-#from app.api.chat_api import router as chat_router
 from app.api.ask_api import router as ask_router
 from app.api.documents_api import router as documents_router
 from app.api.statistics_api import router as statistics_router
@@ -46,6 +45,8 @@ from app.database.models import Base
 
 # Import models so SQLAlchemy registers every table
 import app.database.models
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
 
 
 
@@ -91,9 +92,13 @@ app.include_router(
 app.include_router(
     document_search_router
 )
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+UPLOADS_DIR = BASE_DIR / "uploads"
+
 app.mount(
     "/uploads",
-    StaticFiles(directory="uploads"),
+    StaticFiles(directory=str(UPLOADS_DIR)),
     name="uploads"
 )
 @app.post("/")

@@ -1,8 +1,11 @@
 from fastapi import APIRouter
 
-from app.services.chroma_service import text_collection
+from fastapi import APIRouter
+
+from app.services.retrieval.hybrid_retrieval_service import hybrid_retrieve
 from app.services.reranker_service import rerank_results
 
+router = APIRouter()
 router = APIRouter()
 
 
@@ -12,29 +15,17 @@ def search(
     source_file: str = None
 ):
 
-    # Search all documents
-    if source_file is None:
+    documents, metadatas, scores = hybrid_retrieve(
 
-        results = collection.query(
-            query_texts=[query],
-            n_results=10
-        )
+    question=query,
 
-    # Search specific document only
-    else:
+    source_file=source_file,
 
-        results = text_collection.query(
-            query_texts=[query],
-            n_results=20,
-            where={
-                "source_file": source_file
-            }
-        )
+    top_k=20
 
-    documents = results["documents"][0]
-    metadatas = results["metadatas"][0]
+)
 
-    print("Retrieved Docs:", len(documents))
+    print("Retrieved Results :", len(documents))
 
     ranked = rerank_results(
         query,
@@ -67,26 +58,54 @@ def search(
     for item in ranked[:3]:
 
         top_results.append({
+
     "score": item["score"],
+
     "content": item["content"],
+
     "topic": item["metadata"].get(
         "topic",
         ""
     ),
+
     "source_file": item["metadata"].get(
         "source_file",
         ""
     ),
+
     "page_no": item["metadata"].get(
         "page_no",
         1
     ),
-    "similarity_score":
-        item["metadata"].get(
-            "similarity_score",
-            0
-        )
+
+    "retrieval_type": item["metadata"].get(
+        "retrieval_type",
+        "text"
+    ),
+
+    "similarity_score": item["metadata"].get(
+        "similarity_score",
+        0
+    )
+
 })
+    print("\n==============================")
+    print("SEARCH API SUMMARY")
+    print("==============================")
+
+    text_count = sum(
+    1 for x in top_results
+    if x["retrieval_type"] == "text"
+)
+
+    image_count = sum(
+    1 for x in top_results
+    if x["retrieval_type"] == "image"
+)
+ 
+    print("Text Results :", text_count)
+    print("Image Results:", image_count)
+    print("==============================")
 
     return {
         "query": query,

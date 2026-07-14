@@ -6,7 +6,7 @@ from app.services.embedding_service import create_embedding
 from app.services.image_embedding_service import (
     embed_text_for_image_search
 )
-
+from app.services.retrieval.unified.score_normalizer import normalize_scores
 
 def hybrid_retrieve(
     question,

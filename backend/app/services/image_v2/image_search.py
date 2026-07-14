@@ -1,36 +1,46 @@
-from .retrieval.hybrid_retriever import hybrid_search
-from .retrieval.cross_encoder_reranker import rerank
-from .context.context_pipeline import build_contexts
-from .embedding_generator import get_embedding_model
+from app.services.retrieval.hybrid_retrieval_service import hybrid_retrieve
+from app.services.retrieval.unified.score_normalizer import normalize_results
 
 
-def search_images(query):
+def search_images(
+    query,
+    page_no=None,
+    source_file=None,
+    top_k=10
+):
 
     print("\n==========================")
     print("IMAGE SEARCH PIPELINE")
     print("==========================")
 
-    model = get_embedding_model()
+    ####################################################
+    # Stage 12.1 : Hybrid Retrieval
+    ####################################################
 
-    query_embedding = model.encode(
-        query,
-        normalize_embeddings=True
-    ).tolist()
+    documents, metadatas, scores = hybrid_retrieve(
 
-    # Stage 11.1
-    results = hybrid_search(
-        query,
-        query_embedding,
-        top_k=30
+        question=query,
+
+        page_no=page_no,
+
+        source_file=source_file,
+
+        top_k=top_k
+
     )
 
-    # Stage 11.2
-    results = rerank(
-        query,
-        results
-    )
+    ####################################################
+    # Stage 12.2 : Score Normalization
+    ####################################################
 
-    # Stage 11.3
-    results = build_contexts(results)
+    results = normalize_results(
+
+        documents,
+
+        metadatas,
+
+        scores
+
+    )
 
     return results

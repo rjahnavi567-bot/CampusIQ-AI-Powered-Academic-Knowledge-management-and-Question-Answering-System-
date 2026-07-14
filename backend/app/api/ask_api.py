@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 import re
 
-from app.services.hybrid_retrieval_service import (
+from app.services.retrieval.hybrid_retrieval_service import (
 
     retrieve_text,
 
