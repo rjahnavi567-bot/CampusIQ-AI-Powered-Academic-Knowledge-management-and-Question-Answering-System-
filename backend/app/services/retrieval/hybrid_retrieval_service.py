@@ -7,7 +7,6 @@ from app.services.image_embedding_service import (
     embed_text_for_image_search
 )
 from app.services.retrieval.unified.score_normalizer import normalize_scores
-
 def hybrid_retrieve(
     question,
     page_no=None,
@@ -16,9 +15,11 @@ def hybrid_retrieve(
 ):
     query_embedding = create_embedding(question)
     clip_embedding = embed_text_for_image_search(question)
+
     print("\n===== QUERY EMBEDDING =====")
     print("Query embedding length:", len(clip_embedding))
     print("===========================\n")
+
     filters = []
 
     if page_no is not None:
@@ -33,130 +34,129 @@ def hybrid_retrieve(
         where = filters[0]
 
     elif len(filters) > 1:
-        where = {
-        "$and": filters
-    }
+        where = {"$and": filters}
 
-    # ---------------------------------
-    # TEXT SEARCH (384-dimensional)
-    # ---------------------------------
+    # --------------------------
+    # TEXT SEARCH
+    # --------------------------
 
-# ---------------------------------
-# TEXT SEARCH
-# ---------------------------------
-    
-    query_args = {
-    "query_embeddings": [query_embedding],
-    "n_results": top_k
-}
-
-    if where is not None:
-        query_args["where"] = where
-
-    print("\n===== CHROMA FILTER =====")
-    print(where)
-    print("=========================\n")
-
-    try:
-
-       text_results = text_collection.query(**query_args)
-
-    except Exception as e:
-
-       print("\nTEXT SEARCH FAILED")
-       print(e)
-
-       text_results = {
-        "documents":[[]],
-        "metadatas":[[]],
-        "distances":[[]]
-    }
-
-# ---------------------------------
-# IMAGE SEARCH
-# ---------------------------------
-
-    try:
- 
-        image_args = {
-        "query_embeddings": [clip_embedding],
+    text_args = {
+        "query_embeddings": [query_embedding],
         "n_results": top_k
     }
 
-        if where is not None:
-            image_args["where"] = where
+    if where:
+        text_args["where"] = where
+
+    try:
+
+        text_results = text_collection.query(**text_args)
+
+    except Exception as e:
+
+        print("TEXT SEARCH FAILED")
+        print(e)
+
+        text_results = {
+            "documents":[[]],
+            "metadatas":[[]],
+            "distances":[[]]
+        }
+
+    # --------------------------
+    # IMAGE SEARCH
+    # --------------------------
+
+    image_args = {
+        "query_embeddings":[clip_embedding],
+        "n_results":top_k
+    }
+
+    if where:
+        image_args["where"] = where
+
+    try:
 
         image_results = image_collection.query(**image_args)
 
     except Exception as e:
 
-        print("\nIMAGE SEARCH FAILED")
+        print("IMAGE SEARCH FAILED")
         print(e)
 
         image_results = {
-        "documents":[[]],
-        "metadatas":[[]],
-        "distances":[[]]
-    }
+            "documents":[[]],
+            "metadatas":[[]],
+            "distances":[[]]
+        }
 
-    documents=[]
-    metadatas=[]
-    scores=[]
+    documents = []
+    metadatas = []
+    scores = []
 
-# ---------------- TEXT ----------------
+    # --------------------------
+    # TEXT RESULTS
+    # --------------------------
 
     if (
-    text_results
-    and text_results.get("documents")
-    and len(text_results["documents"]) > 0
-    and len(text_results["documents"][0]) > 0
-):
-        for doc,meta,score in zip(
-        text_results["documents"][0],
-        text_results["metadatas"][0],
-        text_results["distances"][0]
+        text_results.get("documents")
+        and len(text_results["documents"][0]) > 0
     ):
 
-            meta["retrieval_type"]="text"
+        for doc, meta, score in zip(
+
+            text_results["documents"][0],
+            text_results["metadatas"][0],
+            text_results["distances"][0]
+
+        ):
+
+            meta["retrieval_type"] = "text"
 
             documents.append(doc)
             metadatas.append(meta)
             scores.append(score)
-# ---------------- IMAGE ----------------
+
+    # --------------------------
+    # IMAGE RESULTS
+    # --------------------------
 
     if (
-
-    image_results
-
-    and
-
-    image_results.get("documents")
-
-    and
-
-    len(image_results["documents"]) > 0
-
-    and
-
-    len(image_results["documents"][0]) > 0
-
-):
-
-        for doc,meta,score in zip(
-        image_results["documents"][0],
-        image_results["metadatas"][0],
-        image_results["distances"][0]
+        image_results.get("documents")
+        and len(image_results["documents"][0]) > 0
     ):
 
-            meta["retrieval_type"]="image"
+        for doc, meta, score in zip(
+
+            image_results["documents"][0],
+            image_results["metadatas"][0],
+            image_results["distances"][0]
+
+        ):
+
+            meta["retrieval_type"] = "image"
 
             documents.append(doc)
             metadatas.append(meta)
             scores.append(score)
+
+    # --------------------------
+    # Stage 12.2
+    # Score Normalization
+    # --------------------------
+
+    scores = normalize_scores(scores)
+
     print("\n===== RETRIEVAL SUMMARY =====")
-    print("Text results :", len(text_results["documents"][0]))
-    print("Image results:", len(image_results["documents"][0]))
-    print("Final results:", len(documents))
+    print("Text Results :", sum(
+        1 for m in metadatas
+        if m["retrieval_type"] == "text"
+    ))
+    print("Image Results:", sum(
+        1 for m in metadatas
+        if m["retrieval_type"] == "image"
+    ))
+    print("Total Results :", len(documents))
     print("=============================\n")
 
     return documents, metadatas, scores
@@ -164,7 +164,6 @@ def hybrid_retrieve(
 # ==========================================================
 # TEXT RETRIEVAL ONLY
 # ==========================================================
-
 def retrieve_text(
     question,
     page_no=None,
@@ -202,7 +201,7 @@ def retrieve_text(
 
     try:
 
-        results = text_collection.query(**query_args)
+        query_results = text_collection.query(**query_args)
 
     except Exception as e:
 
@@ -216,28 +215,30 @@ def retrieve_text(
     scores = []
 
     if (
-        results
-        and results.get("documents")
-        and len(results["documents"]) > 0
+        query_results.get("documents")
+        and len(query_results["documents"][0]) > 0
     ):
 
         for doc, meta, score in zip(
 
-    results["documents"][0],
+            query_results["documents"][0],
+            query_results["metadatas"][0],
+            query_results["distances"][0]
 
-    results["metadatas"][0],
-
-    results["distances"][0]
-
-):
+        ):
 
             meta["retrieval_type"] = "text"
 
             documents.append(doc)
-
             metadatas.append(meta)
-
             scores.append(score)
+
+    # ------------------------------
+    # Stage 12.2
+    # Normalize Scores
+    # ------------------------------
+
+    scores = normalize_scores(scores)
 
     return documents, metadatas, scores
 
@@ -246,113 +247,91 @@ def retrieve_text(
 # ==========================================================
 
 def retrieve_images(
-
     question,
-
     pages,
-
     source_file=None,
-
     top_k=6
-
 ):
 
     clip_embedding = embed_text_for_image_search(question)
 
     page_filters = []
 
-    for p in pages:
+    for page in pages:
 
         page_filters.append({
-
-            "page_no": p
-
+            "page_no": page
         })
 
     where = {
-
         "$or": page_filters
-
     }
 
     if source_file:
 
         where = {
-
             "$and": [
-
                 {
-
                     "source_file": source_file
-
                 },
-
                 where
-
             ]
-
         }
 
     try:
 
-        results = image_collection.query(
+        query_results = image_collection.query(
 
-    query_embeddings=[clip_embedding],
+            query_embeddings=[clip_embedding],
 
-    where=where,
+            where=where,
 
-    n_results=top_k,
+            n_results=top_k,
 
-    include=[
+            include=[
+                "documents",
+                "metadatas",
+                "distances",
+                "embeddings"
+            ]
 
-        "documents",
-
-        "metadatas",
-
-        "distances",
-
-        "embeddings"
-
-    ]
-
-)
+        )
 
     except Exception as e:
 
         print("IMAGE SEARCH FAILED")
-
         print(e)
 
         return [], [], []
 
     documents = []
-
     metadatas = []
-
     scores = []
 
     if (
 
-        results
+        query_results.get("documents")
 
-        and results.get("documents")
+        and
 
-        and len(results["documents"]) > 0
+        len(query_results["documents"][0]) > 0
 
     ):
 
         for doc, meta, score, embedding in zip(
 
-            results["documents"][0],
+            query_results["documents"][0],
 
-            results["metadatas"][0],
+            query_results["metadatas"][0],
 
-            results["distances"][0],
-            results["embeddings"][0]
+            query_results["distances"][0],
+
+            query_results["embeddings"][0]
 
         ):
 
             meta["retrieval_type"] = "image"
+
             meta["clip_embedding"] = embedding
 
             documents.append(doc)
@@ -360,5 +339,12 @@ def retrieve_images(
             metadatas.append(meta)
 
             scores.append(score)
+
+    # -----------------------------------
+    # Stage 12.2
+    # Normalize Scores
+    # -----------------------------------
+
+    scores = normalize_scores(scores)
 
     return documents, metadatas, scores

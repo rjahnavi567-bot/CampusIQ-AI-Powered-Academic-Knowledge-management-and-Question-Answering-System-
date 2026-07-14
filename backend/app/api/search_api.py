@@ -1,11 +1,8 @@
 from fastapi import APIRouter
 
-from fastapi import APIRouter
-
 from app.services.retrieval.hybrid_retrieval_service import hybrid_retrieve
 from app.services.reranker_service import rerank_results
 
-router = APIRouter()
 router = APIRouter()
 
 
@@ -15,43 +12,54 @@ def search(
     source_file: str = None
 ):
 
+    # ---------------------------------
+    # Hybrid Retrieval
+    # ---------------------------------
+
     documents, metadatas, scores = hybrid_retrieve(
-
-    question=query,
-
-    source_file=source_file,
-
-    top_k=20
-
-)
+        question=query,
+        source_file=source_file,
+        top_k=20
+    )
 
     print("Retrieved Results :", len(documents))
+
+    # ---------------------------------
+    # Cross Encoder Re-ranking
+    # ---------------------------------
 
     ranked = rerank_results(
         query,
         documents,
         metadatas
     )
+
     query_lower = query.lower()
 
     for item in ranked:
 
         topic = item["metadata"].get(
-        "topic",
-        ""
-    ).lower()
+            "topic",
+            ""
+        ).lower()
 
         if any(
             word in topic
             for word in query_lower.split()
-    ):
+        ):
             item["score"] += 0.20
+
     ranked.sort(
-    key=lambda x: x["score"],
-    reverse=True
-)
+        key=lambda x: x["score"],
+        reverse=True
+    )
+
     if len(ranked) > 0:
-        print("Top Score:", ranked[0]["score"])
+        print("Top Score :", ranked[0]["score"])
+
+    # ---------------------------------
+    # Build Response
+    # ---------------------------------
 
     top_results = []
 
@@ -59,56 +67,65 @@ def search(
 
         top_results.append({
 
-    "score": item["score"],
+            "score": item["score"],
 
-    "content": item["content"],
+            "content": item["content"],
 
-    "topic": item["metadata"].get(
-        "topic",
-        ""
-    ),
+            "topic": item["metadata"].get(
+                "topic",
+                ""
+            ),
 
-    "source_file": item["metadata"].get(
-        "source_file",
-        ""
-    ),
+            "source_file": item["metadata"].get(
+                "source_file",
+                ""
+            ),
 
-    "page_no": item["metadata"].get(
-        "page_no",
-        1
-    ),
+            "page_no": item["metadata"].get(
+                "page_no",
+                1
+            ),
 
-    "retrieval_type": item["metadata"].get(
-        "retrieval_type",
-        "text"
-    ),
+            "retrieval_type": item["metadata"].get(
+                "retrieval_type",
+                "text"
+            ),
 
-    "similarity_score": item["metadata"].get(
-        "similarity_score",
-        0
-    )
+            "similarity_score": item["metadata"].get(
+                "similarity_score",
+                0
+            )
 
-})
+        })
+
+    # ---------------------------------
+    # Summary
+    # ---------------------------------
+
     print("\n==============================")
     print("SEARCH API SUMMARY")
     print("==============================")
 
     text_count = sum(
-    1 for x in top_results
-    if x["retrieval_type"] == "text"
-)
+        1 for x in top_results
+        if x["retrieval_type"] == "text"
+    )
 
     image_count = sum(
-    1 for x in top_results
-    if x["retrieval_type"] == "image"
-)
- 
+        1 for x in top_results
+        if x["retrieval_type"] == "image"
+    )
+
     print("Text Results :", text_count)
     print("Image Results:", image_count)
     print("==============================")
 
     return {
+
         "query": query,
+
         "total_retrieved": len(documents),
+
         "results": top_results
+
     }

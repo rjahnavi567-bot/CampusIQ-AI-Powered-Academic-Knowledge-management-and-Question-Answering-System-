@@ -1,51 +1,52 @@
-from sqlalchemy.orm import Session
+from app.services.retrieval.hybrid_retrieval_service import hybrid_retrieve
+from app.services.retrieval.unified.result_builder import build_results
+from app.services.retrieval.unified.result_fusion import fuse_results
 
-from app.database.connection import SessionLocal
+# -------------------------------------
+# Query
+# -------------------------------------
 
-from app.services.image_v2.embedding_generator import get_embedding_model
-
-from app.services.retrieval.unified.unified_retriever import (
-    unified_retrieve
-)
-from app.services.retrieval.unified.unified_ranker import unified_rank
 query = "microprogram sequencer"
 
-db: Session = SessionLocal()
+# -------------------------------------
+# Retrieve
+# -------------------------------------
 
-model = get_embedding_model()
-
-query_embedding = model.encode(
-    query,
-    normalize_embeddings=True
-).tolist()
-
-results = unified_retrieve(
-    db=db,
-    query=query,
-    query_embedding=query_embedding
+documents, metadatas, scores = hybrid_retrieve(
+    question=query,
+    top_k=20
 )
 
+# -------------------------------------
+# Build Result Objects
+# -------------------------------------
 
-results = unified_rank(results)
+results = build_results(
+    documents,
+    metadatas,
+    scores
+)
 
-print()
+# -------------------------------------
+# Fuse & Rank
+# -------------------------------------
 
-print("=" * 60)
+results = fuse_results(
+    results,
+    top_k=10
+)
 
-for i, r in enumerate(results[:10], start=1):
+# -------------------------------------
+# Display
+# -------------------------------------
 
-    print()
+print("\n========== FINAL RESULTS ==========\n")
+
+for i, item in enumerate(results, start=1):
 
     print(f"Rank {i}")
-
-    print("Source :", r["source"])
-
-    if r["source"] == "image":
-
-        print(r["id"])
-
-        print(r["document"][:200])
-
-    else:
-
-        print(r)
+    print("Type :", item["metadata"]["retrieval_type"])
+    print("Score:", round(item["score"], 3))
+    print("Page :", item["metadata"].get("page_no"))
+    print(item["document"][:200])
+    print("-" * 50)

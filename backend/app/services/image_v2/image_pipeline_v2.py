@@ -435,10 +435,6 @@ def process_images_v2(
     images = verify_vectors(images)
 
     print(f"Verified : {len(images)}")
-    
-
-
-
     ####################################################
     # Pipeline Complete (Current Stage)
     ####################################################
