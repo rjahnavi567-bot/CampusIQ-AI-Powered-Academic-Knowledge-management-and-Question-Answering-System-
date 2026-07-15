@@ -10,7 +10,7 @@ from .sliding_window_detector import detect_window_figures
 from .visual_object_detector import detect_visual_objects
 from .visual_object_filter import filter_visual_objects
 from .visual_object_merger import merge_visual_objects
-from app.services.image_v2.improve.region_refiner import refine_regions
+
 from .final_detection_fusion import final_fusion
 from app.services.page_sources.source_loader import load_document
 from .crop_service import crop_regions
@@ -129,10 +129,6 @@ class ImageExtractor:
     visual_objects
 )
 
-            all_detections = refine_regions(
-    all_detections,
-    page_image
-)
 ####################################################
 # Stage 6 : Crop Service
 ####################################################

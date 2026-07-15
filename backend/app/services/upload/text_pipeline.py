@@ -19,6 +19,8 @@ def process_text_pages(pages, filename):
 
     # Detect extension once
     file_type = os.path.splitext(filename)[1].lower()
+    print("\n===== TEXT PAGES =====")
+    print("Total Pages:", len(pages))
 
     for page in pages:
 
@@ -35,6 +37,10 @@ def process_text_pages(pages, filename):
         content_signature += text[:1000] + "\n"
 
         page_chunks = create_semantic_chunks(text)
+        print(
+    f"Page {page['page_no']} -> "
+    f"{len(page_chunks)} chunks"
+)
 
         for chunk in page_chunks:
 
@@ -46,8 +52,14 @@ def process_text_pages(pages, filename):
             chunk["file_type"] = file_type
 
             chunks.append(chunk)
-
+        print(f"\nPage {page['page_no']}")
+        print("Text Length:", len(page["text"]))
+        print(page["text"][:200])
     print("\n===== FIRST CHUNK =====")
-    print(chunks[0])
+    print(len(chunks))
 
+    if chunks:
+        print(chunks[0])
+    else:
+        print("No chunks generated.")
     return chunks, content_signature

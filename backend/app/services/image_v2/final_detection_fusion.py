@@ -1,56 +1,68 @@
-from .region_fusion import calculate_iou
-
+from .improve.geometry import iou
+from app.services.image_v2.improve.fusion_score import assign_detection_scores
 
 IOU_THRESHOLD = 0.35
 
 
 def final_fusion(*detection_lists):
     """
-    Merge detections from all detectors while removing duplicates.
+    Merge detections coming from
 
-    Input:
-        final_fusion(
-            layout,
-            regions,
-            windows,
-            visual_objects
-        )
+    layout
+    region detector
+    sliding window
+    visual detector
 
-    Output:
-        Single detection list
+    while removing duplicates.
     """
+
+    # -----------------------------
+    # Flatten all detections
+    # -----------------------------
+
+    all_boxes = []
+
+    for detections in detection_lists:
+        all_boxes.extend(detections)
+
+    # -----------------------------
+    # Assign detector priority score
+    # -----------------------------
+
+    all_boxes = assign_detection_scores(all_boxes)
+
+    # -----------------------------
+    # Sort best detections first
+    # -----------------------------
+
+    all_boxes.sort(
+        key=lambda x: x.get("fusion_score", 0),
+        reverse=True
+    )
 
     merged = []
 
-    for detections in detection_lists:
+    # -----------------------------
+    # Greedy fusion
+    # -----------------------------
 
-        for det in detections:
+    for det in all_boxes:
 
-            duplicate = False
+        duplicate = False
 
-            for existing in merged:
+        for existing in merged:
 
-                iou = calculate_iou(
-                    det["bbox"],
-                    existing["bbox"]
-                )
+            io = iou(
+                det["bbox"],
+                existing["bbox"]
+            )
 
-                if iou >= IOU_THRESHOLD:
+            if io >= IOU_THRESHOLD:
+                duplicate = True
+                break
 
-                    duplicate = True
-
-                    # Keep the higher-confidence detection
-                    if det.get("confidence", 0) > existing.get("confidence", 0):
-
-                        existing["bbox"] = det["bbox"]
-                        existing["category"] = det["category"]
-                        existing["confidence"] = det["confidence"]
-
-                    break
-
-            if not duplicate:
-
-                merged.append(det.copy())
+        if not duplicate:
+            merged.append(det.copy())
 
     print(f"Final detections : {len(merged)}")
 
