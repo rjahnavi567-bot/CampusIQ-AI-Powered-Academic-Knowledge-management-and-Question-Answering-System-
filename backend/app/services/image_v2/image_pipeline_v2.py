@@ -40,33 +40,38 @@ from .vector_storage import store_vectors
 
 from .vector_verifier import verify_vectors
 from .context.context_pipeline import build_contexts
+from app.services.page_sources.source_loader import load_document
 def process_images_v2(
     file_path,
     document_id,
     page_lookup,
     page_text_lookup
 ):
-    extension = os.path.splitext(file_path)[1].lower()
-
-    if extension != ".pdf":
-        raise Exception(
-            "Stage-1 currently supports PDF only."
-        )
+    
 
     ####################################################
-    # Stage 1 : Extraction
-    ####################################################
+# Stage 1 : Universal Document Loading
+####################################################
 
     print("\n==============================")
-    print("STAGE 1 : IMAGE EXTRACTION")
+    print("STAGE 1 : DOCUMENT LOADING")
+    print("==============================")
+
+    print(f"Input File : {os.path.basename(file_path)}")
+
+####################################################
+# Stage 1.1 : Image Extraction
+####################################################
+
+    print("\n==============================")
+    print("STAGE 2 : IMAGE EXTRACTION")
     print("==============================")
 
     extractor = ImageExtractor(document_id)
 
     images = extractor.extract(file_path)
 
-    print(f"Extracted : {len(images)}")
-
+    print(f"Extracted Images : {len(images)}")
     ####################################################
     # Stage 1.2 : Metadata
     ####################################################

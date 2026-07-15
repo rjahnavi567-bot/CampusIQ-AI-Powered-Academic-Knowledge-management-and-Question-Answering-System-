@@ -1,7 +1,7 @@
 import os
-import fitz
-
-from .page_renderer import render_page
+import numpy as np
+import cv2
+from PIL import Image
 from .layout_detector import detect_figures
 from .region_detector import detect_regions
 from .region_fusion import fuse_regions
@@ -12,7 +12,7 @@ from .visual_object_filter import filter_visual_objects
 from .visual_object_merger import merge_visual_objects
 
 from .final_detection_fusion import final_fusion
-
+from app.services.page_sources.source_loader import load_document
 from .crop_service import crop_regions
 from .validator.validator import PipelineValidator
 from .sliding_window_detector import generate_windows
@@ -37,25 +37,33 @@ class ImageExtractor:
 
     ############################################################
 
-    def extract(self, pdf_path):
-
-        pdf = fitz.open(pdf_path)
+    def extract(self, file_path):
 
         candidates = []
 
-        for page_index in range(len(pdf)):
+        pages = load_document(file_path)
+        total_layout = 0
+        total_regions = 0
+        total_windows = 0
+        total_visual = 0
+        total_final = 0
+
+        for page in pages:
+
+            page_no = page["page_no"]
+
+            page_image = page["image"]
+            # Convert PIL image to OpenCV image
+            if isinstance(page_image, Image.Image):
+
+                page_image = cv2.cvtColor(
+        np.array(page_image),
+        cv2.COLOR_RGB2BGR
+    )
 
             print("\n========================================")
-            print(f"Processing Page {page_index + 1}")
+            print(f"Processing Page {page_no}")
             print("========================================")
-
-            ####################################################
-            # Stage 1 : Render Page
-            ####################################################
-
-            page = pdf.load_page(page_index)
-
-            page_image = render_page(page)
 
             ####################################################
 # Stage 2 : PPStructure
@@ -129,7 +137,7 @@ class ImageExtractor:
 
     page_image=page_image,
 
-    page_no=page_index + 1,
+    page_no=page_no,
 
     detections=all_detections,
 
@@ -138,14 +146,19 @@ class ImageExtractor:
     document_id=self.document_id
 
 )
+            
 
             candidates.extend(page_candidates)
-        print(f"PPStructure: {len(layout_regions)}")
-        print(f"Region Detector: {len(region_boxes)}")
-        print(f"Sliding Window: {len(window_detections)}")
-        print(f"Visual Objects: {len(visual_objects)}")
-        print(f"Final Detections: {len(all_detections)}")
-        pdf.close()
+            total_layout += len(layout_regions)
+            total_regions += len(region_boxes)
+            total_windows += len(window_detections)
+            total_visual += len(visual_objects)
+            total_final += len(all_detections)
+        print(f"PPStructure : {total_layout}")
+        print(f"Region Detector : {total_regions}")
+        print(f"Sliding Window : {total_windows}")
+        print(f"Visual Objects : {total_visual}")
+        print(f"Final Detections : {total_final}")
 
         print("\n========================================")
         print(f"TOTAL IMAGES EXTRACTED : {len(candidates)}")
