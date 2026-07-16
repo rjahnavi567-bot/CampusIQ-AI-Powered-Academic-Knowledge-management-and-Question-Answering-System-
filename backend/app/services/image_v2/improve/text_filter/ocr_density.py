@@ -6,11 +6,11 @@ import pytesseract
 # Configuration
 # -------------------------------
 
-MAX_WORDS = 80
+MAX_WORDS = 120
 
-MAX_CHARACTERS = 450
+MAX_CHARACTERS = 900
 
-MIN_TEXT_RATIO = 0.55
+MIN_TEXT_RATIO = 0.70
 
 
 def compute_text_density(image):

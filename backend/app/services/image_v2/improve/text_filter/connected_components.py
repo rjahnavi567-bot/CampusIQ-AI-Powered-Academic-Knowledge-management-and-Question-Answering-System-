@@ -5,7 +5,7 @@ import cv2
 # Configuration
 # ------------------------------------
 
-MAX_COMPONENTS = 2200
+MAX_COMPONENTS = 3500
 
 MIN_COMPONENT_AREA = 5
 

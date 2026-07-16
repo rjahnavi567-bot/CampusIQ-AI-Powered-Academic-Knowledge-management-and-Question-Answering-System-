@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 LOW_EDGE_THRESHOLD = 0.015
-HIGH_EDGE_THRESHOLD = 0.35
+HIGH_EDGE_THRESHOLD = 0.50
 
 
 def edge_density(image):

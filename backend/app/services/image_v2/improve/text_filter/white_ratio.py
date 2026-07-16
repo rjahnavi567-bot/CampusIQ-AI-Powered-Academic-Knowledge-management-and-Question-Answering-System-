@@ -3,7 +3,7 @@ import numpy as np
 
 WHITE_THRESHOLD = 245
 
-MAX_WHITE_RATIO = 0.92
+MAX_WHITE_RATIO = 0.97
 
 
 def white_ratio(crop):
