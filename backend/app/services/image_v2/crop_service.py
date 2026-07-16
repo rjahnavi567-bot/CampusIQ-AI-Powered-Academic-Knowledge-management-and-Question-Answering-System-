@@ -2,8 +2,9 @@ import cv2
 
 from .crop_saver import save_crop
 from .models import ImageCandidate
-
-
+from app.services.image_v2.improve.page_classifier import classify_full_page
+from .improve.adaptive_expander import adaptive_expand
+from app.services.image_v2.improve.border_trimmer import trim_white_border
 # ----------------------------------------
 # Minimum crop size
 # ----------------------------------------
@@ -37,10 +38,10 @@ def crop_regions(
 
     for det in detections:
 
-        x1, y1, x2, y2 = map(
-            int,
-            det["bbox"]
-        )
+        x1, y1, x2, y2 = adaptive_expand(
+    det["bbox"],
+    page_image.shape
+)
 
         ###################################################
         # Keep crop inside page
@@ -73,6 +74,12 @@ def crop_regions(
             x1:x2
 
         ]
+        if classify_full_page(crop, page_image.shape):
+
+            print("Rejected full-page document")
+
+            continue
+        crop = trim_white_border(crop)
 
         if crop.size == 0:
             continue

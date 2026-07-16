@@ -1,12 +1,17 @@
 from .geometry import iou
-
+from app.services.image_v2.improve.content_aware_expansion import content_expand
 
 MIN_AREA_RATIO = 0.003
-MAX_AREA_RATIO = 0.85
+
 
 MERGE_DISTANCE = 30
 
-EXPAND_PIXELS = 12
+SMALL_OBJECT = 150 * 150
+MEDIUM_OBJECT = 450 * 450
+
+SMALL_EXPAND = 8
+MEDIUM_EXPAND = 18
+LARGE_EXPAND = 35
 def area(box):
 
     x1, y1, x2, y2 = box
@@ -17,13 +22,35 @@ def expand_box(box, width, height):
 
     x1, y1, x2, y2 = box
 
-    x1 = max(0, x1 - EXPAND_PIXELS)
-    y1 = max(0, y1 - EXPAND_PIXELS)
+    object_area = (x2 - x1) * (y2 - y1)
 
-    x2 = min(width, x2 + EXPAND_PIXELS)
-    y2 = min(height, y2 + EXPAND_PIXELS)
+    if object_area < SMALL_OBJECT:
 
-    return (x1, y1, x2, y2)
+        expand = SMALL_EXPAND
+
+    elif object_area < MEDIUM_OBJECT:
+
+        expand = MEDIUM_EXPAND
+
+    else:
+
+        expand = LARGE_EXPAND
+
+    x1 = max(0, x1 - expand)
+    y1 = max(0, y1 - expand)
+
+    x2 = min(width, x2 + expand)
+    y2 = min(height, y2 + expand)
+    print(
+    f"Expand={expand}px  Area={object_area}"
+)
+
+    return (
+        x1,
+        y1,
+        x2,
+        y2
+    )
 
 def clip_box(box, width, height):
 
@@ -99,9 +126,6 @@ def refine_regions(detections, image):
 
     for det in refined:
 
-        if area(det["bbox"]) / page_area > MAX_AREA_RATIO:
-            continue
-
         filtered.append(det)
 
     refined = filtered
@@ -140,17 +164,7 @@ def refine_regions(detections, image):
 
         merged.append(current)
 
-    # -----------------------------------
-    # Step 4 : Expand boxes slightly
-    # -----------------------------------
-
-    for det in merged:
-
-        det["bbox"] = expand_box(
-            det["bbox"],
-            width,
-            height
-        )
+        det["bbox"] = box
 
     print(f"Region refinement : {len(merged)}")
 

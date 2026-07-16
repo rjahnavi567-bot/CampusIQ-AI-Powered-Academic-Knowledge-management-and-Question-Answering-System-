@@ -14,10 +14,16 @@ from app.services.image_v2.improve.region_refiner import refine_regions
 from .final_detection_fusion import final_fusion
 from app.services.page_sources.source_loader import load_document
 from .crop_service import crop_regions
+from .improve.nms import non_max_suppression
+from .improve.containment_filter import remove_contained_boxes
 from .validator.validator import PipelineValidator
 from .sliding_window_detector import generate_windows
 from .sliding_window_detector import detect_window_figures
 from .sliding_window_fusion import merge_window_detections
+from .improve.figure_grouper import group_figures
+from app.services.image_v2.improve.text_filter.text_heavy_filter import (
+    filter_text_heavy
+)
 class ImageExtractor:
 
     def __init__(self, document_id):
@@ -47,6 +53,7 @@ class ImageExtractor:
         total_windows = 0
         total_visual = 0
         total_final = 0
+        total_text_rejected = 0
 
         for page in pages:
 
@@ -133,6 +140,27 @@ class ImageExtractor:
     all_detections,
     page_image
 )
+            all_detections = non_max_suppression(
+    all_detections
+)
+
+            all_detections = remove_contained_boxes(
+    all_detections
+          
+)
+            all_detections = group_figures(
+    all_detections,
+    page_image
+)
+            
+            before = len(all_detections)
+
+            all_detections = filter_text_heavy(
+    page_image,
+    all_detections
+)
+
+            total_text_rejected += before - len(all_detections)
 ####################################################
 # Stage 6 : Crop Service
 ####################################################
@@ -163,6 +191,7 @@ class ImageExtractor:
         print(f"Sliding Window : {total_windows}")
         print(f"Visual Objects : {total_visual}")
         print(f"Final Detections : {total_final}")
+        print(f"Text Heavy Rejected : {total_text_rejected}")
 
         print("\n========================================")
         print(f"TOTAL IMAGES EXTRACTED : {len(candidates)}")

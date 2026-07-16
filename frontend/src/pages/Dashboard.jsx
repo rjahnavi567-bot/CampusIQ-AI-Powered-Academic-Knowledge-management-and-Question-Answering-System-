@@ -42,7 +42,7 @@ export default function Dashboard() {
 <div className="hero-card">
 
 <h1>
-🎓 AI Academic System
+🎓 campusIQ: Intelligent Academic Assistance System
 </h1>
 
 <p>

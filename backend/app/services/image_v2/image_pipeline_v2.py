@@ -41,6 +41,8 @@ from .vector_storage import store_vectors
 from .vector_verifier import verify_vectors
 from .context.context_pipeline import build_contexts
 from app.services.page_sources.source_loader import load_document
+from app.services.image_v2.improve.text_filter.edge_density_filter import filter_edge_density
+
 def process_images_v2(
     file_path,
     document_id,

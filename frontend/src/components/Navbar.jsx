@@ -7,7 +7,7 @@ export default function Navbar() {
     <nav className="navbar">
 
       <h2>
-        🎓 AI Academic System
+        🎓 campusIQ: Intelligent Academic Assistance System
       </h2>
 
       <div>
