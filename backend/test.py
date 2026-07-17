@@ -1,14 +1,7 @@
-from app.services.retrieval.image.clip_image_search import retrieve_clip_images
+from app.services.statistics import stats
 
-results = retrieve_clip_images(
-    question="Explain the pipeline diagram",
-    top_k=5
-)
+stats.increment("documents_uploaded")
 
-print()
+stats.increment("documents_uploaded")
 
-print("Returned:", len(results))
-
-for r in results:
-
-    print(r["metadata"]["page_no"], r["score"])
+print(stats.report())

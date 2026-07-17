@@ -24,6 +24,8 @@ from .improve.figure_grouper import group_figures
 from app.services.image_v2.improve.text_filter.text_heavy_filter import (
     filter_text_heavy
 )
+from app.services.statistics import collector
+from app.services.statistics.timer import Timer
 class ImageExtractor:
 
     def __init__(self, document_id):
@@ -44,6 +46,10 @@ class ImageExtractor:
     ############################################################
 
     def extract(self, file_path):
+        image_timer = Timer()
+        filter_timer = Timer()
+
+        image_timer.start()
 
         candidates = []
 
@@ -154,11 +160,31 @@ class ImageExtractor:
 )
             
             before = len(all_detections)
+            before_filter = len(all_detections)
+
+            filter_timer.start()
 
             all_detections = filter_text_heavy(
     page_image,
     all_detections
 )
+            filter_time = filter_timer.stop()
+
+            collector.add_time(
+    "Image Filtering Time",
+    filter_time
+)
+
+            collector.increment(
+    "Total Useful Images Retained",
+    len(all_detections)
+)
+ 
+            collector.increment(
+    "Total Useless Images Filtered",
+    before_filter - len(all_detections)
+)
+            
 
             total_text_rejected += before - len(all_detections)
 ####################################################
@@ -178,6 +204,14 @@ class ImageExtractor:
     document_id=self.document_id
 
 )
+            collector.increment(
+    "Total Images Extracted",
+    len(page_candidates)
+)
+            collector.increment(
+    "Total Images Classified",
+    len(page_candidates)
+)
             
 
             candidates.extend(page_candidates)
@@ -196,5 +230,10 @@ class ImageExtractor:
         print("\n========================================")
         print(f"TOTAL IMAGES EXTRACTED : {len(candidates)}")
         print("========================================\n")
+        image_time = image_timer.stop()
 
+        collector.add_time(
+    "Image Extraction Time",
+    image_time
+)
         return candidates

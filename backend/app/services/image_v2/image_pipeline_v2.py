@@ -42,7 +42,8 @@ from .vector_verifier import verify_vectors
 from .context.context_pipeline import build_contexts
 from app.services.page_sources.source_loader import load_document
 from app.services.image_v2.improve.text_filter.edge_density_filter import filter_edge_density
-
+from app.services.statistics import collector
+from app.services.statistics.timer import Timer
 def process_images_v2(
     file_path,
     document_id,
@@ -177,6 +178,8 @@ def process_images_v2(
     print("\n==============================")
     print("STAGE 6.5 : GENERATE CAPTIONS")
     print("==============================")
+    caption_timer = Timer()
+    caption_timer.start()
 
     images = generate_captions(
         images,
@@ -184,7 +187,31 @@ def process_images_v2(
         model
     )
 
+    caption_time = caption_timer.stop()
+    caption_count = 0
+
+    for img in images:
+
+        if getattr(img, "caption", "").strip():
+
+            caption_count += 1
+
     print(f"Captioned : {len(images)}")
+    generated = sum(
+    1
+    for img in images
+    if getattr(img, "caption", "").strip()
+)
+
+    collector.increment(
+    "Total Image Captions Generated",
+    generated
+)
+
+    collector.add_time(
+    "Caption Generation Time",
+    caption_time
+)
 
     ####################################################
     # Caption Sample

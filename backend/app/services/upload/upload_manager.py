@@ -4,8 +4,8 @@ import shutil
 import time
 import traceback
 import fitz
+from app.services.statistics.timer import Timer
 from fastapi import HTTPException
-
 from app.database.connection import SessionLocal
 from app.database.models import Document
 from concurrent.futures import ThreadPoolExecutor
@@ -48,9 +48,18 @@ from app.services.image_storage_service import (
 from app.services.image_v2.image_vector_store import (
     store_images as store_clip_embeddings
 )
+from app.services.statistics import (
+    stats,
+    upload_stats
+)
+from app.services.statistics.statistics_collector import collector
 class UploadManager:
-
     def upload(self, file):
+        upload_stats.reset()
+        start_time = time.time()
+        processing_timer = Timer()
+        processing_timer.start()
+
 
         start_time = time.time()
 
@@ -216,6 +225,26 @@ class UploadManager:
 )
 
             print("New Filename :", new_filename)
+            upload_stats.increment("Total Documents Uploaded")
+
+            extension = os.path.splitext(file_path)[1].lower()
+
+
+            if extension == ".pdf":
+                upload_stats.increment("Total PDF Files")
+
+            elif extension == ".docx":
+                upload_stats.increment("Total DOCX Files")
+
+            elif extension == ".pptx":
+                upload_stats.increment("Total PPTX Files")
+
+            elif extension == ".txt":
+                upload_stats.increment("Total TXT Files")
+
+            elif extension in [".png", ".jpg", ".jpeg"]:
+                upload_stats.increment("Total Image Files")
+
             # ------------------------------------
             # Process Images
             # ------------------------------------
@@ -433,6 +462,14 @@ class UploadManager:
                 chunks
 
             )
+                collector.increment(
+    "Total Metadata Records Generated",
+    len(chunks)
+)
+                collector.increment(
+    "Total Chunks Stored",
+    len(chunks)
+)
             # ------------------------------------
             # Store Text Embeddings
             # ------------------------------------
@@ -449,6 +486,10 @@ class UploadManager:
                 print("Saving image metadata...")
 
                 save_images(db, document_id, images)
+                collector.increment(
+    "Total Images Stored",
+    len(images)
+)
 
                 print("\nStoring text image embeddings...")
 
@@ -456,12 +497,21 @@ class UploadManager:
     images,
     document_id
 )
+                collector.increment(
+    "Total Embeddings Generated",
+    len(chunks)
+)
 
                 print("\nStoring CLIP image embeddings...")
 
                 store_clip_embeddings(
     images
 )
+                collector.increment(
+    "Total Embeddings Generated",
+    len(images)
+)
+                
             except Exception:
 
                 # Delete document
@@ -498,6 +548,9 @@ class UploadManager:
                 chunk_count=len(chunks)
 
             )
+            collector.increment(
+    "Total Documents Stored"
+)
 
 
             elapsed = round(
@@ -513,6 +566,42 @@ class UploadManager:
                 f"\nUpload Finished in {elapsed} seconds."
 
             )
+            # ---------------------------------------
+# Merge current upload into global stats
+# ---------------------------------------
+
+            stats.merge_upload_statistics(upload_stats)
+            stats.increment("Total Successful Uploads")
+
+            processing_time = processing_timer.stop()
+
+            stats.add_time(
+    "End-to-End Document Processing Time",
+    processing_time
+)
+            print("\n========================================")
+            print("CURRENT UPLOAD STATISTICS")
+            print("========================================")
+
+            report = upload_stats.report()
+
+            for key, value in report.items():
+                print(f"{key:<35}: {value}")
+
+            print("========================================\n")
+            print("\n========================================")
+            print("GLOBAL STATISTICS")
+            print("========================================")
+
+            global_report = stats.report()
+
+            for key, value in global_report.items():
+
+                print(f"{key:<40}: {value}")
+
+            print("========================================\n")
+
+
 
             # ------------------------------------
             # Build API Response
@@ -535,6 +624,9 @@ class UploadManager:
             )
 
         except Exception as e:
+
+            stats.increment("Total Failed Uploads")
+
 
          # Rollback database
             db.rollback()

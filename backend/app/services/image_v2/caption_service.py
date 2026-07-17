@@ -19,17 +19,22 @@ def caption_images(images):
         # Skip tiny images
             if w < 120 or h < 120:
                 img.caption = ""
+                img.caption_status = "skipped"
                 return img
+            
 
             img.caption = generate_caption(
             img.path
         )
+            img.caption_status = "success"
 
         except Exception as e:
 
             print(e)
 
             img.caption = ""
+            img.caption_status = "failed"
+        
 
         return img
 

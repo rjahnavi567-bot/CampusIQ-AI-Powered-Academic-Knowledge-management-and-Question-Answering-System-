@@ -1,6 +1,6 @@
 import chromadb
 import os
-
+from app.services.statistics.statistics_collector import collector
 # ---------------------------------------------
 # Chroma Collection
 # ---------------------------------------------
@@ -77,6 +77,10 @@ def store_vectors(images):
             store_image(image)
 
             stored += 1
+    collector.increment(
+    "Total Vectors Indexed",
+    len(images)
+)
 
     print(f"Vectors Stored : {stored}")
 

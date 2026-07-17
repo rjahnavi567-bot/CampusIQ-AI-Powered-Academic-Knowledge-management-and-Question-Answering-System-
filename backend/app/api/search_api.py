@@ -2,7 +2,8 @@ from fastapi import APIRouter
 
 from app.services.retrieval.hybrid_retrieval_service import hybrid_retrieve
 from app.services.reranker_service import rerank_results
-
+from app.services.statistics import collector
+from app.services.statistics.timer import Timer
 router = APIRouter()
 
 
@@ -11,6 +12,14 @@ def search(
     query: str,
     source_file: str = None
 ):
+  try:
+    # ---------------------------------
+    # Statistics Timers
+    # ---------------------------------
+    search_timer = Timer()
+    search_timer.start()
+
+    collector.increment("Total Search Queries Executed")
 
     # ---------------------------------
     # Hybrid Retrieval
@@ -21,8 +30,15 @@ def search(
         source_file=source_file,
         top_k=20
     )
+    
+
+    collector.increment(
+    "Total Retrieved Chunks",
+    len(documents)
+)
 
     print("Retrieved Results :", len(documents))
+    
 
     # ---------------------------------
     # Cross Encoder Re-ranking
@@ -33,6 +49,16 @@ def search(
         documents,
         metadatas
     )
+    collector.increment(
+    "Top-10 Retrieval Accuracy",
+    min(10, len(ranked))
+)
+
+    collector.increment(
+    "Top-5 Retrieval Accuracy",
+    min(5, len(ranked))
+)
+    
 
     query_lower = query.lower()
 
@@ -119,6 +145,16 @@ def search(
     print("Text Results :", text_count)
     print("Image Results:", image_count)
     print("==============================")
+    search_time = search_timer.stop()
+
+    collector.timer(
+    "Semantic Search Time",
+    search_time
+)
+
+    collector.increment(
+    "Total Successful Searches"
+)
 
     return {
 
@@ -129,3 +165,6 @@ def search(
         "results": top_results
 
     }
+  except Exception:
+     collector.increment("Total Failed Searches")
+     raise

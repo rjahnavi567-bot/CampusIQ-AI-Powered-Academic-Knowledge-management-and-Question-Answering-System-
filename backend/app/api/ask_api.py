@@ -7,7 +7,10 @@ from app.services.retrieval.hybrid_retrieval_service import (
 
     retrieve_images
 
+
 )
+from app.services.statistics import collector
+from app.services.statistics.timer import Timer
 from app.services.reranker_service import rerank_results
 from app.services.context_builder import build_context
 from app.services.groq_service import generate_answer
@@ -301,6 +304,8 @@ def ask(request: AskRequest):
     # =====================================
     print("\n========== FINAL CONTEXT ==========\n")
     print(context)
+    rag_timer = Timer()
+    rag_timer.start()
     answer = generate_answer(
 
         question,
@@ -310,6 +315,14 @@ def ask(request: AskRequest):
         marks
 
     )
+    rag_time = rag_timer.stop()
+
+    collector.increment("Total RAG Responses Generated")
+
+    collector.timer(
+    "RAG Response Time",
+    rag_time
+)
 
     # ----------------------------------------
     # Parse USED_IMAGES
@@ -575,6 +588,7 @@ def ask(request: AskRequest):
     # RESPONSE
     # =====================================
     print(source_file)
+    collector.increment("Total API Requests Processed")
 
     return {
 
