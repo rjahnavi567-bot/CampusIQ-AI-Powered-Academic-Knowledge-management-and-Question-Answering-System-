@@ -253,3 +253,11 @@ class ImageCandidate:
     decision_reason: str = ""
 
     decision_log: list = field(default_factory=list)
+
+    layout_class = ""
+
+    layout_confidence = 0.0
+
+    figure_type = ""
+
+    figure_confidence = 0.0

@@ -44,10 +44,12 @@ class StatisticsService:
     def increment(self, name, value=1):
 
         self.counters[name] += value
+        self.save()
 
     def set_value(self, name, value):
 
         self.counters[name] = value
+        self.save()
 
     def get(self, name):
 
@@ -60,6 +62,7 @@ class StatisticsService:
     def add_time(self, name, seconds):
 
         self.timers[name].append(seconds)
+        self.save()
 
     def average_time(self, name):
 
@@ -96,12 +99,13 @@ class StatisticsService:
         # Merge counters
         for key, value in upload_stats.counters.items():
 
-            self.increment(key, value)
+            self.counters[key] += value
 
         # Merge timers
         for key, values in upload_stats.timers.items():
 
             self.timers[key].extend(values)
+        self.save()
     # ---------------------------------------------------
 # Persistence
 # ---------------------------------------------------

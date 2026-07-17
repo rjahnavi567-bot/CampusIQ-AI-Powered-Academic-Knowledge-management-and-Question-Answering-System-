@@ -1,0 +1,42 @@
+{
+    "counters": {
+        "Total Failed Uploads": 3,
+        "Total Documents Uploaded": 1,
+        "Total Image Files": 1,
+        "Total Pages Processed": 1,
+        "Total Words Extracted": 300,
+        "Total Paragraphs Identified": 14,
+        "Total Semantic Chunks Generated": 1,
+        "Total Useful Images Retained": 1,
+        "Total Useless Images Filtered": 0,
+        "Total Images Extracted": 1,
+        "Total Images Classified": 1,
+        "Total Image Captions Generated": 0,
+        "Total Metadata Records Generated": 1,
+        "Total Chunks Stored": 1,
+        "Total Images Stored": 1,
+        "Total Embeddings Generated": 2,
+        "Total Documents Stored": 1,
+        "Total Successful Uploads": 1
+    },
+    "timers": {
+        "Chunking Time": [
+            1.5498668999935035
+        ],
+        "Text Extraction Time": [
+            1.5527900999877602
+        ],
+        "Image Filtering Time": [
+            2.866278500005137
+        ],
+        "Image Extraction Time": [
+            6.570490899990546
+        ],
+        "Caption Generation Time": [
+            8.357403000001796
+        ],
+        "End-to-End Document Processing Time": [
+            21.42266089998884
+        ]
+    }
+}
