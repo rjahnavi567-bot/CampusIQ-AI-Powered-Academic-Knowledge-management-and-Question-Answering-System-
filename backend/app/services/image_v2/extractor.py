@@ -42,6 +42,135 @@ class ImageExtractor:
         self.validator = PipelineValidator(
     self.output_dir
 )
+    
+    def process_page(self, page):
+
+        page_no = page["page_no"]
+        page_image = page["image"]
+
+        if isinstance(page_image, Image.Image):
+
+            page_image = cv2.cvtColor(
+            np.array(page_image),
+            cv2.COLOR_RGB2BGR
+        )
+
+        print("\n========================================")
+        print(f"Processing Page {page_no}")
+        print("========================================")
+
+    ####################################################
+    # Stage 2 : PPStructure
+    ####################################################
+
+        layout_regions = detect_figures(page_image)
+
+    ####################################################
+    # Stage 3 : Region Detector
+    ####################################################
+
+        region_boxes = detect_regions(page_image)
+
+    ####################################################
+    # Stage 4 : Region Fusion
+    ####################################################
+
+        regions = fuse_regions(
+        layout_regions,
+        region_boxes
+    )
+
+    ####################################################
+    # Stage 5 : Sliding Window
+    ####################################################
+
+        window_detections = detect_window_figures(page_image)
+
+    ####################################################
+    # Stage 5.6 : Visual Objects
+    ####################################################
+
+        visual_objects = detect_visual_objects(page_image)
+
+        visual_objects = filter_visual_objects(
+        page_image,
+        visual_objects
+    )
+
+        visual_objects = merge_visual_objects(
+        visual_objects
+    )
+
+    ####################################################
+    # Final Fusion
+    ####################################################
+
+        all_detections = final_fusion(
+        regions,
+        window_detections,
+        visual_objects
+    )
+
+        all_detections = refine_regions(
+        all_detections,
+        page_image
+    )
+
+        all_detections = non_max_suppression(
+        all_detections
+    )
+
+        all_detections = remove_contained_boxes(
+        all_detections
+    )
+
+        all_detections = group_figures(
+        all_detections,
+        page_image
+    )
+
+        before_filter = len(all_detections)
+
+        filter_timer = Timer()
+        filter_timer.start()
+
+        all_detections = filter_text_heavy(
+        page_image,
+        all_detections
+    )
+
+        filter_time = filter_timer.stop()
+
+    ####################################################
+    # Crop
+    ####################################################
+
+        page_candidates = crop_regions(
+        page_image=page_image,
+        page_no=page_no,
+        detections=all_detections,
+        output_dir=self.output_dir,
+        document_id=self.document_id
+    )
+
+        return {
+
+        "candidates": page_candidates,
+
+        "layout": len(layout_regions),
+
+        "regions": len(region_boxes),
+
+        "windows": len(window_detections),
+
+        "visual": len(visual_objects),
+
+        "final": len(all_detections),
+
+        "rejected": before_filter - len(all_detections),
+
+        "filter_time": filter_time
+    }
 
     ############################################################
 
@@ -63,163 +192,43 @@ class ImageExtractor:
 
         for page in pages:
 
-            page_no = page["page_no"]
+            result = self.process_page(page)
 
-            page_image = page["image"]
-            # Convert PIL image to OpenCV image
-            if isinstance(page_image, Image.Image):
-
-                page_image = cv2.cvtColor(
-        np.array(page_image),
-        cv2.COLOR_RGB2BGR
-    )
-
-            print("\n========================================")
-            print(f"Processing Page {page_no}")
-            print("========================================")
-
-            ####################################################
-# Stage 2 : PPStructure
-####################################################
-
-            layout_regions = detect_figures(page_image)
-
-####################################################
-# Stage 3 : Region Detector
-####################################################
-
-            region_boxes = detect_regions(page_image)
-
-####################################################
-# Stage 4 : Region Fusion
-####################################################
-
-            regions = fuse_regions(
-    layout_regions,
-    region_boxes
-)
-
-####################################################
-# Stage 5 : Sliding Window Detector
-####################################################
-
-            window_detections = detect_window_figures(
-    page_image
-)
-
-####################################################
-# Stage 5.6 : Visual Object Detector
-####################################################
-
-            visual_objects = detect_visual_objects(
-    page_image
-)
-
-####################################################
-# Stage 5.6.2 : Visual Object Filter
-####################################################
-
-            visual_objects = filter_visual_objects(
-    page_image,
-    visual_objects
-)
-
-####################################################
-# Stage 5.6.3 : Merge Visual Objects
-####################################################
-
-            visual_objects = merge_visual_objects(
-    visual_objects
-)
-
-####################################################
-# Stage 5.6.4 : Final Fusion
-####################################################
-
-            all_detections = final_fusion(
-    regions,
-    window_detections,
-    visual_objects
-)
-
-            all_detections = refine_regions(
-    all_detections,
-    page_image
-)
-            all_detections = non_max_suppression(
-    all_detections
-)
-
-            all_detections = remove_contained_boxes(
-    all_detections
-          
-)
-            all_detections = group_figures(
-    all_detections,
-    page_image
-)
-            
-            before = len(all_detections)
-            before_filter = len(all_detections)
-
-            filter_timer.start()
-
-            all_detections = filter_text_heavy(
-    page_image,
-    all_detections
-)
-            filter_time = filter_timer.stop()
+            candidates.extend(result["candidates"])
 
             collector.add_time(
-    "Image Filtering Time",
-    filter_time
-)
+        "Image Filtering Time",
+        result["filter_time"]
+    )
 
             collector.increment(
-    "Total Useful Images Retained",
-    len(all_detections)
-)
- 
+        "Total Useful Images Retained",
+        result["final"]
+    )
+
             collector.increment(
-    "Total Useless Images Filtered",
-    before_filter - len(all_detections)
-)
-            
+        "Total Useless Images Filtered",
+        result["rejected"]
+    )
 
-            total_text_rejected += before - len(all_detections)
-####################################################
-# Stage 6 : Crop Service
-####################################################
-
-            page_candidates = crop_regions(
-
-    page_image=page_image,
-
-    page_no=page_no,
-
-    detections=all_detections,
-
-    output_dir=self.output_dir,
-
-    document_id=self.document_id
-
-)
             collector.increment(
-    "Total Images Extracted",
-    len(page_candidates)
-)
-            collector.increment(
-    "Total Images Classified",
-    len(page_candidates)
-)
-            
+        "Total Images Extracted",
+        len(result["candidates"])
+    )
 
-            candidates.extend(page_candidates)
-            total_layout += len(layout_regions)
-            total_regions += len(region_boxes)
-            total_windows += len(window_detections)
-            total_visual += len(visual_objects)
-            total_final += len(all_detections)
+            collector.increment(
+        "Total Images Classified",
+        len(result["candidates"])
+    )
+
+            total_layout += result["layout"]
+            total_regions += result["regions"]
+            total_windows += result["windows"]
+            total_visual += result["visual"]
+            total_final += result["final"]
+            total_text_rejected += result["rejected"]
+
+           
         print(f"PPStructure : {total_layout}")
         print(f"Region Detector : {total_regions}")
         print(f"Sliding Window : {total_windows}")

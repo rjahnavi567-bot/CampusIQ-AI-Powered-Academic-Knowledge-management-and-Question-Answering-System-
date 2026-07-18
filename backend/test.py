@@ -1,7 +1,7 @@
-from app.services.statistics import stats
+from app.services.image_v2.siglip.service import classify
 
-stats.increment("documents_uploaded")
+image = r"C:\Users\reddy\AI-Academic-System\backend\uploads\text.png"
 
-stats.increment("documents_uploaded")
+result = classify(image)
 
-print(stats.report())
+print(result)

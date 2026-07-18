@@ -44,12 +44,7 @@ from app.services.page_sources.source_loader import load_document
 from app.services.image_v2.improve.text_filter.edge_density_filter import filter_edge_density
 from app.services.statistics import collector
 from app.services.statistics.timer import Timer
-from app.services.image_v2.layout_classifier.layout_service import (
-    classify_images
-)
-from app.services.image_v2.figure_classifier.figure_service import (
-    classify_figures
-)
+
 def process_images_v2(
     file_path,
     document_id,
@@ -166,28 +161,6 @@ def process_images_v2(
     images = filter_images(images)
 
     print(f"Remaining : {len(images)}")
-    ####################################################
-# Stage 6.3.1 : DocLayout Classification
-####################################################
-
-    print("\n==============================")
-    print("STAGE 6.3.1 : DOCLAYOUT")
-    print("==============================")
-
-    images = classify_images(images)
-
-    print(f"DocLayout : {len(images)}")
-    ####################################################
-# Stage 6.3.2 : SigLIP Figure Classification
-####################################################
-
-    print("\n==============================")
-    print("STAGE 6.3.2 : SIGLIP")
-    print("==============================")
-
-    images = classify_figures(images)
-
-    print(f"SigLIP : {len(images)}")
 
     ####################################################
     # Stage 6.4 : Load Florence

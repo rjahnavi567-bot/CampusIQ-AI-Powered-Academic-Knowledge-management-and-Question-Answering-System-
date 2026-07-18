@@ -319,7 +319,7 @@ def ask(request: AskRequest):
 
     collector.increment("Total RAG Responses Generated")
 
-    collector.timer(
+    collector.add_time(
     "RAG Response Time",
     rag_time
 )
