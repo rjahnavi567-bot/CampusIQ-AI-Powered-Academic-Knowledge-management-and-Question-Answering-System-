@@ -122,6 +122,11 @@ frontend/.env.production
 .parcel-cache/
 vite.svg
 
+#repository
+backend/DocLayout-YOLO/
+
+#doclayout weights
+backend/models/
 
 # Temporary project inspection file
 FileList.txt

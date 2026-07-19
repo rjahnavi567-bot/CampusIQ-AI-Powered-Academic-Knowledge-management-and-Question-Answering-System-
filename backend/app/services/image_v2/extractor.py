@@ -12,7 +12,7 @@ from .visual_object_filter import filter_visual_objects
 from .visual_object_merger import merge_visual_objects
 from app.services.image_v2.improve.region_refiner import refine_regions
 from .final_detection_fusion import final_fusion
-from app.services.page_sources.source_loader import load_document
+from app.services.page_sources.batch_loader import load_document_batches
 from .crop_service import crop_regions
 from .improve.nms import non_max_suppression
 from .improve.containment_filter import remove_contained_boxes
@@ -26,9 +26,11 @@ from app.services.image_v2.improve.text_filter.text_heavy_filter import (
 )
 from app.services.statistics import collector
 from app.services.statistics.timer import Timer
+from itertools import islice
+from concurrent.futures import ThreadPoolExecutor, as_completed
 class ImageExtractor:
 
-    def __init__(self, document_id):
+  def __init__(self, document_id):
 
         self.document_id = document_id
 
@@ -43,7 +45,7 @@ class ImageExtractor:
     self.output_dir
 )
     
-    def process_page(self, page):
+  def process_page(self, page):
 
         page_no = page["page_no"]
         page_image = page["image"]
@@ -173,76 +175,119 @@ class ImageExtractor:
     }
 
     ############################################################
+  def create_batches(self, pages, batch_size):
 
-    def extract(self, file_path):
-        image_timer = Timer()
-        filter_timer = Timer()
+    pages = iter(pages)
 
-        image_timer.start()
+    while True:
 
-        candidates = []
+        batch = list(islice(pages, batch_size))
 
-        pages = load_document(file_path)
-        total_layout = 0
-        total_regions = 0
-        total_windows = 0
-        total_visual = 0
-        total_final = 0
-        total_text_rejected = 0
+        if not batch:
+            break
 
-        for page in pages:
+        yield batch
 
-            result = self.process_page(page)
+  def extract(self, file_path):
 
-            candidates.extend(result["candidates"])
+    image_timer = Timer()
+    image_timer.start()
 
-            collector.add_time(
-        "Image Filtering Time",
-        result["filter_time"]
-    )
+    candidates = []
 
-            collector.increment(
-        "Total Useful Images Retained",
-        result["final"]
-    )
-
-            collector.increment(
-        "Total Useless Images Filtered",
-        result["rejected"]
-    )
-
-            collector.increment(
-        "Total Images Extracted",
-        len(result["candidates"])
-    )
-
-            collector.increment(
-        "Total Images Classified",
-        len(result["candidates"])
-    )
-
-            total_layout += result["layout"]
-            total_regions += result["regions"]
-            total_windows += result["windows"]
-            total_visual += result["visual"]
-            total_final += result["final"]
-            total_text_rejected += result["rejected"]
-
-           
-        print(f"PPStructure : {total_layout}")
-        print(f"Region Detector : {total_regions}")
-        print(f"Sliding Window : {total_windows}")
-        print(f"Visual Objects : {total_visual}")
-        print(f"Final Detections : {total_final}")
-        print(f"Text Heavy Rejected : {total_text_rejected}")
-
-        print("\n========================================")
-        print(f"TOTAL IMAGES EXTRACTED : {len(candidates)}")
-        print("========================================\n")
-        image_time = image_timer.stop()
-
-        collector.add_time(
-    "Image Extraction Time",
-    image_time
+    page_batches = load_document_batches(
+    file_path,
+    batch_size=4
 )
-        return candidates
+
+    total_layout = 0
+    total_regions = 0
+    total_windows = 0
+    total_visual = 0
+    total_final = 0
+    total_text_rejected = 0
+
+    # -----------------------------
+    # MULTITHREADED PAGE PROCESSING
+    # -----------------------------
+
+    max_workers = 4
+
+    batch_size = 4
+
+    for batch_no, batch in enumerate(
+    page_batches,
+    start=1
+):
+
+        print("\n==============================")
+        print(f"BATCH {batch_no}")
+        print("==============================")
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+
+            futures = {
+            executor.submit(
+                self.process_page,
+                page
+            ): page["page_no"]
+            for page in batch
+        }
+
+            for future in as_completed(futures):
+
+                result = future.result()
+
+                candidates.extend(result["candidates"])
+
+                collector.add_time(
+                "Image Filtering Time",
+                result["filter_time"]
+            )
+
+                collector.increment(
+                "Total Useful Images Retained",
+                result["final"]
+            )
+
+                collector.increment(
+                "Total Useless Images Filtered",
+                result["rejected"]
+            )
+
+                collector.increment(
+                "Total Images Extracted",
+                len(result["candidates"])
+            )
+
+                collector.increment(
+                "Total Images Classified",
+                len(result["candidates"])
+            )
+
+                total_layout += result["layout"]
+                total_regions += result["regions"]
+                total_windows += result["windows"]
+                total_visual += result["visual"]
+                total_final += result["final"]
+                total_text_rejected += result["rejected"]
+
+    print(f"PPStructure : {total_layout}")
+    print(f"Region Detector : {total_regions}")
+    print(f"Sliding Window : {total_windows}")
+    print(f"Visual Objects : {total_visual}")
+    print(f"Final Detections : {total_final}")
+    print(f"Text Heavy Rejected : {total_text_rejected}")
+
+    print("\n========================================")
+    print(f"TOTAL IMAGES EXTRACTED : {len(candidates)}")
+    print("========================================\n")
+
+    image_time = image_timer.stop()
+
+    collector.add_time(
+        "Image Extraction Time",
+        image_time
+    )
+
+    return candidates
