@@ -28,11 +28,6 @@ from app.services.statistics import collector
 from app.services.statistics.timer import Timer
 from itertools import islice
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from app.services.image_v2.config import (
-    USE_REGION_DETECTOR,
-    USE_SLIDING_WINDOW,
-    USE_VISUAL_OBJECTS
-)
 class ImageExtractor:
 
   def __init__(self, document_id):
@@ -76,15 +71,7 @@ class ImageExtractor:
     # Stage 3 : Region Detector
     ####################################################
 
-        if USE_REGION_DETECTOR:
-
-            region_boxes = detect_regions(page_image)
-
-        else:
-
-            region_boxes = []
-
-            print("Region Detector : DISABLED")
+        region_boxes = detect_regions(page_image)
 
     ####################################################
     # Stage 4 : Region Fusion
@@ -99,38 +86,22 @@ class ImageExtractor:
     # Stage 5 : Sliding Window
     ####################################################
 
-        if USE_SLIDING_WINDOW:
-
-            window_detections = detect_window_figures(page_image)
-
-        else:
-
-            window_detections = []
-
-            print("Sliding Window : DISABLED")
+        window_detections = detect_window_figures(page_image)
 
     ####################################################
     # Stage 5.6 : Visual Objects
     ####################################################
 
-        if USE_VISUAL_OBJECTS:
+        visual_objects = detect_visual_objects(page_image)
 
-            visual_objects = detect_visual_objects(page_image)
-
-            visual_objects = filter_visual_objects(
+        visual_objects = filter_visual_objects(
         page_image,
         visual_objects
     )
 
-            visual_objects = merge_visual_objects(
+        visual_objects = merge_visual_objects(
         visual_objects
     )
-
-        else:
-
-            visual_objects = []
-
-            print("Visual Detector : DISABLED")
 
     ####################################################
     # Final Fusion

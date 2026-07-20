@@ -1,108 +1,106 @@
 import cv2
-from paddleocr import PPStructure
+import numpy as np
+
+from doclayout_yolo import YOLO
+
+# =====================================================
+# Load DocLayout model ONLY ONCE
+# =====================================================
+
+MODEL_PATH = r"models/doclayout/doclayout_yolo_docstructbench_imgsz1024.pt"
+
+layout_model = YOLO(MODEL_PATH)
 
 
-# ---------------------------------------------------
-# PPStructure Layout Detector
-# ---------------------------------------------------
+# =====================================================
+# Classes that should become image candidates
+# =====================================================
 
-layout_engine = PPStructure(
-    layout=True,
-    table=False,
-    ocr=False,
-    show_log=False
-)
+KEEP_CLASSES = {
+    "figure",
+    "table"
+}
+
+# If later you also want captions:
+# KEEP_CLASSES = {
+#     "figure",
+#     "table",
+#     "figure_caption",
+#     "table_caption"
+# }
 
 
-# ---------------------------------------------------
-# Detect Figure Regions
-# ---------------------------------------------------
+# =====================================================
+# Detect figures using DocLayout
+# =====================================================
 
 def detect_figures(page_image):
     """
-    Stage-2
+    Input:
+        page_image (numpy BGR)
 
-    Input
-    -----
-    page_image : numpy.ndarray (BGR)
-
-    Output
-    ------
-    [
-        {
-            "bbox": (x1,y1,x2,y2),
-            "category": "figure",
-            "confidence": 0.98,
-            "source": "ppstructure"
-        }
-    ]
+    Output:
+        [
+            {
+                "bbox": (x1,y1,x2,y2),
+                "category": "figure",
+                "confidence": 0.97,
+                "source": "doclayout"
+            }
+        ]
     """
 
-    # PPStructure expects RGB image
-    rgb = cv2.cvtColor(
-        page_image,
-        cv2.COLOR_BGR2RGB
-    )
-
     try:
-        results = layout_engine(rgb)
+
+        results = layout_model.predict(
+            source=page_image,
+            conf=0.25,
+            verbose=False
+        )
 
     except Exception as e:
 
-        print("PPStructure Error :", e)
-
+        print("DocLayout Error:", e)
         return []
+
+    result = results[0]
 
     detections = []
 
-    for item in results:
+    for box in result.boxes:
 
-        # Keep only figures
-        if item.get("type") != "figure":
+        cls = int(box.cls.item())
+
+        label = result.names[cls]
+
+        if label not in KEEP_CLASSES:
             continue
 
-        try:
+        x1, y1, x2, y2 = map(int, box.xyxy[0])
 
-            x1, y1, x2, y2 = map(
-                int,
-                item["bbox"]
-            )
-
-            # Ignore invalid boxes
-            if x2 <= x1 or y2 <= y1:
-                continue
-
-            detections.append(
-
-                {
-
-                    "bbox": (
-                        x1,
-                        y1,
-                        x2,
-                        y2
-                    ),
-
-                    "category": "figure",
-
-                    "confidence": float(
-                        item.get(
-                            "score",
-                            1.0
-                        )
-                    ),
-
-                    "source": "ppstructure"
-
-                }
-
-            )
-
-        except Exception:
+        if x2 <= x1 or y2 <= y1:
             continue
 
-    print(
-        f"PPStructure detected {len(detections)} figure(s)."
-    )
+        confidence = float(box.conf.item())
+
+        detections.append({
+
+            "bbox": (
+                x1,
+                y1,
+                x2,
+                y2
+            ),
+
+            # keep compatibility with current pipeline
+            "category": label,
+
+            "confidence": confidence,
+
+            "source": "doclayout"
+
+        })
+
+    print(f"DocLayout detected {len(detections)} useful objects.")
 
     return detections

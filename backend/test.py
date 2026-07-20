@@ -2,18 +2,20 @@ from app.services.image_v2.hybrid.hybrid_extractor import HybridExtractor
 
 extractor = HybridExtractor()
 
-regions = extractor.process_image(
-    "page_156.png"
+results = extractor.process_document(
+
+    "unit.pdf"
+
 )
 
 print()
 
-print("="*60)
+print("======================")
 
-print("Detected Regions")
+print("Pages:", len(results))
 
-print("="*60)
+total = sum(len(p["regions"]) for p in results)
 
-for r in regions:
+print("Total Regions:", total)
 
-    print(r)
+print("======================")
