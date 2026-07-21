@@ -35,13 +35,17 @@ def extract_regions(results, output_folder):
 
         regions.append({
 
-        "bbox": [x1, y1, x2, y2],
+    "label":label,
 
-        "label": label,
+    "confidence":float(box.conf.item()),
 
-        "path": save_path
+    "bbox":[x1,y1,x2,y2],
 
-    })
+    "path":save_path,
+
+    "page_no":1
+
+})
 
     print(f"Extracted {len(regions)} regions")
 

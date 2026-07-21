@@ -4,7 +4,7 @@ import fitz  # PyMuPDF
 import numpy as np
 from PIL import Image
 from doclayout_yolo import YOLO
-
+from app.services.image_v2.doclayout.caption_merger import merge_captions
 from app.services.image_v2.doclayout.region_extractor import extract_regions
 from .hybrid_visualizer import draw_boxes
 from .compare_results import compare_results
@@ -124,6 +124,7 @@ class HybridExtractor:
             results,
             output_folder
         )
+        regions = merge_captions(regions)
         # Fake old detections for now
         old_regions = []
 

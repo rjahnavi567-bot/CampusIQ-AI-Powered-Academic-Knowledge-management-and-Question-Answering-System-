@@ -2,28 +2,18 @@ import os
 import numpy as np
 import cv2
 from PIL import Image
-from .layout_detector import detect_figures
-from .region_detector import detect_regions
-from .region_fusion import fuse_regions
 from .crop_service import crop_regions
-from .sliding_window_detector import detect_window_figures
-from .visual_object_detector import detect_visual_objects
-from .visual_object_filter import filter_visual_objects
-from .visual_object_merger import merge_visual_objects
 from app.services.image_v2.improve.region_refiner import refine_regions
-from .final_detection_fusion import final_fusion
 from app.services.page_sources.batch_loader import load_document_batches
 from .crop_service import crop_regions
 from .improve.nms import non_max_suppression
 from .improve.containment_filter import remove_contained_boxes
 from .validator.validator import PipelineValidator
-from .sliding_window_detector import generate_windows
-from .sliding_window_detector import detect_window_figures
-from .sliding_window_fusion import merge_window_detections
 from .improve.figure_grouper import group_figures
 from app.services.image_v2.improve.text_filter.text_heavy_filter import (
     filter_text_heavy
 )
+from .layout_detector import detect_figures_batch
 from app.services.statistics import collector
 from app.services.statistics.timer import Timer
 from itertools import islice
@@ -50,7 +40,7 @@ class ImageExtractor:
     self.output_dir
 )
     
-  def process_page(self, page):
+  def process_page_from_layout(self, page, detections):
 
         page_no = page["page_no"]
         page_image = page["image"]
@@ -65,100 +55,50 @@ class ImageExtractor:
         print("\n========================================")
         print(f"Processing Page {page_no}")
         print("========================================")
+        ####################################################
+# Stage 2 : DocLayout
+####################################################
 
-    ####################################################
-    # Stage 2 : PPStructure
-    ####################################################
+        all_detections = detections
 
-        layout_regions = detect_figures(page_image)
 
-    ####################################################
-    # Stage 3 : Region Detector
-    ####################################################
-
-        if USE_REGION_DETECTOR:
-
-            region_boxes = detect_regions(page_image)
-
-        else:
-
-            region_boxes = []
-
-            print("Region Detector : DISABLED")
-
-    ####################################################
-    # Stage 4 : Region Fusion
-    ####################################################
-
-        regions = fuse_regions(
-        layout_regions,
-        region_boxes
-    )
-
-    ####################################################
-    # Stage 5 : Sliding Window
-    ####################################################
-
-        if USE_SLIDING_WINDOW:
-
-            window_detections = detect_window_figures(page_image)
-
-        else:
-
-            window_detections = []
-
-            print("Sliding Window : DISABLED")
-
-    ####################################################
-    # Stage 5.6 : Visual Objects
-    ####################################################
-
-        if USE_VISUAL_OBJECTS:
-
-            visual_objects = detect_visual_objects(page_image)
-
-            visual_objects = filter_visual_objects(
-        page_image,
-        visual_objects
-    )
-
-            visual_objects = merge_visual_objects(
-        visual_objects
-    )
-
-        else:
-
-            visual_objects = []
-
-            print("Visual Detector : DISABLED")
-
-    ####################################################
-    # Final Fusion
-    ####################################################
-
-        all_detections = final_fusion(
-        regions,
-        window_detections,
-        visual_objects
-    )
+####################################################
+# Small refinement
+####################################################
 
         all_detections = refine_regions(
-        all_detections,
-        page_image
-    )
+    all_detections,
+    page_image
+)
+
+####################################################
+# NMS
+####################################################
 
         all_detections = non_max_suppression(
-        all_detections
-    )
+    all_detections
+)
+
+####################################################
+# Remove nested boxes
+####################################################
 
         all_detections = remove_contained_boxes(
-        all_detections
-    )
+    all_detections
+)
+
+####################################################
+# Group nearby figures
+####################################################
 
         all_detections = group_figures(
-        all_detections,
-        page_image
-    )
+    all_detections,
+    page_image
+)
+
+####################################################
+# Remove text-heavy crops
+####################################################
 
         before_filter = len(all_detections)
 
@@ -166,9 +106,9 @@ class ImageExtractor:
         filter_timer.start()
 
         all_detections = filter_text_heavy(
-        page_image,
-        all_detections
-    )
+    page_image,
+    all_detections
+)
 
         filter_time = filter_timer.stop()
 
@@ -187,14 +127,13 @@ class ImageExtractor:
         return {
 
         "candidates": page_candidates,
+    "layout": len(all_detections),
 
-        "layout": len(layout_regions),
+    "regions": 0,
 
-        "regions": len(region_boxes),
+    "windows": 0,
 
-        "windows": len(window_detections),
-
-        "visual": len(visual_objects),
+    "visual": 0,
 
         "final": len(all_detections),
 
@@ -226,7 +165,7 @@ class ImageExtractor:
 
     page_batches = load_document_batches(
     file_path,
-    batch_size=4
+    batch_size=8
 )
 
     total_layout = 0
@@ -240,7 +179,7 @@ class ImageExtractor:
     # MULTITHREADED PAGE PROCESSING
     # -----------------------------
 
-    max_workers = 4
+    max_workers = 1
 
     batch_size = 4
 
@@ -253,55 +192,100 @@ class ImageExtractor:
         print(f"BATCH {batch_no}")
         print("==============================")
 
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        # ------------------------------------------
+# Convert pages to OpenCV images
+# ------------------------------------------
 
-            futures = {
-            executor.submit(
-                self.process_page,
-                page
-            ): page["page_no"]
-            for page in batch
-        }
+        images = []
 
-            for future in as_completed(futures):
+        for page in batch:
 
-                result = future.result()
+            page_image = page["image"]
 
-                candidates.extend(result["candidates"])
+            if isinstance(page_image, Image.Image):
 
-                collector.add_time(
-                "Image Filtering Time",
-                result["filter_time"]
-            )
+                page_image = cv2.cvtColor(
 
-                collector.increment(
-                "Total Useful Images Retained",
-                result["final"]
-            )
+            np.array(page_image),
 
-                collector.increment(
-                "Total Useless Images Filtered",
-                result["rejected"]
-            )
+            cv2.COLOR_RGB2BGR
 
-                collector.increment(
-                "Total Images Extracted",
-                len(result["candidates"])
-            )
+        )
 
-                collector.increment(
-                "Total Images Classified",
-                len(result["candidates"])
-            )
+            images.append(page_image)
 
-                total_layout += result["layout"]
-                total_regions += result["regions"]
-                total_windows += result["windows"]
-                total_visual += result["visual"]
-                total_final += result["final"]
-                total_text_rejected += result["rejected"]
+# ------------------------------------------
+# ONE DocLayout inference for entire batch
+# ------------------------------------------
 
-    print(f"PPStructure : {total_layout}")
+
+
+        batch_layout = detect_figures_batch(images)
+
+# ------------------------------------------
+# Process each page using its detections
+# ------------------------------------------
+
+        for page, detections in zip(batch, batch_layout):
+
+            result = self.process_page_from_layout(
+
+        page,
+
+        detections
+
+    )
+
+            candidates.extend(result["candidates"])
+
+            collector.add_time(
+
+        "Image Filtering Time",
+
+        result["filter_time"]
+
+    )
+
+            collector.increment(
+
+        "Total Useful Images Retained",
+
+        result["final"]
+
+    )
+
+            collector.increment(
+
+        "Total Useless Images Filtered",
+
+        result["rejected"]
+
+    )
+
+            collector.increment(
+
+        "Total Images Extracted",
+
+        len(result["candidates"])
+
+    )
+
+            collector.increment(
+
+        "Total Images Classified",
+
+        len(result["candidates"])
+
+    )
+
+            total_layout += result["layout"]
+            total_regions += result["regions"]
+            total_windows += result["windows"]
+            total_visual += result["visual"]
+            total_final += result["final"]
+            total_text_rejected += result["rejected"]
+
+    print(f"DocLayout : {total_layout}")
     print(f"Region Detector : {total_regions}")
     print(f"Sliding Window : {total_windows}")
     print(f"Visual Objects : {total_visual}")

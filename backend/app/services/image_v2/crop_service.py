@@ -80,6 +80,20 @@ def crop_regions(
 
             continue
         crop = trim_white_border(crop)
+        category = det.get("category", "")
+
+        if category == "isolate_formula":
+
+            h, w = crop.shape[:2]
+
+            pad = 25
+
+            x1 = max(0, x1 - pad)
+            y1 = max(0, y1 - pad)
+            x2 = min(page_width, x2 + pad)
+            y2 = min(page_height, y2 + pad)
+
+            crop = page_image[y1:y2, x1:x2]
 
         if crop.size == 0:
             continue

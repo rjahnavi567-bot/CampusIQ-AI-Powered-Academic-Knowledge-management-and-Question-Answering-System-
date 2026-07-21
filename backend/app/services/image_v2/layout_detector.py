@@ -17,16 +17,21 @@ layout_model = YOLO(MODEL_PATH)
 # =====================================================
 
 KEEP_CLASSES = {
-    "figure",
-    "table"
-}
 
+    "figure",
+
+    "table",
+
+    "isolate_formula",
+
+    "formula_caption"
+
+}
 # If later you also want captions:
 # KEEP_CLASSES = {
 #     "figure",
 #     "table",
-#     "figure_caption",
-#     "table_caption"
+#     
 # }
 
 
@@ -104,3 +109,64 @@ def detect_figures(page_image):
     print(f"DocLayout detected {len(detections)} useful objects.")
 
     return detections
+
+def detect_figures_batch(images):
+
+    """
+    images = [
+        numpy image,
+        numpy image,
+        ...
+    ]
+
+    returns
+
+    [
+        detections_for_page1,
+        detections_for_page2,
+        ...
+    ]
+    """
+
+    results = layout_model.predict(
+
+        source=images,
+
+        conf=0.25,
+
+        verbose=False
+
+    )
+
+    pages = []
+
+    for result in results:
+
+        page_detections = []
+
+        for box in result.boxes:
+
+            cls = int(box.cls.item())
+
+            label = result.names[cls]
+
+            if label not in KEEP_CLASSES:
+                continue
+
+            x1, y1, x2, y2 = map(int, box.xyxy[0])
+
+            page_detections.append({
+
+                "bbox": (x1,y1,x2,y2),
+
+                "category": label,
+
+                "confidence": float(box.conf.item()),
+
+                "source":"doclayout"
+
+            })
+
+        pages.append(page_detections)
+
+    return pages
