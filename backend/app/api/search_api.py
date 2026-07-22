@@ -4,6 +4,9 @@ from app.services.retrieval.hybrid_retrieval_service import hybrid_retrieve
 from app.services.reranker_service import rerank_results
 from app.services.statistics import collector
 from app.services.statistics.timer import Timer
+from app.services.retrieval.confidence_validator import (
+    validate_retrieval
+)
 router = APIRouter()
 
 
@@ -79,7 +82,22 @@ def search(
         key=lambda x: x["score"],
         reverse=True
     )
+    # ---------------------------------
+# Confidence Validation
+# ---------------------------------
 
+    is_confident, top_score = validate_retrieval(ranked)
+
+    if not is_confident:
+
+        return {
+        "query": query,
+        "total_retrieved": len(documents),
+        "confidence": top_score,
+        "results": [],
+        "message":
+            "The uploaded academic resources do not contain sufficient information to answer this question."
+    }
     if len(ranked) > 0:
         print("Top Score :", ranked[0]["score"])
 
