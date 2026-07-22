@@ -2,7 +2,19 @@ from fastapi import APIRouter, HTTPException
 from app.database.connection import SessionLocal
 from app.database.models import Document, Chunk
 from app.services.chroma_service import text_collection
+import os
+import shutil
 
+from app.database.models import (
+    Document,
+    Chunk,
+    DocumentImage
+)
+
+from app.services.chroma_service import (
+    text_collection,
+    image_collection
+)
 router = APIRouter()
 
 
@@ -56,7 +68,7 @@ def view_document(document_id: int):
         return {
             "filename": document.filename,
             "url":
-            f"http://localhost:8000/uploads/{document.filename}"
+f"http://localhost:8000/{document.file_path}"
         }
 
     finally:
@@ -123,7 +135,7 @@ def open_document_page(
         return {
             "filename": document.filename,
             "url":
-            f"http://localhost:8000/uploads/{document.filename}#page={page_no}"
+f"http://localhost:8000/{document.file_path}#page={page_no}"
         }
 
     finally:
@@ -132,57 +144,123 @@ def open_document_page(
 # ==========================
 # DELETE DOCUMENT
 # ==========================
-
 @router.delete("/documents/{document_id}")
 def delete_document(document_id: int):
 
     db = SessionLocal()
 
-    document = (
-        db.query(Document)
-        .filter(Document.id == document_id)
-        .first()
-    )
+    try:
 
-    if not document:
-
-        raise HTTPException(
-            status_code=404,
-            detail="Document not found"
+        document = (
+            db.query(Document)
+            .filter(Document.id == document_id)
+            .first()
         )
 
-    db.query(Chunk).filter(
-        Chunk.document_id == document_id
-    ).delete()
+        if not document:
 
-    db.delete(document)
-
-    db.commit()
-
-    results = text_collection.get()
-
-    ids_to_delete = []
-
-    for i, metadata in enumerate(
-        results["metadatas"]
-    ):
-
-        if (
-            metadata.get("source_file")
-            == document.filename
-        ):
-
-            ids_to_delete.append(
-                results["ids"][i]
+            raise HTTPException(
+                status_code=404,
+                detail="Document not found"
             )
 
-    if ids_to_delete:
+        filename = document.filename
+        file_path = document.file_path
 
-        text_collection.delete(
-            ids=ids_to_delete
-        )
+        ###################################################
+        # Delete text embeddings
+        ###################################################
 
-    return {
-        "message":
-        "Document deleted successfully"
-    }
+        results = text_collection.get()
+
+        ids = []
+
+        for i, metadata in enumerate(results["metadatas"]):
+
+            if metadata.get("source_file") == filename:
+
+                ids.append(results["ids"][i])
+
+        if ids:
+
+            text_collection.delete(ids=ids)
+
+        ###################################################
+        # Delete image embeddings
+        ###################################################
+
+        try:
+
+            results = image_collection.get()
+
+            ids = []
+
+            for i, metadata in enumerate(results["metadatas"]):
+
+                if metadata.get("source_file") == filename:
+
+                    ids.append(results["ids"][i])
+
+            if ids:
+
+                image_collection.delete(ids=ids)
+
+        except Exception:
+
+            pass
+
+        ###################################################
+        # Delete image metadata
+        ###################################################
+
+        db.query(DocumentImage).filter(
+
+            DocumentImage.document_id == document_id
+
+        ).delete()
+
+        ###################################################
+        # Delete chunks
+        ###################################################
+
+        db.query(Chunk).filter(
+
+            Chunk.document_id == document_id
+
+        ).delete()
+
+        ###################################################
+        # Delete document row
+        ###################################################
+
+        db.delete(document)
+
+        db.commit()
+
+        ###################################################
+        # Delete uploaded PDF
+        ###################################################
+
+        if file_path and os.path.exists(file_path):
+
+            os.remove(file_path)
+
+        ###################################################
+        # Delete extracted images
+        ###################################################
+
+        image_folder = f"uploads/images/{document_id}"
+
+        if os.path.exists(image_folder):
+
+            shutil.rmtree(image_folder)
+
+        return {
+
+            "message": "Document deleted successfully"
+
+        }
+
+    finally:
+
+        db.close()

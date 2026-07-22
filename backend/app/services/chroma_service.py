@@ -1,19 +1,13 @@
 import chromadb
 
-client = chromadb.PersistentClient(
-    path="./chroma_db"
-)
+client = chromadb.PersistentClient(path="./chroma_db")
 
-# -----------------------------
-# TEXT COLLECTION (384-dim)
-# -----------------------------
+# Text embeddings - 384
 text_collection = client.get_or_create_collection(
     name="academic_text"
 )
 
-# -----------------------------
-# IMAGE COLLECTION (512-dim)
-# -----------------------------
+# Image CLIP embeddings -512
 image_collection = client.get_or_create_collection(
     name="academic_images"
 )

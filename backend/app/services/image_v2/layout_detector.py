@@ -20,11 +20,7 @@ KEEP_CLASSES = {
 
     "figure",
 
-    "table",
-
-    "isolate_formula",
-
-    "formula_caption"
+    "table"
 
 }
 # If later you also want captions:

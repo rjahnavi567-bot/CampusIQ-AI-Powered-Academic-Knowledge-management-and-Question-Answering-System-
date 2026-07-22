@@ -93,9 +93,13 @@ app.include_router(
     document_search_router
 )
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
+
 UPLOADS_DIR = BASE_DIR / "uploads"
 
+print("Serving uploads from:", UPLOADS_DIR)
 app.mount(
     "/uploads",
     StaticFiles(directory=str(UPLOADS_DIR)),

@@ -52,7 +52,107 @@ from app.services.statistics import (
     stats,
     upload_stats
 )
+from app.database.models import Chunk, DocumentImage
+from app.services.chroma_service import (
+    text_collection,
+    image_collection
+)
 from app.services.statistics.statistics_collector import collector
+def cleanup_upload(db, document_id, filename, file_path):
+    import shutil
+    import os
+
+    print("\nRunning upload rollback...")
+
+    # -------------------------
+    # Delete SQL records
+    # -------------------------
+
+    """"db.query(Chunk).filter(
+        Chunk.document_id == document_id
+    ).delete()
+
+    db.query(DocumentImage).filter(
+        DocumentImage.document_id == document_id
+    ).delete()
+
+    db.query(Document).filter(
+        Document.id == document_id
+    ).delete()
+
+    db.commit()"""
+
+    # -------------------------
+    # Delete Chroma Text
+    # -------------------------
+
+    try:
+
+        results = text_collection.get()
+
+        ids = []
+
+        for i, meta in enumerate(results["metadatas"]):
+
+            if meta.get("source_file") == filename:
+
+                ids.append(results["ids"][i])
+
+        if ids:
+
+            text_collection.delete(ids=ids)
+
+            print(f"Deleted {len(ids)} text embeddings")
+
+    except Exception as e:
+
+        print("Text cleanup failed:", e)
+
+    # -------------------------
+    # Delete Chroma Images
+    # -------------------------
+
+    try:
+
+        results = image_collection.get()
+
+        ids = []
+
+        for i, meta in enumerate(results["metadatas"]):
+
+            if meta.get("document_id") == document_id:
+
+                ids.append(results["ids"][i])
+
+        if ids:
+
+            image_collection.delete(ids=ids)
+
+            print(f"Deleted {len(ids)} image embeddings")
+
+    except Exception as e:
+
+        print("Image cleanup failed:", e)
+
+    # -------------------------
+    # Delete uploaded pdf
+    # -------------------------
+
+    if os.path.exists(file_path):
+
+        os.remove(file_path)
+
+    # -------------------------
+    # Delete extracted images
+    # -------------------------
+
+    image_folder = f"uploads/images/{document_id}"
+
+    if os.path.exists(image_folder):
+
+        shutil.rmtree(image_folder)
+
+    print("Rollback completed.")
 class UploadManager:
     def upload(self, file):
         upload_stats.reset()
@@ -445,7 +545,7 @@ class UploadManager:
 
             )
 
-            db.commit()
+            
 
             print("Similarity Check Complete.")
             try:            
@@ -514,19 +614,13 @@ class UploadManager:
                 
             except Exception:
 
-                # Delete document
-                db.delete(new_doc)
-                db.commit()
+                cleanup_upload(
+        db,
+        document_id,
+        new_filename,
+        file_path
+    )
 
-                 # Delete uploaded file
-                if os.path.exists(file_path):
-                    os.remove(file_path)
-
-                  # Delete extracted images
-                image_folder = f"uploads/images/{document_id}"
-
-                if os.path.exists(image_folder):
-                    shutil.rmtree(image_folder)
 
                 raise
             print(
@@ -548,6 +642,7 @@ class UploadManager:
                 chunk_count=len(chunks)
 
             )
+            db.commit()
             collector.increment(
     "Total Documents Stored"
 )
@@ -627,19 +722,20 @@ class UploadManager:
 
             stats.increment("Total Failed Uploads")
 
-
-         # Rollback database
             db.rollback()
 
-    # Delete extracted image folder
-            image_folder = f"uploads/images/{document_id}"
+            try:
 
-            if os.path.exists(image_folder):
-                shutil.rmtree(image_folder)
+                cleanup_upload(
+            db,
+            document_id,
+            new_filename,
+            file_path
+        )
 
-    # Delete uploaded file
-            if os.path.exists(file_path):
-                os.remove(file_path)
+            except Exception as cleanup_error:
+
+                    print("Cleanup Error:", cleanup_error)
 
             print("\nUPLOAD FAILED")
 

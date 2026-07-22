@@ -8,7 +8,7 @@ def create_document(
     file_hash
 ):
     """
-    Creates initial database entry.
+    Create document WITHOUT committing.
     """
 
     new_doc = Document(
@@ -32,12 +32,16 @@ def create_document(
         content_signature="",
 
         embedding=""
+
     )
 
     db.add(new_doc)
 
-    db.commit()
+    # Flush sends INSERT to DB
+    # but DOES NOT commit transaction
+    db.flush()
 
+    # Primary key becomes available
     db.refresh(new_doc)
 
     return new_doc
@@ -50,14 +54,12 @@ def update_document_filename(
     new_path
 ):
     """
-    Update filename after smart title generation.
+    Update filename.
+    No commit here.
     """
 
     document.filename = new_filename
-
     document.file_path = new_path
-
-    db.commit()
 
 
 def finalize_document(
@@ -67,10 +69,8 @@ def finalize_document(
 ):
     """
     Mark upload complete.
+    No commit here.
     """
 
     document.chunk_count = chunk_count
-
     document.status = "Processed"
-
-    db.commit()
