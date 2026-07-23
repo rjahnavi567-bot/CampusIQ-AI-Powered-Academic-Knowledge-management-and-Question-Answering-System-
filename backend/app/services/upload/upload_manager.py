@@ -28,7 +28,7 @@ from app.services.upload.document_initializer import (
 from app.services.upload.duplicate_detector import (
     check_similarity
 )
-
+from app.services.upload.cleanup import cleanup_upload
 from app.services.upload.title_generator import (
     generate_document_title
 )
@@ -58,101 +58,6 @@ from app.services.chroma_service import (
     image_collection
 )
 from app.services.statistics.statistics_collector import collector
-def cleanup_upload(db, document_id, filename, file_path):
-    import shutil
-    import os
-
-    print("\nRunning upload rollback...")
-
-    # -------------------------
-    # Delete SQL records
-    # -------------------------
-
-    """"db.query(Chunk).filter(
-        Chunk.document_id == document_id
-    ).delete()
-
-    db.query(DocumentImage).filter(
-        DocumentImage.document_id == document_id
-    ).delete()
-
-    db.query(Document).filter(
-        Document.id == document_id
-    ).delete()
-
-    db.commit()"""
-
-    # -------------------------
-    # Delete Chroma Text
-    # -------------------------
-
-    try:
-
-        results = text_collection.get()
-
-        ids = []
-
-        for i, meta in enumerate(results["metadatas"]):
-
-            if meta.get("source_file") == filename:
-
-                ids.append(results["ids"][i])
-
-        if ids:
-
-            text_collection.delete(ids=ids)
-
-            print(f"Deleted {len(ids)} text embeddings")
-
-    except Exception as e:
-
-        print("Text cleanup failed:", e)
-
-    # -------------------------
-    # Delete Chroma Images
-    # -------------------------
-
-    try:
-
-        results = image_collection.get()
-
-        ids = []
-
-        for i, meta in enumerate(results["metadatas"]):
-
-            if meta.get("document_id") == document_id:
-
-                ids.append(results["ids"][i])
-
-        if ids:
-
-            image_collection.delete(ids=ids)
-
-            print(f"Deleted {len(ids)} image embeddings")
-
-    except Exception as e:
-
-        print("Image cleanup failed:", e)
-
-    # -------------------------
-    # Delete uploaded pdf
-    # -------------------------
-
-    if os.path.exists(file_path):
-
-        os.remove(file_path)
-
-    # -------------------------
-    # Delete extracted images
-    # -------------------------
-
-    image_folder = f"uploads/images/{document_id}"
-
-    if os.path.exists(image_folder):
-
-        shutil.rmtree(image_folder)
-
-    print("Rollback completed.")
 class UploadManager:
     def upload(self, file):
         upload_stats.reset()
@@ -178,12 +83,18 @@ class UploadManager:
 
         try:
 
-            os.makedirs(
-                "uploads",
-                exist_ok=True
-            )
+            import uuid
 
-            file_path = f"uploads/{file.filename}"
+            os.makedirs("uploads", exist_ok=True)
+            os.makedirs("uploads/temp", exist_ok=True)
+
+            temp_filename = f"{uuid.uuid4()}_{file.filename}"
+
+            file_path = os.path.join(
+    "uploads",
+    "temp",
+    temp_filename
+)
 
             with open(file_path, "wb") as buffer:
 
@@ -300,9 +211,10 @@ class UploadManager:
             )
             try:
             # Rename the actual file
-                os.rename(file_path, new_file_path)
-
-                file_path = new_file_path
+                final_file_path = os.path.join(
+    "uploads",
+    new_filename
+)
             
             except Exception:
 
@@ -320,7 +232,7 @@ class UploadManager:
 
     new_filename=new_filename,
 
-    new_path=new_file_path
+    new_path=final_file_path
 
 )
 
@@ -457,11 +369,12 @@ class UploadManager:
 
             if highest_similarity > 0.95:
 
-                db.delete(new_doc)
-
-                db.commit()
-
-                os.remove(file_path)
+                cleanup_upload(
+    db,
+    document_id,
+    new_filename,
+    file_path
+)
 
                 return {
 
@@ -544,6 +457,7 @@ class UploadManager:
                 embedding
 
             )
+            db.commit()
 
             
 
@@ -614,13 +528,7 @@ class UploadManager:
                 
             except Exception:
 
-                cleanup_upload(
-        db,
-        document_id,
-        new_filename,
-        file_path
-    )
-
+                
 
                 raise
             print(
@@ -642,10 +550,19 @@ class UploadManager:
                 chunk_count=len(chunks)
 
             )
-            db.commit()
+            
             collector.increment(
     "Total Documents Stored"
 )
+            shutil.move(
+    file_path,
+    final_file_path
+)
+
+            new_doc.file_path = final_file_path
+            new_doc.filename = new_filename
+
+            db.commit()
 
 
             elapsed = round(

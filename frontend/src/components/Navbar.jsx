@@ -29,9 +29,6 @@ export default function Navbar() {
           Documents
         </Link>
 
-        <Link to="/search">
-  Search
-</Link>
 
         <Link to="/history">
   History

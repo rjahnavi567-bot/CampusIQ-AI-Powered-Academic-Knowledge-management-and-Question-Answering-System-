@@ -11,8 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import Upload from "./pages/Upload";
 import Ask from "./pages/Ask";
 import Documents from "./pages/Documents";
-import SearchDocuments
-from "./pages/SearchDocuments";
+
 function App() {
 
   return (
@@ -42,10 +41,6 @@ function App() {
           element={<Documents />}
         />
 
-        <Route
-  path="/search"
-  element={<SearchDocuments />}
-/>
         <Route
   path="/history"
   element={<History />}

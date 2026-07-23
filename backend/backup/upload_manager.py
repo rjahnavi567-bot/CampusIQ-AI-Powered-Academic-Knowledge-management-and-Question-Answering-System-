@@ -28,7 +28,7 @@ from app.services.upload.document_initializer import (
 from app.services.upload.duplicate_detector import (
     check_similarity
 )
-
+from app.services.upload.cleanup import cleanup_upload
 from app.services.upload.title_generator import (
     generate_document_title
 )
@@ -75,15 +75,25 @@ class UploadManager:
             )
 
         db = SessionLocal()
+        document_id = None
+        new_filename = None
+        file_path = None
+        final_file_path = None
 
         try:
 
-            os.makedirs(
-                "uploads",
-                exist_ok=True
-            )
+            import uuid
 
-            file_path = f"uploads/{file.filename}"
+            os.makedirs("uploads", exist_ok=True)
+            os.makedirs("uploads/temp", exist_ok=True)
+
+            temp_filename = f"{uuid.uuid4()}_{file.filename}"
+
+            file_path = os.path.join(
+    "uploads",
+    "temp",
+    temp_filename
+)
 
             with open(file_path, "wb") as buffer:
 
@@ -200,9 +210,10 @@ class UploadManager:
             )
             try:
             # Rename the actual file
-                os.rename(file_path, new_file_path)
-
-                file_path = new_file_path
+                final_file_path = os.path.join(
+    "uploads",
+    new_filename
+)
             
             except Exception:
 
@@ -220,7 +231,7 @@ class UploadManager:
 
     new_filename=new_filename,
 
-    new_path=new_file_path
+    new_path=final_file_path
 
 )
 
@@ -338,220 +349,232 @@ class UploadManager:
             
 
             # ------------------------------------
-            # Similarity Detection
-            # ------------------------------------
+# Similarity Detection
+# ------------------------------------
 
             print("Checking document similarity...")
 
             embedding, highest_similarity, similar_document = (
 
-                check_similarity(
+            check_similarity(
 
-                    db,
+        db,
 
-                    content_signature
+        content_signature
 
-                )
+    )
 
-            )
+)
+
+# ----------------------------------------------------
+# Duplicate document
+# ----------------------------------------------------
 
             if highest_similarity > 0.95:
 
-                db.delete(new_doc)
-
-                db.commit()
-
-                os.remove(file_path)
+                cleanup_upload(
+        db,
+        document_id,
+        new_filename,
+        file_path
+    )
 
                 return {
 
-                    "error":
+        "error":
+        "Very similar document already exists.",
 
-                    "Very similar document already exists.",
+        "similarity":
+                round(
+            highest_similarity * 100,
+            2
+        ),
 
-                    "similarity":
+        "existing_document":
+        similar_document.filename,
 
-                    round(
+        "document_id":
+        similar_document.id,
 
-                        highest_similarity * 100,
+        "view_url":
+        f"/documents/{similar_document.id}/view"
 
-                        2
-
-                    ),
-
-                    "existing_document":
-
-                    similar_document.filename,
-
-                    "document_id":
-
-                    similar_document.id,
-
-                    "view_url":
-
-                    f"/documents/{similar_document.id}/view"
-
-                }
+    }
 
             similarity_warning = None
-
+                 
             if (
 
-                highest_similarity >= 0.90
+    highest_similarity >= 0.90
 
-                and similar_document
+    and similar_document
 
-            ):
-
+):
+ 
                 similarity_warning = {
 
-                    "similarity":
+        "similarity":
+                round(
+            highest_similarity * 100,
+            2
+        ),
 
-                    round(
+        "existing_document":
+        similar_document.filename,
 
-                        highest_similarity * 100,
+        "document_id":
+        similar_document.id
 
-                        2
+    }
 
-                    ),
-
-                    "existing_document":
-
-                    similar_document.filename,
-
-                    "document_id":
-
-                    similar_document.id
-
-                }
-
-            # ------------------------------------
-            # Save Signature + Embedding
-            # ------------------------------------
+# ------------------------------------
+# Save Signature + Embedding
+# ------------------------------------
 
             new_doc.content_signature = (
 
-                str(content_signature)
+    str(content_signature)
 
-                .replace("\x00", "")
+    .replace("\x00", "")
 
-                .replace("\u0000", "")
+    .replace("\u0000", "")
 
-            )
+)
 
             new_doc.embedding = json.dumps(
-
-                embedding
-
-            )
+    embedding
+)
 
             db.commit()
 
             print("Similarity Check Complete.")
-            try:            
-                # ------------------------------------
-            # Save Chunks
-            # ------------------------------------
+
+            try:
+
+    # ------------------------------------
+    # Save SQL Chunks
+    # ------------------------------------
 
                 print("Saving chunks...")
 
                 save_chunks(
+        document_id,
+        chunks
+    )
 
-                document_id,
-
-                chunks
-
-            )
                 collector.increment(
-    "Total Metadata Records Generated",
-    len(chunks)
-)
+        "Total Metadata Records Generated",
+        len(chunks)
+    )
+
                 collector.increment(
-    "Total Chunks Stored",
-    len(chunks)
-)
-            # ------------------------------------
-            # Store Text Embeddings
-            # ------------------------------------
+        "Total Chunks Stored",
+        len(chunks)
+    )
+
+    # ------------------------------------
+    # Store Text Embeddings
+    # ------------------------------------
+
                 print("Uploading text embeddings to Chroma...")
 
                 store_text_chunks(
+        document_id,
+        chunks
+    )
 
-                document_id,
-
-                chunks
-
-            )
+    # ------------------------------------
+    # Save Images
+    # ------------------------------------
 
                 print("Saving image metadata...")
 
-                save_images(db, document_id, images)
+                save_images(
+        db,
+        document_id,
+        images
+    )
+
                 collector.increment(
-    "Total Images Stored",
-    len(images)
-)
+        "Total Images Stored",
+        len(images)
+    )
+
+    # ------------------------------------
+    # Store OCR Embeddings
+    # ------------------------------------
 
                 print("\nStoring text image embeddings...")
 
                 store_text_embeddings(
-    images,
-    document_id
-)
+        images,
+        document_id
+    )
+
                 collector.increment(
-    "Total Embeddings Generated",
-    len(chunks)
-)
+        "Total Embeddings Generated",
+        len(chunks)
+    )
+
+    # ------------------------------------
+    # Store CLIP Embeddings
+    # ------------------------------------
 
                 print("\nStoring CLIP image embeddings...")
 
                 store_clip_embeddings(
-    images
-)
+        images
+    )
+
                 collector.increment(
-    "Total Embeddings Generated",
-    len(images)
-)
-                
+        "Total Embeddings Generated",
+        len(images)
+    )
+
             except Exception:
 
-                # Delete document
-                db.delete(new_doc)
-                db.commit()
-
-                 # Delete uploaded file
-                if os.path.exists(file_path):
-                    os.remove(file_path)
-
-                  # Delete extracted images
-                image_folder = f"uploads/images/{document_id}"
-
-                if os.path.exists(image_folder):
-                    shutil.rmtree(image_folder)
+                cleanup_upload(
+        db,
+        document_id,
+        new_filename,
+        file_path
+    )
 
                 raise
-            print(
 
-                f"Stored {len(images)} images."
+            print(f"Stored {len(images)} images.")
 
-            )
+# ------------------------------------
+# Move file from temp → uploads
+# ------------------------------------
 
-            # ------------------------------------
-            # Update Database
-            # ------------------------------------
+            shutil.move(
+    file_path,
+    final_file_path
+)
+
+            new_doc.file_path = final_file_path
+            new_doc.filename = new_filename
+
+            db.commit()
+
+# ------------------------------------
+# Finalize Database
+# ------------------------------------
 
             finalize_document(
 
-                db=db,
+    db=db,
 
-                document=new_doc,
+    document=new_doc,
 
-                chunk_count=len(chunks)
+    chunk_count=len(chunks)
 
-            )
+)
+
             collector.increment(
     "Total Documents Stored"
 )
-
 
             elapsed = round(
 
@@ -627,27 +650,48 @@ class UploadManager:
 
             stats.increment("Total Failed Uploads")
 
-
-         # Rollback database
             db.rollback()
 
-    # Delete extracted image folder
-            image_folder = f"uploads/images/{document_id}"
+    # ----------------------------------------
+    # Cleanup partially created resources
+    # ----------------------------------------
 
-            if os.path.exists(image_folder):
-                shutil.rmtree(image_folder)
+            try:
 
-    # Delete uploaded file
-            if os.path.exists(file_path):
-                os.remove(file_path)
+                if document_id is not None:
+
+                    cleanup_upload(
+
+                db=db,
+
+                document_id=document_id,
+
+                filename=new_filename if new_filename else file.filename,
+
+                file_path=file_path
+
+            )
+
+                elif file_path and os.path.exists(file_path):
+
+            # Document record was never created
+                    os.remove(file_path)
+
+            except Exception as cleanup_error:
+
+                print("\nCleanup Error")
+                print(cleanup_error)
 
             print("\nUPLOAD FAILED")
 
             traceback.print_exc()
 
             raise HTTPException(
+
         status_code=500,
+
         detail=str(e)
+
     )
 
 upload_manager = UploadManager()
