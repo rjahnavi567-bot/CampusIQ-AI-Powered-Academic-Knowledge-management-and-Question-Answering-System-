@@ -59,7 +59,11 @@ from app.services.chroma_service import (
 )
 from app.services.statistics.statistics_collector import collector
 class UploadManager:
-    def upload(self, file):
+    def upload(
+        self,
+        file,
+        user_id
+    ):
         upload_stats.reset()
         start_time = time.time()
         processing_timer = Timer()
@@ -157,7 +161,8 @@ class UploadManager:
 
                 file_path=file_path,
 
-                file_hash=file_hash
+                file_hash=file_hash,
+                uploaded_by=user_id
 
             )
 

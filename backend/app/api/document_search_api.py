@@ -1,6 +1,8 @@
 from fastapi import APIRouter
 from app.services.chroma_service import text_collection
 from urllib.parse import quote
+from fastapi import Depends
+from app.dependencies.auth_dependency import get_current_user
 router = APIRouter()
 
 

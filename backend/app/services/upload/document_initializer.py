@@ -5,7 +5,8 @@ def create_document(
     db,
     filename,
     file_path,
-    file_hash
+    file_hash,
+    uploaded_by
 ):
     """
     Create document WITHOUT committing.
@@ -21,7 +22,7 @@ def create_document(
 
         unit="Unit-1",
 
-        uploaded_by=1,
+        uploaded_by=uploaded_by,
 
         status="Processing",
 

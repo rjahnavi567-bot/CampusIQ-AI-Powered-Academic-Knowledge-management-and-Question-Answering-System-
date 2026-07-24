@@ -1,7 +1,8 @@
 from fastapi import APIRouter
 from app.database.connection import SessionLocal
 from app.database.models import Document
-
+from fastapi import Depends
+from app.dependencies.auth_dependency import get_current_user
 router = APIRouter()
 
 @router.get("/recent-documents")

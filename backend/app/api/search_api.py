@@ -7,6 +7,8 @@ from app.services.statistics.timer import Timer
 from app.services.retrieval.confidence_validator import (
     validate_retrieval
 )
+from fastapi import Depends
+from app.dependencies.auth_dependency import get_current_user
 router = APIRouter()
 
 

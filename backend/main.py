@@ -47,7 +47,9 @@ from app.database.models import Base
 import app.database.models
 from pathlib import Path
 from fastapi.staticfiles import StaticFiles
-
+from app.api.login_api import router as login_router
+from app.api.auth_api import router as auth_router
+from app.api.register_api import router as register_router
 
 
 Base.metadata.create_all(bind=engine)
@@ -93,6 +95,9 @@ app.include_router(
     document_search_router
 )
 
+app.include_router(login_router)
+app.include_router(auth_router)
+app.include_router(register_router)
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent

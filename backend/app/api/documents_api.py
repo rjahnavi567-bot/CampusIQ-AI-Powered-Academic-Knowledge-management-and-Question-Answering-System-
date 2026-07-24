@@ -15,6 +15,8 @@ from app.services.chroma_service import (
     text_collection,
     image_collection
 )
+from fastapi import Depends
+from app.dependencies.auth_dependency import get_current_user
 router = APIRouter()
 
 
@@ -23,8 +25,9 @@ router = APIRouter()
 # ==========================
 
 @router.get("/documents")
-def get_documents():
-
+def get_documents(
+    current_user=Depends(get_current_user)
+):
     db = SessionLocal()
 
     try:

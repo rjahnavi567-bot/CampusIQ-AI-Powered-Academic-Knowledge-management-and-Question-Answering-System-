@@ -6,9 +6,11 @@ from "react";
 
 import { api }
 from "../api/api";
-
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 export default function Dashboard() {
-
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [stats,
   setStats] = useState({
 
@@ -18,22 +20,30 @@ export default function Dashboard() {
 
     recent_questions:[]
   });
+  function handleLogout() {
 
-  useEffect(()=>{
+    logout();
 
-    api.get(
-      "/dashboard-stats"
-    )
+    navigate("/login");
 
-    .then((res)=>{
+}
+  useEffect(() => {
 
-      setStats(
-        res.data
-      );
+  api.get("/dashboard-stats")
+
+    .then((res) => {
+
+      setStats(res.data);
+
+    })
+
+    .catch((err) => {
+
+      console.error(err);
 
     });
 
-  },[]);
+}, []);
 
   return (
 
@@ -41,16 +51,43 @@ export default function Dashboard() {
 
 <div className="hero-card">
 
+<div
+    style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center"
+    }}
+>
+
+    <div>
+        <h3>Welcome, {user?.name}</h3>
+        <p>{user?.role}</p>
+    </div>
+
+    <button onClick={handleLogout}>
+        Logout
+    </button>
+
+</div>
+
 <h1>
 🎓 campusIQ: Intelligent Academic Assistance System
 </h1>
 
 <p>
 Upload study materials,
-generate exam-focused
-answers,
+generate exam-focused answers,
 and learn smarter with AI.
 </p>
+
+</div>
+<div className="page-card">
+
+  <h3>Welcome, {user?.name}</h3>
+
+  <p>Email: {user?.email}</p>
+
+  <p>Role: {user?.role}</p>
 
 </div>
 

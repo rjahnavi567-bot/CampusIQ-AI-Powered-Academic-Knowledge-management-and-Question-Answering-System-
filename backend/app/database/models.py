@@ -1,6 +1,8 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Float
 from app.database.connection import Base
 from datetime import datetime
+from sqlalchemy import Boolean
+from datetime import datetime
 class Chunk(Base):
     __tablename__ = "chunks"
 
@@ -20,12 +22,7 @@ class Chunk(Base):
     page_no = Column(Integer)
     similarity_score = Column(String)
 
-class User(Base):
-    __tablename__ = "users"
 
-    id = Column(Integer,primary_key=True,index=True)
-    name = Column(String)
-    role = Column(String)
 
 class Document(Base):
     __tablename__ = "documents"
@@ -118,4 +115,23 @@ class DocumentImage(Base):
 
     classification_confidence = Column(Float)
     confidence_score = Column(Integer)
-    
+
+
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    name = Column(String)
+
+    email = Column(String, unique=True)
+
+    password = Column(String)
+
+    role = Column(String)
+
+    is_active = Column(Boolean, default=True)
+
+    created_at = Column(DateTime, default=datetime.utcnow)

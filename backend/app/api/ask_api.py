@@ -21,14 +21,17 @@ from app.database.models import DocumentImage
 from app.services.image_embedding_service import (
     embed_text_for_image_search
 )
-
+from fastapi import Depends
+from app.dependencies.auth_dependency import get_current_user
 from app.services.image_reranker_service import rerank_images
 router = APIRouter()
 
 
 @router.post("/ask")
-def ask(request: AskRequest):
-
+def ask(
+    request: AskRequest,
+    current_user=Depends(get_current_user)
+):
     question = request.question
     marks = request.marks
 
