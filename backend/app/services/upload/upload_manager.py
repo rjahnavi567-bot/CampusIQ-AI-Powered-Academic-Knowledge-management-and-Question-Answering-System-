@@ -89,17 +89,22 @@ class UploadManager:
 
             import uuid
 
-            os.makedirs("uploads", exist_ok=True)
-            os.makedirs("uploads/temp", exist_ok=True)
+            temp_dir = os.path.join("uploads", "temp")
 
-            temp_filename = f"{uuid.uuid4()}_{file.filename}"
+            os.makedirs(temp_dir, exist_ok=True)
+
+            from pathlib import Path
+
+            extension = Path(file.filename).suffix
+
+            temp_filename = f"{uuid.uuid4()}{extension}"
 
             file_path = os.path.join(
-    "uploads",
-    "temp",
+    temp_dir,
     temp_filename
 )
-
+            print("Temp directory exists:", os.path.exists(temp_dir))
+            print("Writing to:", os.path.abspath(file_path)) 
             with open(file_path, "wb") as buffer:
 
                 shutil.copyfileobj(
@@ -372,7 +377,7 @@ class UploadManager:
 
             )
 
-            if highest_similarity > 0.95:
+            if highest_similarity == 1:
 
                 cleanup_upload(
     db,
