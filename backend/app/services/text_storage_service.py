@@ -24,26 +24,27 @@ def store_text_chunks(document_id, chunks):
         )
 
         metadata = {
-            "document_id": document_id,
-            "type": "text",
-            "topic": chunk.get("topic", ""),
-            "keywords": ",".join(
-                chunk.get("keywords", [])
-            ),
-            "source_file": chunk.get(
-                "source_file",
-                ""
-            ),
-            "page_no": int(
-                chunk.get("page_no", 1)
-            ),
-            "similarity_score": float(
-                chunk.get(
-                    "similarity_score",
-                    0
-                )
-            )
-        }
+    "document_id": document_id,
+    "type": "text",
+    "topic": chunk.get("topic", ""),
+    "keywords": ",".join(
+        chunk.get("keywords", [])
+    ),
+    "source_file": chunk.get(
+        "source_file",
+        ""
+    ),
+    "subject": chunk.get("subject", ""),
+    "page_no": int(
+        chunk.get("page_no", 1)
+    ),
+    "similarity_score": float(
+        chunk.get(
+            "similarity_score",
+            0
+        )
+    )
+}
 
         if (
             "file_type" in chunk

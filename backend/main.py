@@ -42,7 +42,7 @@ from app.api.document_search_api import (
 )
 from app.database.connection import engine
 from app.database.models import Base
-
+from app.services.document_cache import document_cache
 # Import models so SQLAlchemy registers every table
 import app.database.models
 from pathlib import Path
@@ -50,10 +50,14 @@ from fastapi.staticfiles import StaticFiles
 from app.api.login_api import router as login_router
 from app.api.auth_api import router as auth_router
 from app.api.register_api import router as register_router
-
+from app.api.document_suggestion_api import router as suggestion_router
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
+@app.on_event("startup")
+def startup_event():
+
+    document_cache.load_cache()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],
@@ -94,6 +98,7 @@ app.include_router(
 app.include_router(
     document_search_router
 )
+app.include_router(suggestion_router)
 
 app.include_router(login_router)
 app.include_router(auth_router)

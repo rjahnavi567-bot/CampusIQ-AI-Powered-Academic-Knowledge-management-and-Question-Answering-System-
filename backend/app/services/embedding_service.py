@@ -1,5 +1,6 @@
 from sentence_transformers import SentenceTransformer
 
+# Global embedding model
 model = SentenceTransformer(
     "BAAI/bge-small-en-v1.5"
 )

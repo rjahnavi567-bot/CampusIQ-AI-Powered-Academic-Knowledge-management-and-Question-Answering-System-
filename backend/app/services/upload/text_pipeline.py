@@ -3,7 +3,11 @@ from app.services.statistics import stats
 from app.services.statistics.timer import Timer
 from app.services.chunk_service import create_semantic_chunks
 from app.services.statistics import collector
-def process_text_pages(pages, filename):
+def process_text_pages(
+    pages,
+    filename,
+    subject
+):
     """
     Extract semantic chunks from all pages.
 
@@ -78,6 +82,7 @@ def process_text_pages(pages, filename):
 
             # NEW
             chunk["file_type"] = file_type
+            chunk["subject"] = subject
 
             chunks.append(chunk)
         print(f"\nPage {page['page_no']}")

@@ -32,7 +32,7 @@ from app.services.upload.cleanup import cleanup_upload
 from app.services.upload.title_generator import (
     generate_document_title
 )
-
+from app.services.trie_service import document_trie
 from app.services.upload.text_pipeline import (
     process_text_pages
 )
@@ -57,6 +57,8 @@ from app.services.chroma_service import (
     text_collection,
     image_collection
 )
+from app.services.subject_detection.subject_detector import detect_subject
+from app.services.document_cache import document_cache
 from app.services.statistics.statistics_collector import collector
 class UploadManager:
     def upload(
@@ -170,6 +172,7 @@ class UploadManager:
                 uploaded_by=user_id
 
             )
+            
 
             document_id = new_doc.id
 
@@ -184,6 +187,16 @@ class UploadManager:
             pages = extract_text(
                 file_path
             )
+            # ------------------------------------
+# Detect Subject
+# ------------------------------------
+
+            print("Detecting subject...")
+
+            detected_subject = detect_subject(pages)
+
+            print("Detected Subject :", detected_subject)
+            new_doc.subject = detected_subject
             page_lookup = {}
 
             for page in pages:
@@ -329,7 +342,8 @@ class UploadManager:
 
         pages=pages,
 
-        filename=new_filename
+        filename=new_filename,
+        subject=detected_subject
 
     )
 
@@ -573,6 +587,10 @@ class UploadManager:
             new_doc.filename = new_filename
 
             db.commit()
+            db.refresh(new_doc)
+
+            document_cache.add_document(new_doc)
+            document_trie.insert(new_filename)
 
 
             elapsed = round(
@@ -641,7 +659,8 @@ class UploadManager:
 
                 images=images,
 
-                similarity_warning=similarity_warning
+                similarity_warning=similarity_warning,
+                subject= detected_subject
 
             )
 

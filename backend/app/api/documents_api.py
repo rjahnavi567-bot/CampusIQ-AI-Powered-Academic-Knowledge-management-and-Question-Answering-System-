@@ -4,13 +4,13 @@ from app.database.models import Document, Chunk
 from app.services.chroma_service import text_collection
 import os
 import shutil
-
+from app.services.document_cache import document_cache
 from app.database.models import (
     Document,
     Chunk,
     DocumentImage
 )
-
+from app.services.trie_service import document_trie
 from app.services.chroma_service import (
     text_collection,
     image_collection
@@ -20,6 +20,42 @@ from app.dependencies.auth_dependency import get_current_user
 router = APIRouter()
 
 
+@router.get("/documents/suggestions")
+def autocomplete(query: str):
+
+    if not query:
+
+        return []
+
+    return document_trie.search_prefix(query)
+@router.get("/documents/search")
+def search_documents(query: str):
+
+    if not query.strip():
+        return []
+
+    # 1. Exact search using HashMap
+    exact = document_cache.get_document(query)
+
+    if exact:
+        return [exact]
+
+    # 2. Partial search using PostgreSQL
+    db = SessionLocal()
+
+    try:
+
+        documents = (
+            db.query(Document)
+            .filter(Document.filename.ilike(f"%{query}%"))
+            .order_by(Document.filename)
+            .all()
+        )
+
+        return documents
+
+    finally:
+        db.close()
 # ==========================
 # GET ALL DOCUMENTS
 # ==========================
@@ -239,6 +275,7 @@ def delete_document(document_id: int):
         db.delete(document)
 
         db.commit()
+        document_cache.remove_document(document.filename)
 
         ###################################################
         # Delete uploaded PDF

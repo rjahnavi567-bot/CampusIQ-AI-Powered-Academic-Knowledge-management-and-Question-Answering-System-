@@ -30,12 +30,17 @@ class Document(Base):
     id = Column(Integer, primary_key=True, index=True)
 
     filename = Column(String)
+    subject = Column(String)
 
     file_path = Column(String)
 
-    subject = Column(String)
-
     unit = Column(String)
+    primary_subject = Column(String)
+    secondary_subjects = Column(Text)
+    subject_confidence = Column(Float)
+    
+
+    subject_detected_by = Column(String)
 
     uploaded_by = Column(Integer)
 
@@ -50,6 +55,31 @@ class Document(Base):
     created_at = Column(
         DateTime,
         default=datetime.utcnow
+    )
+class Subject(Base):
+
+    __tablename__ = "subjects"
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
+
+    name = Column(
+        String,
+        unique=True,
+        nullable=False
+    )
+
+    description = Column(
+        Text,
+        nullable=False
+    )
+
+    embedding = Column(
+        Text,
+        nullable=True
     )
 class QuestionHistory(Base):
 
@@ -116,6 +146,19 @@ class DocumentImage(Base):
     classification_confidence = Column(Float)
     confidence_score = Column(Integer)
 
+class AcademicSubject(Base):
+
+    __tablename__ = "academic_subjects"
+
+    id = Column(Integer, primary_key=True)
+
+    subject_name = Column(String)
+
+    parent_subject = Column(String)
+
+    keywords = Column(Text)
+
+    embedding = Column(Text)
 
 
 
