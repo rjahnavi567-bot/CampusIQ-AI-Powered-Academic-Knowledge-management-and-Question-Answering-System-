@@ -2,64 +2,106 @@ import json
 import numpy as np
 
 from app.database.connection import SessionLocal
-from app.database.models import Subject
+from app.database.models import AcademicSubject
 
 from app.services.embedding_service import model
 
 
 class SubjectDetector:
 
-    def detect_subject(self, text):
+  def detect_subject(self, text):
 
-        db = SessionLocal()
+    db = SessionLocal()
 
-        try:
+    try:
 
-            # Generate embedding for uploaded document
-            document_embedding = model.encode(
-                text,
-                normalize_embeddings=True
+        # Generate document embedding
+        document_embedding = model.encode(
+            text,
+            normalize_embeddings=True
+        )
+
+        subjects = db.query(
+            AcademicSubject
+        ).all()
+
+        similarities = []
+
+        for subject in subjects:
+
+            if not subject.embedding:
+                continue
+
+            subject_embedding = np.array(
+                json.loads(subject.embedding)
             )
 
-            subjects = db.query(Subject).all()
-
-            best_subject = None
-            best_score = -1
-
-            for subject in subjects:
-
-                if not subject.embedding:
-                    continue
-
-                subject_embedding = np.array(
-                    json.loads(subject.embedding)
-                )
-
-                score = np.dot(
+            similarity = float(
+                np.dot(
                     document_embedding,
                     subject_embedding
                 )
+            )
 
-                if score > best_score:
+            similarities.append({
 
-                    best_score = score
-                    best_subject = subject
+                "subject": subject.subject_name,
+
+                "score": similarity
+
+            })
+
+        similarities.sort(
+
+            key=lambda x: x["score"],
+
+            reverse=True
+
+        )
+
+        if len(similarities) == 0:
 
             return {
 
-                "subject": best_subject.name if best_subject else None,
+                "primary_subject": None,
 
-                "score": round(
-                    float(best_score),
-                    4
-                )
+                "confidence": 0,
+
+                "secondary_subjects": []
 
             }
 
-        finally:
+        primary = similarities[0]
 
-            db.close()
+        secondary = []
 
+        for item in similarities[1:]:
+
+            if item["score"] >= 0.75:
+
+                secondary.append(
+                    item["subject"]
+                )
+
+        return {
+
+            "primary_subject":
+            primary["subject"],
+
+            "confidence":
+            round(
+                primary["score"] * 100,
+                2
+            ),
+
+            "secondary_subjects":
+            secondary
+
+        }
+
+    finally:
+
+        db.close()
 
 subject_detector = SubjectDetector()
 def detect_subject(text):

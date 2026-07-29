@@ -57,9 +57,10 @@ from app.services.chroma_service import (
     text_collection,
     image_collection
 )
-from app.services.subject_detection.subject_detector import detect_subject
+
 from app.services.document_cache import document_cache
 from app.services.statistics.statistics_collector import collector
+from app.services.subject_detection.subject_detector import detect_subject
 class UploadManager:
     def upload(
         self,
@@ -193,10 +194,24 @@ class UploadManager:
 
             print("Detecting subject...")
 
-            detected_subject = detect_subject(pages)
+            subject_text = ""
 
-            print("Detected Subject :", detected_subject)
-            new_doc.subject = detected_subject
+            for page in pages[:5]:
+
+                subject_text += page["text"] + "\n"
+
+            subject_result = detect_subject(subject_text)
+
+            print("Detected Subject :", subject_result)
+            # New columns
+            new_doc.subject = subject_result["primary_subject"]
+
+            new_doc.subject_confidence = subject_result["confidence"]
+
+            new_doc.secondary_subjects = json.dumps(
+    subject_result["secondary_subjects"]
+)
+            new_doc.subject_detected_by = "Embedding Similarity v1"
             page_lookup = {}
 
             for page in pages:
@@ -343,7 +358,7 @@ class UploadManager:
         pages=pages,
 
         filename=new_filename,
-        subject=detected_subject
+        subject=subject_result
 
     )
 
@@ -461,7 +476,6 @@ class UploadManager:
                     similar_document.id
 
                 }
-
             # ------------------------------------
             # Save Signature + Embedding
             # ------------------------------------
@@ -660,7 +674,7 @@ class UploadManager:
                 images=images,
 
                 similarity_warning=similarity_warning,
-                subject= detected_subject
+                subject=subject_result
 
             )
 
@@ -673,11 +687,11 @@ class UploadManager:
             try:
 
                 cleanup_upload(
-            db,
-            document_id,
-            new_filename,
-            file_path
-        )
+    db,
+    document_id,
+    locals().get("new_filename", file.filename),
+    file_path
+)
 
             except Exception as cleanup_error:
 

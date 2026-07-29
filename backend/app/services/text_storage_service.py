@@ -35,6 +35,17 @@ def store_text_chunks(document_id, chunks):
         ""
     ),
     "subject": chunk.get("subject", ""),
+    "subject_confidence": float(
+    chunk.get(
+        "subject_confidence",
+        0
+    )
+),
+
+"secondary_subjects": chunk.get(
+    "secondary_subjects",
+    ""
+),
     "page_no": int(
         chunk.get("page_no", 1)
     ),

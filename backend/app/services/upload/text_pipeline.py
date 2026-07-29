@@ -82,7 +82,14 @@ def process_text_pages(
 
             # NEW
             chunk["file_type"] = file_type
-            chunk["subject"] = subject
+
+            chunk["subject"] = subject["primary_subject"]
+
+            chunk["subject_confidence"] = subject["confidence"]
+
+            chunk["secondary_subjects"] = "|".join(
+    subject["secondary_subjects"]
+)
 
             chunks.append(chunk)
         print(f"\nPage {page['page_no']}")

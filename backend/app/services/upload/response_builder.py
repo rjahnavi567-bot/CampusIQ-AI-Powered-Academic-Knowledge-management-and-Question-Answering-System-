@@ -4,7 +4,8 @@ def build_upload_response(
     suggested_title,
     chunks,
     images,
-    similarity_warning
+    similarity_warning,
+    subject=None
 ):
     """
     Builds upload response.
@@ -23,6 +24,8 @@ def build_upload_response(
 
         "suggested_title":
         suggested_title,
+
+        "subject_detection": subject,
 
         "chunks_created":
         len(chunks),
