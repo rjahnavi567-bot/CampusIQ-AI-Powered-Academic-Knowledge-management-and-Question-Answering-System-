@@ -13,29 +13,37 @@ def build_upload_response(
 
     response = {
 
-        "message":
-        "File processed successfully",
+    "message": "File processed successfully",
 
-        "original_filename":
-        original_filename,
+    "original_filename": original_filename,
 
-        "stored_filename":
-        stored_filename,
+    "stored_filename": stored_filename,
 
-        "suggested_title":
-        suggested_title,
+    "suggested_title": suggested_title,
 
-        "subject_detection": subject,
+    "subject_detection": {
 
-        "chunks_created":
-        len(chunks),
+        "primary_subject": subject["primary_subject"],
 
-        "images_extracted":
-        len(images),
+        "parent_subject": subject["parent_subject"],
 
-        "images_understood":
-        len(images)
-    }
+        "confidence": subject["confidence"],
+
+        "matched_keywords": subject["matched_keywords"],
+
+        "secondary_subjects": subject["secondary_subjects"],
+
+        "method": subject["method"]
+
+    },
+
+    "chunks_created": len(chunks),
+
+    "images_extracted": len(images),
+
+    "images_understood": len(images)
+
+}
 
     if similarity_warning:
 

@@ -4,7 +4,12 @@ from app.services.metadata_service import extract_metadata
 from app.services.title_service import generate_title
 
 
-def generate_document_title(file_path, pages, original_filename):
+def generate_document_title(
+    file_path,
+    pages,
+    preview_text,
+    original_filename
+):
     """
     Generates a smart filename for uploaded document.
     """
@@ -15,10 +20,7 @@ def generate_document_title(file_path, pages, original_filename):
 
     if suggested_title == "Untitled_Document":
 
-        full_text = ""
-
-        for page in pages:
-            full_text += page["text"][:1000] + " "
+        full_text = preview_text
 
         words = []
 

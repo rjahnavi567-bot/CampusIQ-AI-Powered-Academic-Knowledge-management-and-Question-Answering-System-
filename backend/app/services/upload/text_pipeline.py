@@ -85,11 +85,19 @@ def process_text_pages(
 
             chunk["subject"] = subject["primary_subject"]
 
+            chunk["parent_subject"] = subject["parent_subject"]
+
             chunk["subject_confidence"] = subject["confidence"]
 
             chunk["secondary_subjects"] = "|".join(
     subject["secondary_subjects"]
 )
+
+            chunk["matched_keywords"] = "|".join(
+    subject["matched_keywords"]
+)
+
+            chunk["subject_detection_method"] = subject["method"]
 
             chunks.append(chunk)
         print(f"\nPage {page['page_no']}")

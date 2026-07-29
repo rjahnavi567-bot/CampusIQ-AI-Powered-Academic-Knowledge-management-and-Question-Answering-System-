@@ -57,10 +57,11 @@ from app.services.chroma_service import (
     text_collection,
     image_collection
 )
-
+from app.services.subject_detection.subject_classifier import classify_subject
+from app.services.preview_service import build_preview_text
 from app.services.document_cache import document_cache
 from app.services.statistics.statistics_collector import collector
-from app.services.subject_detection.subject_detector import detect_subject
+
 class UploadManager:
     def upload(
         self,
@@ -188,6 +189,9 @@ class UploadManager:
             pages = extract_text(
                 file_path
             )
+
+
+            preview_text = build_preview_text(pages)
             # ------------------------------------
 # Detect Subject
 # ------------------------------------
@@ -200,17 +204,29 @@ class UploadManager:
 
                 subject_text += page["text"] + "\n"
 
-            subject_result = detect_subject(subject_text)
+            subject_result = classify_subject(preview_text)
 
             print("Detected Subject :", subject_result)
-            # New columns
             new_doc.subject = subject_result["primary_subject"]
+
+            new_doc.primary_subject = subject_result["primary_subject"]
+
+            new_doc.parent_subject = subject_result["parent_subject"]
 
             new_doc.subject_confidence = subject_result["confidence"]
 
             new_doc.secondary_subjects = json.dumps(
     subject_result["secondary_subjects"]
 )
+
+            new_doc.matched_keywords = json.dumps(
+    subject_result["matched_keywords"]
+)
+
+            new_doc.subject_detection_method = subject_result["method"]
+            # New columns
+            new_doc.subject_confidence = subject_result["confidence"]
+
             new_doc.subject_detected_by = "Embedding Similarity v1"
             page_lookup = {}
 
@@ -237,14 +253,11 @@ class UploadManager:
             suggested_title, new_filename, new_file_path = (
 
                 generate_document_title(
-
-                    file_path=file_path,
-
-                    pages=pages,
-
-                    original_filename=file.filename
-
-                )
+    file_path=file_path,
+    pages=pages,
+    preview_text=preview_text,
+    original_filename=file.filename
+)
 
             )
             try:

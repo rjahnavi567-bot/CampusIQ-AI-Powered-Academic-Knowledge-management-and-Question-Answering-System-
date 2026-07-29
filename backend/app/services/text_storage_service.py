@@ -24,37 +24,62 @@ def store_text_chunks(document_id, chunks):
         )
 
         metadata = {
+
     "document_id": document_id,
+
     "type": "text",
+
     "topic": chunk.get("topic", ""),
+
     "keywords": ",".join(
         chunk.get("keywords", [])
     ),
+
+    "subject": chunk.get("subject", ""),
+
+    "parent_subject": chunk.get(
+        "parent_subject",
+        ""
+    ),
+
+    "subject_confidence": float(
+        chunk.get(
+            "subject_confidence",
+            0
+        )
+    ),
+
+    "secondary_subjects": chunk.get(
+        "secondary_subjects",
+        ""
+    ),
+
+    "matched_keywords": chunk.get(
+        "matched_keywords",
+        ""
+    ),
+
+    "subject_detection_method": chunk.get(
+        "subject_detection_method",
+        ""
+    ),
+
     "source_file": chunk.get(
         "source_file",
         ""
     ),
-    "subject": chunk.get("subject", ""),
-    "subject_confidence": float(
-    chunk.get(
-        "subject_confidence",
-        0
-    )
-),
 
-"secondary_subjects": chunk.get(
-    "secondary_subjects",
-    ""
-),
     "page_no": int(
         chunk.get("page_no", 1)
     ),
+
     "similarity_score": float(
         chunk.get(
             "similarity_score",
             0
         )
     )
+
 }
 
         if (
@@ -64,6 +89,9 @@ def store_text_chunks(document_id, chunks):
             metadata["file_type"] = chunk["file_type"]
 
         metadatas.append(metadata)
+    print("\n===== METADATA SAMPLE =====")
+    for key, value in metadatas[0].items():
+        print(key, type(value), value)
 
     text_collection.add(
         ids=ids,

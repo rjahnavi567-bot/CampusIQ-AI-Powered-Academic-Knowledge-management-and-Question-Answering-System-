@@ -56,6 +56,11 @@ class Document(Base):
         DateTime,
         default=datetime.utcnow
     )
+    parent_subject = Column(String)
+
+    matched_keywords = Column(Text)
+
+    subject_detection_method = Column(String)
 class Subject(Base):
 
     __tablename__ = "subjects"
