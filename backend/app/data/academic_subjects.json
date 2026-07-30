@@ -1,0 +1,30 @@
+[
+  {
+    "subject_name": "Data Structures",
+    "parent_subject": "Computer Science",
+    "description": "Study of data organization",
+    "keywords": [
+      "stack",
+      "queue",
+      "tree"
+    ],
+    "topics": [
+      "Arrays",
+      "Linked Lists"
+    ]
+  },
+  {
+    "subject_name": "Operating Systems",
+    "parent_subject": "Computer Science",
+    "description": "Operating system concepts",
+    "keywords": [
+      "process",
+      "thread",
+      "memory"
+    ],
+    "topics": [
+      "Scheduling",
+      "Deadlocks"
+    ]
+  }
+]

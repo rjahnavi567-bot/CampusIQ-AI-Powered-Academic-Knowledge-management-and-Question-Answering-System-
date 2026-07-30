@@ -157,11 +157,15 @@ class AcademicSubject(Base):
 
     id = Column(Integer, primary_key=True)
 
-    subject_name = Column(String)
+    subject_name = Column(String, nullable=False)
 
-    parent_subject = Column(String)
+    parent_subject = Column(String, nullable=False)
+
+    description = Column(Text)
 
     keywords = Column(Text)
+
+    topics = Column(Text)
 
     embedding = Column(Text)
 

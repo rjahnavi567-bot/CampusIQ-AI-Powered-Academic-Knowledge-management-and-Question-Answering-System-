@@ -29,13 +29,27 @@ def generate_subject_embeddings():
                 continue
 
 
-            text = (
-                subject.subject_name
-                +
-                " "
-                +
-                subject.keywords
-            )
+            text = f"""
+Subject
+
+{subject.subject_name}
+
+Parent Subject
+
+{subject.parent_subject}
+
+Description
+
+{subject.description}
+
+Keywords
+
+{subject.keywords}
+
+Topics
+
+{subject.topics}
+"""
 
 
             embedding = create_embedding(
