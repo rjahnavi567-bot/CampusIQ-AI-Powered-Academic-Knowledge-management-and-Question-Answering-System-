@@ -27,6 +27,24 @@ def generate_subject_embeddings():
                     f"Skipping {subject.subject_name}"
                 )
                 continue
+            parts = []
+
+# Branch
+            if subject.branch:
+               parts.append(subject.branch)
+
+# Parent subject
+            if subject.parent_subject:
+                parts.append(subject.parent_subject)
+
+ # Subject
+            parts.append(subject.subject_name)
+
+ # Keywords
+            if subject.keywords:
+                parts.append(subject.keywords)
+
+            text = " ".join(parts)
 
 
             text = f"""
