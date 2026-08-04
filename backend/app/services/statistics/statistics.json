@@ -1,24 +1,24 @@
 {
     "counters": {
         "Total Failed Uploads": 40,
-        "Total Documents Uploaded": 51,
+        "Total Documents Uploaded": 52,
         "Total Image Files": 3,
-        "Total Pages Processed": 6432,
-        "Total Words Extracted": 1990094,
-        "Total Paragraphs Identified": 6050,
-        "Total Semantic Chunks Generated": 6154,
+        "Total Pages Processed": 6433,
+        "Total Words Extracted": 1990728,
+        "Total Paragraphs Identified": 6061,
+        "Total Semantic Chunks Generated": 6155,
         "Total Useful Images Retained": 3264,
         "Total Useless Images Filtered": 0,
         "Total Images Extracted": 3259,
         "Total Images Classified": 3259,
         "Total Image Captions Generated": 0,
-        "Total Metadata Records Generated": 6154,
-        "Total Chunks Stored": 6154,
+        "Total Metadata Records Generated": 6155,
+        "Total Chunks Stored": 6155,
         "Total Images Stored": 3157,
-        "Total Embeddings Generated": 9311,
-        "Total Documents Stored": 51,
-        "Total Successful Uploads": 51,
-        "Total TXT Files": 16,
+        "Total Embeddings Generated": 9312,
+        "Total Documents Stored": 52,
+        "Total Successful Uploads": 52,
+        "Total TXT Files": 17,
         "Total PPTX Files": 3,
         "Total DOCX Files": 10,
         "Total PDF Files": 19
@@ -5779,7 +5779,8 @@
             0.796533900022041,
             1.6498240000219084,
             3.5573992000427097,
-            0.48722870007622987
+            0.48722870007622987,
+            1.575097499997355
         ],
         "Text Extraction Time": [
             1.5527900999877602,
@@ -5832,7 +5833,8 @@
             0.7998205000185408,
             1.6525608000229113,
             3.5645605999743566,
-            0.4908649999415502
+            0.4908649999415502,
+            1.5809363999869674
         ],
         "Image Filtering Time": [
             2.866278500005137,
@@ -12278,7 +12280,8 @@
             2.7528509999392554,
             2.6503466999856755,
             0.5700937000801787,
-            0.0005000999663025141
+            0.0005000999663025141,
+            0.0007835999131202698
         ],
         "Image Extraction Time": [
             6.570490899990546,
@@ -12331,7 +12334,8 @@
             1.9319758000201546,
             9.57585950003704,
             20.81474539998453,
-            3.4091286999173462
+            3.4091286999173462,
+            4.228611700003967
         ],
         "Caption Generation Time": [
             8.357403000001796,
@@ -12384,7 +12388,8 @@
             0.0003924000193364918,
             26.605094200000167,
             56.967281299992464,
-            0.0006489999359473586
+            0.0006489999359473586,
+            0.00016789999790489674
         ],
         "End-to-End Document Processing Time": [
             21.42266089998884,
@@ -12437,7 +12442,8 @@
             6.419836500019301,
             44.08643359999405,
             92.38855539995711,
-            18.625093799899332
+            18.625093799899332,
+            20.509634500020184
         ]
     }
 }

@@ -6,15 +6,17 @@ from app.database.models import AcademicSubject
 db = SessionLocal()
 
 with open(
-    "app/data/common_subjects.json",
+    "app/data/academic_subjects.json",
     "r",
     encoding="utf-8"
 ) as f:
+
     subjects = json.load(f)
 
 try:
 
     db.query(AcademicSubject).delete()
+
     db.commit()
 
     for item in subjects:
@@ -27,10 +29,6 @@ try:
 
             description=item["description"],
 
-            branches=",".join(item["branches"]),
-
-            aliases=",".join(item["aliases"]),
-
             keywords=",".join(item["keywords"]),
 
             topics=",".join(item["topics"])
@@ -41,7 +39,7 @@ try:
 
     db.commit()
 
-    print("Academic subjects inserted successfully.")
+    print("Subjects inserted successfully.")
 
 finally:
 

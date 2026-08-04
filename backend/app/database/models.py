@@ -161,6 +161,10 @@ class AcademicSubject(Base):
 
     parent_subject = Column(String, nullable=False)
 
+    branches = Column(Text)
+
+    aliases = Column(Text)
+
     description = Column(Text)
 
     keywords = Column(Text)
@@ -168,8 +172,6 @@ class AcademicSubject(Base):
     topics = Column(Text)
 
     embedding = Column(Text)
-
-
 
 class User(Base):
     __tablename__ = "users"

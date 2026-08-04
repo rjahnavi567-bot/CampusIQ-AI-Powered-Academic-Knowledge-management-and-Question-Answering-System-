@@ -1,0 +1,1107 @@
+[
+  {
+    "subject_name": "Calculus and Linear Algebra",
+    "parent_subject": "Mathematics",
+    "branches": [
+      "CSE",
+      "CSE-AIML",
+      "CSE-DS",
+      "CSE-CY",
+      "IT",
+      "ECE",
+      "EEE",
+      "Mechanical",
+      "Civil",
+      "Chemical"
+    ],
+    "aliases": [
+      "Calculus",
+      "Linear Algebra",
+      "Engineering Mathematics I"
+    ],
+    "description": "Fundamentals of differential calculus, integral calculus, matrices, vectors and linear algebra.",
+    "keywords": [
+      "calculus",
+      "linear algebra",
+      "differentiation",
+      "integration",
+      "limits",
+      "continuity",
+      "matrices",
+      "vectors",
+      "eigenvalues",
+      "determinants"
+    ],
+    "topics": [
+      "Limits",
+      "Continuity",
+      "Differentiation",
+      "Integration",
+      "Matrices",
+      "Vector Spaces",
+      "Eigenvalues",
+      "Eigenvectors"
+    ]
+  },
+  {
+    "subject_name": "Probability and Statistics",
+    "parent_subject": "Mathematics",
+    "branches": [
+      "CSE",
+      "CSE-AIML",
+      "CSE-DS",
+      "IT",
+      "ECE",
+      "EEE",
+      "Mechanical",
+      "Civil",
+      "Chemical"
+    ],
+    "aliases": [
+      "Statistics",
+      "Probability"
+    ],
+    "description": "Study of probability theory, statistical analysis and random processes.",
+    "keywords": [
+      "probability",
+      "statistics",
+      "distribution",
+      "random variable",
+      "mean",
+      "variance",
+      "hypothesis testing",
+      "correlation"
+    ],
+    "topics": [
+      "Random Variables",
+      "Probability Distributions",
+      "Sampling",
+      "Estimation",
+      "Hypothesis Testing",
+      "Regression"
+    ]
+  },
+  {
+    "subject_name": "Discrete Mathematical Structures",
+    "parent_subject": "Mathematics",
+    "branches": [
+      "CSE",
+      "CSE-AIML",
+      "CSE-DS",
+      "CSE-CY",
+      "IT"
+    ],
+    "aliases": [
+      "Discrete Mathematics",
+      "DMS"
+    ],
+    "description": "Mathematical foundations for computer science including logic, graphs and combinatorics.",
+    "keywords": [
+      "logic",
+      "sets",
+      "relations",
+      "functions",
+      "graph theory",
+      "trees",
+      "combinatorics",
+      "boolean algebra"
+    ],
+    "topics": [
+      "Logic",
+      "Relations",
+      "Functions",
+      "Graphs",
+      "Trees",
+      "Combinatorics"
+    ]
+  },
+  {
+    "subject_name": "Numerical Methods",
+    "parent_subject": "Mathematics",
+    "branches": [
+      "CSE",
+      "IT",
+      "ECE",
+      "EEE",
+      "Mechanical",
+      "Civil"
+    ],
+    "aliases": [
+      "Numerical Analysis"
+    ],
+    "description": "Algorithms for solving mathematical problems numerically.",
+    "keywords": [
+      "newton raphson",
+      "interpolation",
+      "integration",
+      "root finding",
+      "trapezoidal",
+      "simpson",
+      "gauss elimination"
+    ],
+    "topics": [
+      "Interpolation",
+      "Root Finding",
+      "Numerical Integration",
+      "Linear Systems"
+    ]
+  },
+  {
+    "subject_name": "Engineering Physics",
+    "parent_subject": "Physics",
+    "branches": [
+      "CSE",
+      "IT",
+      "ECE",
+      "EEE",
+      "Mechanical",
+      "Civil",
+      "Chemical"
+    ],
+    "aliases": [
+      "Applied Physics",
+      "Physics"
+    ],
+    "description": "Engineering applications of optics, semiconductors, quantum physics and materials.",
+    "keywords": [
+      "laser",
+      "optics",
+      "semiconductor",
+      "crystal",
+      "diffraction",
+      "interference",
+      "quantum"
+    ],
+    "topics": [
+      "Optics",
+      "Lasers",
+      "Semiconductors",
+      "Quantum Physics",
+      "Crystal Structures"
+    ]
+  },
+  {
+    "subject_name": "Engineering Chemistry",
+    "parent_subject": "Chemistry",
+    "branches": [
+      "CSE",
+      "IT",
+      "ECE",
+      "EEE",
+      "Mechanical",
+      "Civil",
+      "Chemical"
+    ],
+    "aliases": [
+      "Chemistry"
+    ],
+    "description": "Engineering chemistry including electrochemistry, corrosion and polymers.",
+    "keywords": [
+      "corrosion",
+      "electrochemistry",
+      "polymer",
+      "water treatment",
+      "nanomaterials",
+      "fuel"
+    ],
+    "topics": [
+      "Electrochemistry",
+      "Corrosion",
+      "Polymers",
+      "Water Chemistry",
+      "Nanomaterials"
+    ]
+  },
+  {
+    "subject_name": "Programming using C",
+    "parent_subject": "Programming",
+    "branches": [
+      "CSE",
+      "IT",
+      "ECE",
+      "EEE",
+      "Mechanical",
+      "Civil",
+      "Chemical"
+    ],
+    "aliases": [
+      "C Programming",
+      "Programming in C"
+    ],
+    "description": "Programming fundamentals using the C language.",
+    "keywords": [
+      "c",
+      "pointer",
+      "array",
+      "structure",
+      "function",
+      "recursion",
+      "file handling"
+    ],
+    "topics": [
+      "Pointers",
+      "Arrays",
+      "Functions",
+      "Recursion",
+      "Structures",
+      "Files"
+    ]
+  },
+  {
+    "subject_name": "Python Programming",
+    "parent_subject": "Programming",
+    "branches": [
+      "CSE",
+      "CSE-AIML",
+      "CSE-DS",
+      "IT",
+      "ECE",
+      "EEE"
+    ],
+    "aliases": [
+      "Python",
+      "Programming with Python"
+    ],
+    "description": "Programming using Python with libraries for scientific computing.",
+    "keywords": [
+      "python",
+      "numpy",
+      "pandas",
+      "matplotlib",
+      "file handling",
+      "oops"
+    ],
+    "topics": [
+      "Functions",
+      "Modules",
+      "NumPy",
+      "Pandas",
+      "OOP",
+      "File Handling"
+    ]
+  }
+  ,
+{
+  "subject_name": "Object Oriented Programming through Java",
+  "parent_subject": "Programming",
+  "branches": [
+    "CSE",
+    "CSE-AIML",
+    "CSE-DS",
+    "CSE-CY",
+    "IT"
+  ],
+  "aliases": [
+    "Java",
+    "Java Programming",
+    "OOP",
+    "Object Oriented Programming"
+  ],
+  "description": "Object-oriented programming concepts using Java.",
+  "keywords": [
+    "java",
+    "class",
+    "object",
+    "inheritance",
+    "polymorphism",
+    "encapsulation",
+    "abstraction",
+    "collections",
+    "exception handling",
+    "multithreading"
+  ],
+  "topics": [
+    "Classes",
+    "Objects",
+    "Inheritance",
+    "Polymorphism",
+    "Collections",
+    "Exceptions",
+    "Threads"
+  ]
+},
+{
+  "subject_name": "Data Structures and Algorithms",
+  "parent_subject": "Computer Science",
+  "branches": [
+    "CSE",
+    "CSE-AIML",
+    "CSE-DS",
+    "CSE-CY",
+    "IT"
+  ],
+  "aliases": [
+    "DSA",
+    "Data Structures",
+    "Algorithms"
+  ],
+  "description": "Study of efficient data organization and algorithm design.",
+  "keywords": [
+    "array",
+    "linked list",
+    "stack",
+    "queue",
+    "tree",
+    "graph",
+    "heap",
+    "hashing",
+    "sorting",
+    "searching"
+  ],
+  "topics": [
+    "Arrays",
+    "Linked Lists",
+    "Stacks",
+    "Queues",
+    "Trees",
+    "Graphs",
+    "Hash Tables",
+    "Sorting",
+    "Searching"
+  ]
+},
+{
+  "subject_name": "Database Management Systems",
+  "parent_subject": "Computer Science",
+  "branches": [
+    "CSE",
+    "CSE-AIML",
+    "CSE-DS",
+    "CSE-CY",
+    "IT"
+  ],
+  "aliases": [
+    "DBMS",
+    "Database Systems",
+    "Database"
+  ],
+  "description": "Concepts of relational databases and SQL.",
+  "keywords": [
+    "sql",
+    "database",
+    "normalization",
+    "transactions",
+    "acid",
+    "index",
+    "join",
+    "er diagram",
+    "schema",
+    "query optimization"
+  ],
+  "topics": [
+    "ER Model",
+    "Normalization",
+    "SQL",
+    "Transactions",
+    "Concurrency",
+    "Indexes",
+    "Recovery"
+  ]
+},
+{
+  "subject_name": "Design and Analysis of Algorithms",
+  "parent_subject": "Computer Science",
+  "branches": [
+    "CSE",
+    "CSE-AIML",
+    "CSE-DS",
+    "CSE-CY",
+    "IT"
+  ],
+  "aliases": [
+    "DAA",
+    "Algorithm Design"
+  ],
+  "description": "Algorithm design techniques and complexity analysis.",
+  "keywords": [
+    "greedy",
+    "dynamic programming",
+    "divide and conquer",
+    "backtracking",
+    "branch and bound",
+    "complexity",
+    "big o"
+  ],
+  "topics": [
+    "Greedy",
+    "Dynamic Programming",
+    "Divide and Conquer",
+    "Backtracking",
+    "Complexity Analysis"
+  ]
+},
+{
+  "subject_name": "Operating Systems",
+  "parent_subject": "Computer Science",
+  "branches": [
+    "CSE",
+    "CSE-AIML",
+    "CSE-DS",
+    "CSE-CY",
+    "IT"
+  ],
+  "aliases": [
+    "OS",
+    "Operating System"
+  ],
+  "description": "Study of operating system architecture and resource management.",
+  "keywords": [
+    "process",
+    "thread",
+    "cpu scheduling",
+    "deadlock",
+    "paging",
+    "virtual memory",
+    "semaphore",
+    "mutex",
+    "kernel",
+    "file system"
+  ],
+  "topics": [
+    "Processes",
+    "Threads",
+    "Scheduling",
+    "Synchronization",
+    "Deadlocks",
+    "Memory Management",
+    "Virtual Memory",
+    "File Systems"
+  ]
+},
+{
+  "subject_name": "Computer Networks",
+  "parent_subject": "Computer Science",
+  "branches": [
+    "CSE",
+    "CSE-AIML",
+    "CSE-DS",
+    "CSE-CY",
+    "IT",
+    "ECE"
+  ],
+  "aliases": [
+    "CN",
+    "Networks",
+    "Networking"
+  ],
+  "description": "Communication protocols and computer networking.",
+  "keywords": [
+    "tcp",
+    "udp",
+    "ip",
+    "osi",
+    "routing",
+    "switching",
+    "ethernet",
+    "dns",
+    "http",
+    "socket"
+  ],
+  "topics": [
+    "OSI Model",
+    "TCP/IP",
+    "Routing",
+    "Switching",
+    "Transport Layer",
+    "Application Layer"
+  ]
+},
+{
+  "subject_name": "Compiler Design",
+  "parent_subject": "Computer Science",
+  "branches": [
+    "CSE",
+    "IT"
+  ],
+  "aliases": [
+    "Compiler",
+    "Compiler Construction"
+  ],
+  "description": "Principles of compiler construction.",
+  "keywords": [
+    "lexer",
+    "parser",
+    "syntax tree",
+    "semantic analysis",
+    "intermediate code",
+    "optimization",
+    "code generation"
+  ],
+  "topics": [
+    "Lexical Analysis",
+    "Parsing",
+    "Semantic Analysis",
+    "Intermediate Code",
+    "Optimization",
+    "Code Generation"
+  ]
+},
+{
+  "subject_name": "Formal Language and Automata Theory",
+  "parent_subject": "Computer Science",
+  "branches": [
+    "CSE",
+    "IT"
+  ],
+  "aliases": [
+    "FLAT",
+    "Automata",
+    "Formal Languages"
+  ],
+  "description": "Finite automata, regular expressions and computation theory.",
+  "keywords": [
+    "dfa",
+    "nfa",
+    "grammar",
+    "automata",
+    "regular expression",
+    "turing machine",
+    "pda"
+  ],
+  "topics": [
+    "Finite Automata",
+    "Regular Languages",
+    "Context Free Grammar",
+    "Pushdown Automata",
+    "Turing Machine"
+  ]
+},
+{
+  "subject_name": "Software Engineering",
+  "parent_subject": "Computer Science",
+  "branches": [
+    "CSE",
+    "IT",
+    "CSE-AIML",
+    "CSE-DS"
+  ],
+  "aliases": [
+    "SE",
+    "Software Engineering Essentials"
+  ],
+  "description": "Software development life cycle and software project management.",
+  "keywords": [
+    "sdlc",
+    "uml",
+    "requirements",
+    "design",
+    "agile",
+    "scrum",
+    "testing",
+    "maintenance"
+  ],
+  "topics": [
+    "SDLC",
+    "Requirements",
+    "UML",
+    "Design",
+    "Agile",
+    "Project Management"
+  ]
+},
+{
+  "subject_name": "Software Testing",
+  "parent_subject": "Computer Science",
+  "branches": [
+    "CSE",
+    "IT"
+  ],
+  "aliases": [
+    "Testing",
+    "QA"
+  ],
+  "description": "Software quality assurance and testing methodologies.",
+  "keywords": [
+    "unit testing",
+    "integration testing",
+    "selenium",
+    "test case",
+    "regression testing",
+    "black box",
+    "white box"
+  ],
+  "topics": [
+    "Unit Testing",
+    "Integration Testing",
+    "System Testing",
+    "Automation Testing",
+    "Selenium"
+  ]
+}
+,
+{
+  "subject_name": "Artificial Intelligence",
+  "parent_subject": "Artificial Intelligence",
+  "branches": [
+    "CSE",
+    "CSE-AIML",
+    "CSE-DS",
+    "IT"
+  ],
+  "aliases": [
+    "AI",
+    "Artificial Intelligence-I",
+    "Artificial Intelligence-II"
+  ],
+  "description": "Study of intelligent systems, search algorithms, reasoning and knowledge representation.",
+  "keywords": [
+    "artificial intelligence",
+    "intelligent agent",
+    "knowledge representation",
+    "expert system",
+    "heuristic search",
+    "a star",
+    "minimax",
+    "planning",
+    "reasoning"
+  ],
+  "topics": [
+    "Search Algorithms",
+    "Knowledge Representation",
+    "Reasoning",
+    "Planning",
+    "Expert Systems",
+    "Game Playing"
+  ]
+},
+{
+  "subject_name": "Machine Learning",
+  "parent_subject": "Artificial Intelligence",
+  "branches": [
+    "CSE",
+    "CSE-AIML",
+    "CSE-DS",
+    "IT"
+  ],
+  "aliases": [
+    "ML",
+    "Machine Learning-I",
+    "Machine Learning-II"
+  ],
+  "description": "Learning algorithms for prediction and pattern recognition.",
+  "keywords": [
+    "regression",
+    "classification",
+    "clustering",
+    "decision tree",
+    "random forest",
+    "svm",
+    "knn",
+    "naive bayes",
+    "feature engineering"
+  ],
+  "topics": [
+    "Supervised Learning",
+    "Unsupervised Learning",
+    "Classification",
+    "Regression",
+    "Clustering",
+    "Model Evaluation"
+  ]
+},
+{
+  "subject_name": "Deep Learning",
+  "parent_subject": "Artificial Intelligence",
+  "branches": [
+    "CSE",
+    "CSE-AIML",
+    "CSE-DS",
+    "IT"
+  ],
+  "aliases": [
+    "DL",
+    "Principles of Deep Learning"
+  ],
+  "description": "Neural networks and deep learning architectures.",
+  "keywords": [
+    "cnn",
+    "rnn",
+    "lstm",
+    "transformer",
+    "neural network",
+    "backpropagation",
+    "attention"
+  ],
+  "topics": [
+    "ANN",
+    "CNN",
+    "RNN",
+    "Transformers",
+    "Optimization"
+  ]
+},
+{
+  "subject_name": "Natural Language Processing",
+  "parent_subject": "Artificial Intelligence",
+  "branches": [
+    "CSE",
+    "CSE-AIML",
+    "CSE-DS",
+    "IT"
+  ],
+  "aliases": [
+    "NLP"
+  ],
+  "description": "Processing and understanding human language using AI.",
+  "keywords": [
+    "tokenization",
+    "stemming",
+    "bert",
+    "llm",
+    "embeddings",
+    "transformer",
+    "text classification",
+    "named entity recognition"
+  ],
+  "topics": [
+    "Text Processing",
+    "Language Models",
+    "Transformers",
+    "Embeddings",
+    "NER"
+  ]
+},
+{
+  "subject_name": "Information Retrieval and Search Engines",
+  "parent_subject": "Artificial Intelligence",
+  "branches": [
+    "CSE",
+    "CSE-DS"
+  ],
+  "aliases": [
+    "IR",
+    "Search Engines"
+  ],
+  "description": "Techniques for indexing, ranking and retrieving information.",
+  "keywords": [
+    "tf-idf",
+    "bm25",
+    "ranking",
+    "retrieval",
+    "indexing",
+    "search engine",
+    "query expansion",
+    "vector search"
+  ],
+  "topics": [
+    "Indexing",
+    "Ranking",
+    "BM25",
+    "Vector Retrieval",
+    "Semantic Search"
+  ]
+},
+{
+  "subject_name": "Big Data Analytics",
+  "parent_subject": "Data Science",
+  "branches": [
+    "CSE",
+    "CSE-DS",
+    "IT"
+  ],
+  "aliases": [
+    "Big Data"
+  ],
+  "description": "Large-scale distributed data processing.",
+  "keywords": [
+    "hadoop",
+    "spark",
+    "mapreduce",
+    "hive",
+    "hdfs",
+    "distributed computing"
+  ],
+  "topics": [
+    "Hadoop",
+    "Spark",
+    "HDFS",
+    "Hive",
+    "MapReduce"
+  ]
+},
+{
+  "subject_name": "Cloud Computing",
+  "parent_subject": "Computer Science",
+  "branches": [
+    "CSE",
+    "CSE-AIML",
+    "CSE-DS",
+    "IT"
+  ],
+  "aliases": [
+    "Cloud"
+  ],
+  "description": "Cloud infrastructure and distributed services.",
+  "keywords": [
+    "aws",
+    "azure",
+    "gcp",
+    "docker",
+    "virtualization",
+    "iaas",
+    "paas",
+    "saas"
+  ],
+  "topics": [
+    "Virtualization",
+    "Containers",
+    "AWS",
+    "Azure",
+    "Cloud Deployment"
+  ]
+},
+{
+  "subject_name": "DevOps",
+  "parent_subject": "Computer Science",
+  "branches": [
+    "CSE",
+    "CSE-AIML",
+    "CSE-DS",
+    "IT"
+  ],
+  "aliases": [
+    "Development Operations"
+  ],
+  "description": "Continuous integration and deployment practices.",
+  "keywords": [
+    "jenkins",
+    "docker",
+    "kubernetes",
+    "ci",
+    "cd",
+    "github actions",
+    "ansible"
+  ],
+  "topics": [
+    "CI/CD",
+    "Docker",
+    "Kubernetes",
+    "Jenkins",
+    "Automation"
+  ]
+},
+{
+  "subject_name": "Blockchain Technologies",
+  "parent_subject": "Computer Science",
+  "branches": [
+    "CSE",
+    "IT"
+  ],
+  "aliases": [
+    "Blockchain"
+  ],
+  "description": "Distributed ledger technologies and smart contracts.",
+  "keywords": [
+    "ethereum",
+    "bitcoin",
+    "smart contract",
+    "consensus",
+    "web3",
+    "solidity"
+  ],
+  "topics": [
+    "Blockchain",
+    "Ethereum",
+    "Consensus",
+    "Smart Contracts"
+  ]
+},
+{
+  "subject_name": "Cyber Security",
+  "parent_subject": "Security",
+  "branches": [
+    "CSE",
+    "CSE-CY",
+    "IT"
+  ],
+  "aliases": [
+    "Cyber Security",
+    "Principles of Cyber Security"
+  ],
+  "description": "Protection of systems, networks and digital assets.",
+  "keywords": [
+    "malware",
+    "ransomware",
+    "firewall",
+    "penetration testing",
+    "vulnerability",
+    "security",
+    "authentication"
+  ],
+  "topics": [
+    "Threats",
+    "Malware",
+    "Authentication",
+    "Security Policies",
+    "Penetration Testing"
+  ]
+},
+{
+  "subject_name": "Network Security and Cryptography",
+  "parent_subject": "Security",
+  "branches": [
+    "CSE",
+    "CSE-CY",
+    "IT",
+    "ECE"
+  ],
+  "aliases": [
+    "Cryptography",
+    "Network Security"
+  ],
+  "description": "Encryption techniques and secure network communication.",
+  "keywords": [
+    "aes",
+    "rsa",
+    "sha",
+    "hashing",
+    "vpn",
+    "ssl",
+    "tls",
+    "public key"
+  ],
+  "topics": [
+    "Encryption",
+    "Digital Signatures",
+    "Hashing",
+    "VPN",
+    "PKI"
+  ]
+}
+,
+{
+  "subject_name": "Computer Graphics",
+  "parent_subject": "Computer Science",
+  "branches": ["CSE","IT"],
+  "aliases": ["Graphics"],
+  "description": "Generation and manipulation of computer graphics.",
+  "keywords": ["opengl","graphics","rendering","transformation","clipping","rasterization","3d graphics"],
+  "topics": ["OpenGL","2D Graphics","3D Graphics","Viewing","Projection"]
+},
+{
+  "subject_name": "Data Visualization",
+  "parent_subject": "Data Science",
+  "branches": ["CSE-DS","CSE-AIML","IT"],
+  "aliases": ["Visualization"],
+  "description": "Visualization techniques for data analysis.",
+  "keywords": ["matplotlib","seaborn","plotly","dashboard","tableau","visualization"],
+  "topics": ["Charts","Dashboards","Matplotlib","Seaborn","Plotly"]
+},
+{
+  "subject_name": "Business Analytics",
+  "parent_subject": "Data Science",
+  "branches": ["CSE-DS","IT"],
+  "aliases": [],
+  "description": "Business intelligence and analytics.",
+  "keywords": ["analytics","business intelligence","kpi","dashboard","decision making"],
+  "topics": ["BI","KPI","Reporting","Prediction"]
+},
+{
+  "subject_name": "Reinforcement Learning",
+  "parent_subject": "Artificial Intelligence",
+  "branches": ["CSE-AIML"],
+  "aliases": ["RL"],
+  "description": "Learning through interaction using rewards.",
+  "keywords": ["q learning","policy","mdp","actor critic","reward","agent"],
+  "topics": ["MDP","Q Learning","Policy Gradient","Actor Critic"]
+},
+{
+  "subject_name": "Unstructured Databases",
+  "parent_subject": "Database",
+  "branches": ["CSE","IT"],
+  "aliases": ["NoSQL"],
+  "description": "NoSQL databases and document stores.",
+  "keywords": ["mongodb","cassandra","redis","nosql","document database"],
+  "topics": ["MongoDB","Cassandra","Redis","Document Store"]
+},
+{
+  "subject_name": "Internet of Things",
+  "parent_subject": "Computer Science",
+  "branches": ["ECE","EEE","CSE","IT"],
+  "aliases": ["IoT"],
+  "description": "Connected embedded systems and sensors.",
+  "keywords": ["iot","mqtt","esp32","arduino","sensor","edge computing"],
+  "topics": ["MQTT","ESP32","Arduino","Sensors","Cloud IoT"]
+},
+{
+  "subject_name": "Wireless Sensor Networks",
+  "parent_subject": "Computer Science",
+  "branches": ["ECE","CSE"],
+  "aliases": ["WSN"],
+  "description": "Wireless sensor communication systems.",
+  "keywords": ["sensor network","routing","zigbee","wireless","mesh"],
+  "topics": ["Routing","Sensor Nodes","Energy Efficiency"]
+},
+{
+  "subject_name": "Robotic Process Automation",
+  "parent_subject": "Artificial Intelligence",
+  "branches": ["CSE","IT"],
+  "aliases": ["RPA"],
+  "description": "Automation of repetitive business processes.",
+  "keywords": ["uipath","automation anywhere","workflow","rpa","bot"],
+  "topics": ["UiPath","Automation Anywhere","Workflow Automation"]
+},
+{
+  "subject_name": "Android Development",
+  "parent_subject": "Programming",
+  "branches": ["IT","CSE"],
+  "aliases": ["Android"],
+  "description": "Android application development.",
+  "keywords": ["android","kotlin","java","activity","intent","xml","android studio"],
+  "topics": ["Activities","Layouts","Fragments","SQLite"]
+},
+{
+  "subject_name": "Web Development",
+  "parent_subject": "Programming",
+  "branches": ["IT","CSE"],
+  "aliases": ["Web Programming"],
+  "description": "Frontend and backend web development.",
+  "keywords": ["html","css","javascript","django","flask","react","bootstrap"],
+  "topics": ["HTML","CSS","JavaScript","Backend","Frontend"]
+},
+{
+  "subject_name": "Middleware Technologies",
+  "parent_subject": "Computer Science",
+  "branches": ["IT"],
+  "aliases": [],
+  "description": "Middleware communication technologies.",
+  "keywords": ["middleware","rpc","rest","soap","message queue"],
+  "topics": ["REST","SOAP","RPC","Message Brokers"]
+},
+{
+  "subject_name": "Human Computer Interaction",
+  "parent_subject": "Computer Science",
+  "branches": ["IT"],
+  "aliases": ["HCI"],
+  "description": "User interface and interaction design.",
+  "keywords": ["usability","ux","ui","interaction","design"],
+  "topics": ["UX","UI","Evaluation","Accessibility"]
+},
+{
+  "subject_name": "Unix Network Programming",
+  "parent_subject": "Computer Science",
+  "branches": ["IT"],
+  "aliases": ["UNP"],
+  "description": "Network programming in Unix systems.",
+  "keywords": ["socket","fork","tcp","udp","select","poll"],
+  "topics": ["Sockets","TCP","UDP","IPC"]
+},
+{
+  "subject_name": "Information Storage Systems",
+  "parent_subject": "Computer Science",
+  "branches": ["IT"],
+  "aliases": ["Storage Systems"],
+  "description": "Enterprise storage technologies.",
+  "keywords": ["san","nas","raid","storage","backup"],
+  "topics": ["RAID","SAN","NAS","Backup"]
+},
+{
+  "subject_name": "E-Commerce",
+  "parent_subject": "Computer Science",
+  "branches": ["IT"],
+  "aliases": ["Electronic Commerce"],
+  "description": "Electronic commerce technologies and security.",
+  "keywords": ["payment gateway","ecommerce","shopping cart","digital payment"],
+  "topics": ["Online Payments","Security","Business Models"]
+}
+]
