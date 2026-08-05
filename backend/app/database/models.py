@@ -150,7 +150,6 @@ class DocumentImage(Base):
 
     classification_confidence = Column(Float)
     confidence_score = Column(Integer)
-
 class AcademicSubject(Base):
 
     __tablename__ = "academic_subjects"
@@ -159,17 +158,17 @@ class AcademicSubject(Base):
 
     subject_name = Column(String, nullable=False)
 
-    parent_subject = Column(String, nullable=False)
+    parent_subject = Column(String)
 
-    branches = Column(Text)
-
-    aliases = Column(Text)
+    branch = Column(String)
 
     description = Column(Text)
 
     keywords = Column(Text)
 
     topics = Column(Text)
+
+    aliases = Column(Text)
 
     embedding = Column(Text)
 

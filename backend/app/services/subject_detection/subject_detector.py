@@ -1,69 +1,88 @@
 import json
 import numpy as np
 
-from app.database.connection import SessionLocal
-from app.database.models import AcademicSubject
 from app.services.embedding_service import model
+
+from app.services.subject_detection.subject_repository import (
+    load_all_subjects
+)
 
 
 class SubjectDetector:
 
+    def compare_against_subjects(
+        self,
+        document_embedding,
+        subjects
+    ):
+
+        similarities = []
+
+        for subject in subjects:
+
+            if not subject.embedding:
+                continue
+
+            subject_embedding = np.array(
+                json.loads(subject.embedding)
+            )
+
+            score = float(
+                np.dot(
+                    document_embedding,
+                    subject_embedding
+                )
+            )
+
+            similarities.append({
+
+                "subject": subject.subject_name,
+
+                "parent_subject": subject.parent_subject,
+
+                "branch": subject.branch,
+
+                "score": round(score, 4)
+
+            })
+
+        similarities.sort(
+            key=lambda x: x["score"],
+            reverse=True
+        )
+
+        return similarities
+
     def detect_subject(self, text):
 
-        db = SessionLocal()
+        document_embedding = model.encode(
+            text,
+            normalize_embeddings=True
+        )
 
-        try:
+        ##################################################
+        # Compare against ALL subjects
+        ##################################################
 
-            document_embedding = model.encode(
-                text,
-                normalize_embeddings=True
-            )
+        subjects = load_all_subjects()
 
-            subjects = db.query(
-                AcademicSubject
-            ).all()
+        matches = self.compare_against_subjects(
 
-            similarities = []
+            document_embedding,
 
-            for subject in subjects:
+            subjects
 
-                if not subject.embedding:
-                    continue
+        )
 
-                subject_embedding = np.array(
-                    json.loads(subject.embedding)
-                )
+        ##################################################
+        # Return Top 10 matches
+        ##################################################
 
-                score = float(
-                    np.dot(
-                        document_embedding,
-                        subject_embedding
-                    )
-                )
+        return {
 
-                similarities.append({
+            "top_matches": matches[:10]
 
-                    "subject": subject.subject_name,
-
-                    "score": round(score, 4)
-
-                })
-
-            similarities.sort(
-
-                key=lambda x: x["score"],
-
-                reverse=True
-
-            )
-
-            return {
-    "top_matches": similarities
-}
-
-        finally:
-
-            db.close()
+        }
 
 
 subject_detector = SubjectDetector()

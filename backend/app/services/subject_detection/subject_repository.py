@@ -1,7 +1,8 @@
 from app.database.connection import SessionLocal
 from app.database.models import AcademicSubject
 
-def load_subjects():
+
+def load_all_subjects():
 
     db = SessionLocal()
 
@@ -12,3 +13,4 @@ def load_subjects():
     finally:
 
         db.close()
+

@@ -1,21 +1,10 @@
-from app.services.image_v2.hybrid.hybrid_extractor import HybridExtractor
+from app.services.subject_detection.subject_classifier import classify_subject
 
-extractor = HybridExtractor()
+text = """
+Decision Tree Classification
+Random Forest
+Support Vector Machine
+Regression
+"""
 
-results = extractor.process_document(
-
-    "unit.pdf"
-
-)
-
-print()
-
-print("======================")
-
-print("Pages:", len(results))
-
-total = sum(len(p["regions"]) for p in results)
-
-print("Total Regions:", total)
-
-print("======================")
+print(classify_subject(text))

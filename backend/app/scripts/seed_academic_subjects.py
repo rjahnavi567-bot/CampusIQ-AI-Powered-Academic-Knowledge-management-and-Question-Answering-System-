@@ -6,7 +6,7 @@ from app.database.models import AcademicSubject
 db = SessionLocal()
 
 with open(
-    "app/data/common_subjects.json",
+    "app/scripts/common_subjects.json",
     "r",
     encoding="utf-8"
 ) as f:
@@ -21,21 +21,21 @@ try:
 
         db_subject = AcademicSubject(
 
-            subject_name=item["subject_name"],
+    subject_name=item["subject_name"],
 
-            parent_subject=item["parent_subject"],
+    parent_subject=item["parent_subject"],
 
-            description=item["description"],
+    branch=item["branch"],
 
-            branches=",".join(item["branches"]),
+    description=item.get("description", ""),
 
-            aliases=",".join(item["aliases"]),
+    keywords=",".join(item.get("keywords", [])),
 
-            keywords=",".join(item["keywords"]),
+    topics=",".join(item.get("topics", [])),
 
-            topics=",".join(item["topics"])
+    aliases=",".join(item.get("aliases", []))
 
-        )
+)
 
         db.add(db_subject)
 

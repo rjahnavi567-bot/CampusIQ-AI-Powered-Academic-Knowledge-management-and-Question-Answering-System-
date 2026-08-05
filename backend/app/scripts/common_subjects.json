@@ -2,7 +2,7 @@
   {
     "subject_name": "Calculus and Linear Algebra",
     "parent_subject": "Mathematics",
-    "branches": [
+    "branch": [
       "CSE",
       "CSE-AIML",
       "CSE-DS",
@@ -46,7 +46,7 @@
   {
     "subject_name": "Probability and Statistics",
     "parent_subject": "Mathematics",
-    "branches": [
+    "branch": [
       "CSE",
       "CSE-AIML",
       "CSE-DS",
@@ -84,7 +84,7 @@
   {
     "subject_name": "Discrete Mathematical Structures",
     "parent_subject": "Mathematics",
-    "branches": [
+    "branch": [
       "CSE",
       "CSE-AIML",
       "CSE-DS",
@@ -118,7 +118,7 @@
   {
     "subject_name": "Numerical Methods",
     "parent_subject": "Mathematics",
-    "branches": [
+    "branch": [
       "CSE",
       "IT",
       "ECE",
@@ -149,7 +149,7 @@
   {
     "subject_name": "Engineering Physics",
     "parent_subject": "Physics",
-    "branches": [
+    "branch": [
       "CSE",
       "IT",
       "ECE",
@@ -183,7 +183,7 @@
   {
     "subject_name": "Engineering Chemistry",
     "parent_subject": "Chemistry",
-    "branches": [
+    "branch": [
       "CSE",
       "IT",
       "ECE",
@@ -215,7 +215,7 @@
   {
     "subject_name": "Programming using C",
     "parent_subject": "Programming",
-    "branches": [
+    "branch": [
       "CSE",
       "IT",
       "ECE",
@@ -250,7 +250,7 @@
   {
     "subject_name": "Python Programming",
     "parent_subject": "Programming",
-    "branches": [
+    "branch": [
       "CSE",
       "CSE-AIML",
       "CSE-DS",
@@ -284,7 +284,7 @@
 {
   "subject_name": "Object Oriented Programming through Java",
   "parent_subject": "Programming",
-  "branches": [
+  "branch": [
     "CSE",
     "CSE-AIML",
     "CSE-DS",
@@ -323,7 +323,7 @@
 {
   "subject_name": "Data Structures and Algorithms",
   "parent_subject": "Computer Science",
-  "branches": [
+  "branch": [
     "CSE",
     "CSE-AIML",
     "CSE-DS",
@@ -363,7 +363,7 @@
 {
   "subject_name": "Database Management Systems",
   "parent_subject": "Computer Science",
-  "branches": [
+  "branch": [
     "CSE",
     "CSE-AIML",
     "CSE-DS",
@@ -401,7 +401,7 @@
 {
   "subject_name": "Design and Analysis of Algorithms",
   "parent_subject": "Computer Science",
-  "branches": [
+  "branch": [
     "CSE",
     "CSE-AIML",
     "CSE-DS",
@@ -433,7 +433,7 @@
 {
   "subject_name": "Operating Systems",
   "parent_subject": "Computer Science",
-  "branches": [
+  "branch": [
     "CSE",
     "CSE-AIML",
     "CSE-DS",
@@ -471,7 +471,7 @@
 {
   "subject_name": "Computer Networks",
   "parent_subject": "Computer Science",
-  "branches": [
+  "branch": [
     "CSE",
     "CSE-AIML",
     "CSE-DS",
@@ -509,7 +509,7 @@
 {
   "subject_name": "Compiler Design",
   "parent_subject": "Computer Science",
-  "branches": [
+  "branch": [
     "CSE",
     "IT"
   ],
@@ -539,7 +539,7 @@
 {
   "subject_name": "Formal Language and Automata Theory",
   "parent_subject": "Computer Science",
-  "branches": [
+  "branch": [
     "CSE",
     "IT"
   ],
@@ -569,7 +569,7 @@
 {
   "subject_name": "Software Engineering",
   "parent_subject": "Computer Science",
-  "branches": [
+  "branch": [
     "CSE",
     "IT",
     "CSE-AIML",
@@ -602,7 +602,7 @@
 {
   "subject_name": "Software Testing",
   "parent_subject": "Computer Science",
-  "branches": [
+  "branch": [
     "CSE",
     "IT"
   ],
@@ -632,7 +632,7 @@
 {
   "subject_name": "Artificial Intelligence",
   "parent_subject": "Artificial Intelligence",
-  "branches": [
+  "branch": [
     "CSE",
     "CSE-AIML",
     "CSE-DS",
@@ -667,7 +667,7 @@
 {
   "subject_name": "Machine Learning",
   "parent_subject": "Artificial Intelligence",
-  "branches": [
+  "branch": [
     "CSE",
     "CSE-AIML",
     "CSE-DS",
@@ -702,7 +702,7 @@
 {
   "subject_name": "Deep Learning",
   "parent_subject": "Artificial Intelligence",
-  "branches": [
+  "branch": [
     "CSE",
     "CSE-AIML",
     "CSE-DS",
@@ -733,7 +733,7 @@
 {
   "subject_name": "Natural Language Processing",
   "parent_subject": "Artificial Intelligence",
-  "branches": [
+  "branch": [
     "CSE",
     "CSE-AIML",
     "CSE-DS",
@@ -764,7 +764,7 @@
 {
   "subject_name": "Information Retrieval and Search Engines",
   "parent_subject": "Artificial Intelligence",
-  "branches": [
+  "branch": [
     "CSE",
     "CSE-DS"
   ],
@@ -794,7 +794,7 @@
 {
   "subject_name": "Big Data Analytics",
   "parent_subject": "Data Science",
-  "branches": [
+  "branch": [
     "CSE",
     "CSE-DS",
     "IT"
@@ -822,7 +822,7 @@
 {
   "subject_name": "Cloud Computing",
   "parent_subject": "Computer Science",
-  "branches": [
+  "branch": [
     "CSE",
     "CSE-AIML",
     "CSE-DS",
@@ -853,7 +853,7 @@
 {
   "subject_name": "DevOps",
   "parent_subject": "Computer Science",
-  "branches": [
+  "branch": [
     "CSE",
     "CSE-AIML",
     "CSE-DS",
@@ -883,7 +883,7 @@
 {
   "subject_name": "Blockchain Technologies",
   "parent_subject": "Computer Science",
-  "branches": [
+  "branch": [
     "CSE",
     "IT"
   ],
@@ -909,7 +909,7 @@
 {
   "subject_name": "Cyber Security",
   "parent_subject": "Security",
-  "branches": [
+  "branch": [
     "CSE",
     "CSE-CY",
     "IT"
@@ -939,7 +939,7 @@
 {
   "subject_name": "Network Security and Cryptography",
   "parent_subject": "Security",
-  "branches": [
+  "branch": [
     "CSE",
     "CSE-CY",
     "IT",
@@ -972,7 +972,7 @@
 {
   "subject_name": "Computer Graphics",
   "parent_subject": "Computer Science",
-  "branches": ["CSE","IT"],
+  "branch": ["CSE","IT"],
   "aliases": ["Graphics"],
   "description": "Generation and manipulation of computer graphics.",
   "keywords": ["opengl","graphics","rendering","transformation","clipping","rasterization","3d graphics"],
@@ -981,7 +981,7 @@
 {
   "subject_name": "Data Visualization",
   "parent_subject": "Data Science",
-  "branches": ["CSE-DS","CSE-AIML","IT"],
+  "branch": ["CSE-DS","CSE-AIML","IT"],
   "aliases": ["Visualization"],
   "description": "Visualization techniques for data analysis.",
   "keywords": ["matplotlib","seaborn","plotly","dashboard","tableau","visualization"],
@@ -990,7 +990,7 @@
 {
   "subject_name": "Business Analytics",
   "parent_subject": "Data Science",
-  "branches": ["CSE-DS","IT"],
+  "branch": ["CSE-DS","IT"],
   "aliases": [],
   "description": "Business intelligence and analytics.",
   "keywords": ["analytics","business intelligence","kpi","dashboard","decision making"],
@@ -999,7 +999,7 @@
 {
   "subject_name": "Reinforcement Learning",
   "parent_subject": "Artificial Intelligence",
-  "branches": ["CSE-AIML"],
+  "branch": ["CSE-AIML"],
   "aliases": ["RL"],
   "description": "Learning through interaction using rewards.",
   "keywords": ["q learning","policy","mdp","actor critic","reward","agent"],
@@ -1008,7 +1008,7 @@
 {
   "subject_name": "Unstructured Databases",
   "parent_subject": "Database",
-  "branches": ["CSE","IT"],
+  "branch": ["CSE","IT"],
   "aliases": ["NoSQL"],
   "description": "NoSQL databases and document stores.",
   "keywords": ["mongodb","cassandra","redis","nosql","document database"],
@@ -1017,7 +1017,7 @@
 {
   "subject_name": "Internet of Things",
   "parent_subject": "Computer Science",
-  "branches": ["ECE","EEE","CSE","IT"],
+  "branch": ["ECE","EEE","CSE","IT"],
   "aliases": ["IoT"],
   "description": "Connected embedded systems and sensors.",
   "keywords": ["iot","mqtt","esp32","arduino","sensor","edge computing"],
@@ -1026,7 +1026,7 @@
 {
   "subject_name": "Wireless Sensor Networks",
   "parent_subject": "Computer Science",
-  "branches": ["ECE","CSE"],
+  "branch": ["ECE","CSE"],
   "aliases": ["WSN"],
   "description": "Wireless sensor communication systems.",
   "keywords": ["sensor network","routing","zigbee","wireless","mesh"],
@@ -1035,7 +1035,7 @@
 {
   "subject_name": "Robotic Process Automation",
   "parent_subject": "Artificial Intelligence",
-  "branches": ["CSE","IT"],
+  "branch": ["CSE","IT"],
   "aliases": ["RPA"],
   "description": "Automation of repetitive business processes.",
   "keywords": ["uipath","automation anywhere","workflow","rpa","bot"],
@@ -1044,7 +1044,7 @@
 {
   "subject_name": "Android Development",
   "parent_subject": "Programming",
-  "branches": ["IT","CSE"],
+  "branch": ["IT","CSE"],
   "aliases": ["Android"],
   "description": "Android application development.",
   "keywords": ["android","kotlin","java","activity","intent","xml","android studio"],
@@ -1053,7 +1053,7 @@
 {
   "subject_name": "Web Development",
   "parent_subject": "Programming",
-  "branches": ["IT","CSE"],
+  "branch": ["IT","CSE"],
   "aliases": ["Web Programming"],
   "description": "Frontend and backend web development.",
   "keywords": ["html","css","javascript","django","flask","react","bootstrap"],
@@ -1062,7 +1062,7 @@
 {
   "subject_name": "Middleware Technologies",
   "parent_subject": "Computer Science",
-  "branches": ["IT"],
+  "branch": ["IT"],
   "aliases": [],
   "description": "Middleware communication technologies.",
   "keywords": ["middleware","rpc","rest","soap","message queue"],
@@ -1071,7 +1071,7 @@
 {
   "subject_name": "Human Computer Interaction",
   "parent_subject": "Computer Science",
-  "branches": ["IT"],
+  "branch": ["IT"],
   "aliases": ["HCI"],
   "description": "User interface and interaction design.",
   "keywords": ["usability","ux","ui","interaction","design"],
@@ -1080,7 +1080,7 @@
 {
   "subject_name": "Unix Network Programming",
   "parent_subject": "Computer Science",
-  "branches": ["IT"],
+  "branch": ["IT"],
   "aliases": ["UNP"],
   "description": "Network programming in Unix systems.",
   "keywords": ["socket","fork","tcp","udp","select","poll"],
@@ -1089,7 +1089,7 @@
 {
   "subject_name": "Information Storage Systems",
   "parent_subject": "Computer Science",
-  "branches": ["IT"],
+  "branch": ["IT"],
   "aliases": ["Storage Systems"],
   "description": "Enterprise storage technologies.",
   "keywords": ["san","nas","raid","storage","backup"],
@@ -1098,10 +1098,11 @@
 {
   "subject_name": "E-Commerce",
   "parent_subject": "Computer Science",
-  "branches": ["IT"],
+  "branch": ["IT"],
   "aliases": ["Electronic Commerce"],
   "description": "Electronic commerce technologies and security.",
   "keywords": ["payment gateway","ecommerce","shopping cart","digital payment"],
   "topics": ["Online Payments","Security","Business Models"]
 }
 ]
+
