@@ -29,44 +29,44 @@ def generate_subject_embeddings():
                 continue
             parts = []
 
-# Branch
-            if subject.branch:
-               parts.append(subject.branch)
+            parts.append(subject.subject_name)
 
-# Parent subject
             if subject.parent_subject:
                 parts.append(subject.parent_subject)
 
- # Subject
-            parts.append(subject.subject_name)
+            if subject.aliases:
+                parts.append(subject.aliases)
 
- # Keywords
+            if subject.description:
+                parts.append(subject.description)
+
             if subject.keywords:
                 parts.append(subject.keywords)
 
-            text = " ".join(parts)
+            if subject.topics:
+                parts.append(subject.topics)
+
+            text = "\n".join(parts)
 
 
             text = f"""
-Subject
-
+Subject:
 {subject.subject_name}
 
-Parent Subject
-
+Parent Subject:
 {subject.parent_subject}
 
-Description
-
+Description:
 {subject.description}
 
-Keywords
-
+Keywords:
 {subject.keywords}
 
-Topics
-
+Topics:
 {subject.topics}
+
+Aliases:
+{subject.aliases}
 """
 
 

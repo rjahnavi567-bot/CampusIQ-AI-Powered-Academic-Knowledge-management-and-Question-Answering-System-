@@ -82,23 +82,25 @@ def process_text_pages(
 
             # NEW
             chunk["file_type"] = file_type
+            print(subject)
 
-            chunk["subject"] = subject["primary_subject"]
+            chunk["subject"] = subject.get("primary_subject") or ""
 
-            chunk["parent_subject"] = subject["parent_subject"]
+            chunk["parent_subject"] = subject.get("parent_subject") or ""
 
-            chunk["subject_confidence"] = subject["confidence"]
+            chunk["subject_confidence"] = subject.get("confidence", 0)
 
             chunk["secondary_subjects"] = "|".join(
-    subject["secondary_subjects"]
+    subject.get("secondary_subjects", [])
 )
 
             chunk["matched_keywords"] = "|".join(
-    subject["matched_keywords"]
+    subject.get("matched_keywords", [])
 )
 
-            chunk["subject_detection_method"] = subject["method"]
-
+            chunk["subject_detection_method"] = (
+    subject.get("method") or ""
+)
             chunks.append(chunk)
         print(f"\nPage {page['page_no']}")
         print("Text Length:", len(page["text"]))
@@ -108,6 +110,11 @@ def process_text_pages(
 
     if chunks:
         print(chunks[0])
+        print("\n===== CHUNK TYPES =====")
+        
+        for k, v in chunks[0].items():
+                print(k, type(v), v)
+    
     else:
         print("No chunks generated.")
     text_time = text_timer.stop()

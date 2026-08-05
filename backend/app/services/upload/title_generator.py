@@ -8,7 +8,8 @@ def generate_document_title(
     file_path,
     pages,
     preview_text,
-    original_filename
+    original_filename,
+    subject_result=None
 ):
     """
     Generates a smart filename for uploaded document.
@@ -18,28 +19,47 @@ def generate_document_title(
 
     suggested_title = generate_title(metadata)
 
-    if suggested_title == "Untitled_Document":
+####################################################
+# Fallback title from document content
+####################################################
 
-        full_text = preview_text
+    if suggested_title == "Untitled_Document":
 
         words = []
 
-        for word in full_text.split():
+        for word in preview_text.split():
+
+            word = word.strip()
 
             if len(word) > 3:
-                words.append(word)
+               words.append(word)
 
             if len(words) >= 8:
-                break
+               break
 
         if words:
             suggested_title = "_".join(words)
 
         else:
             suggested_title = os.path.splitext(
-                original_filename
-            )[0]
+            original_filename
+        )[0]
 
+####################################################
+# Prefix detected subject
+####################################################
+
+    if subject_result:
+
+        subject = subject_result.get("primary_subject")
+
+        if subject:
+
+            subject = subject.replace("/", "_").replace(" ", "_")
+
+            if not suggested_title.lower().startswith(subject.lower()):
+
+               suggested_title = f"{subject}_{suggested_title}"
     suggested_title = (
         suggested_title
         .replace(":", "")

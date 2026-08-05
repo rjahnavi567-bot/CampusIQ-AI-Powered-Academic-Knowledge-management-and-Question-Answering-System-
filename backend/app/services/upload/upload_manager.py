@@ -256,7 +256,8 @@ class UploadManager:
     file_path=file_path,
     pages=pages,
     preview_text=preview_text,
-    original_filename=file.filename
+    original_filename=file.filename,
+    subject_result=subject_result
 )
 
             )

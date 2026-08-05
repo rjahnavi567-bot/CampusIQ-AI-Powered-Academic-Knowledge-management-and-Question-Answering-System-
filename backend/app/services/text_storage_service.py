@@ -29,18 +29,26 @@ def store_text_chunks(document_id, chunks):
 
     "type": "text",
 
-    "topic": chunk.get("topic", ""),
+    "topic": chunk.get("topic") or "",
 
     "keywords": ",".join(
         chunk.get("keywords", [])
     ),
 
-    "subject": chunk.get("subject", ""),
+    "subject": chunk.get("subject") or "",
 
-    "parent_subject": chunk.get(
-        "parent_subject",
-        ""
-    ),
+    "parent_subject": chunk.get("parent_subject") or "",
+
+    "secondary_subjects": chunk.get("secondary_subjects") or "",
+
+    "matched_keywords": chunk.get("matched_keywords") or "",
+
+    "subject_detection_method": chunk.get("subject_detection_method") or "",
+
+    "topic": chunk.get("topic") or "",
+
+    "source_file": chunk.get("source_file") or "",
+
 
     "subject_confidence": float(
         chunk.get(
@@ -48,27 +56,7 @@ def store_text_chunks(document_id, chunks):
             0
         )
     ),
-
-    "secondary_subjects": chunk.get(
-        "secondary_subjects",
-        ""
-    ),
-
-    "matched_keywords": chunk.get(
-        "matched_keywords",
-        ""
-    ),
-
-    "subject_detection_method": chunk.get(
-        "subject_detection_method",
-        ""
-    ),
-
-    "source_file": chunk.get(
-        "source_file",
-        ""
-    ),
-
+    
     "page_no": int(
         chunk.get("page_no", 1)
     ),
