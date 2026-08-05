@@ -16,10 +16,49 @@ from app.services.chroma_service import (
     image_collection
 )
 from fastapi import Depends
+from collections import defaultdict
 from app.dependencies.auth_dependency import get_current_user
 router = APIRouter()
 
+@router.get("/documents/grouped")
+def get_documents_grouped(
+    current_user=Depends(get_current_user)
+):
+    db = SessionLocal()
 
+    try:
+
+        docs = (
+            db.query(Document)
+            .order_by(
+                Document.parent_subject,
+                Document.subject,
+                Document.filename
+            )
+            .all()
+        )
+
+        grouped = defaultdict(list)
+
+        for doc in docs:
+
+            subject = (
+                doc.subject
+                if doc.subject
+                else "Uncategorized"
+            )
+
+            grouped[subject].append(
+                {
+                    "id": doc.id,
+                    "filename": doc.filename
+                }
+            )
+
+        return grouped
+
+    finally:
+        db.close()
 @router.get("/documents/suggestions")
 def autocomplete(query: str):
 
