@@ -9,10 +9,22 @@ export default function Ask() {
 
   const [marks, setMarks] = useState(5);
 
-  const [documents, setDocuments] = useState([]);
+  const [groupedDocuments, setGroupedDocuments] = useState([]);
 
   const [selectedDocuments, setSelectedDocuments] =
     useState([]);
+  const [expandedSubjects, setExpandedSubjects] = useState({});
+  const toggleSubject = (subject) => {
+
+    setExpandedSubjects(prev => ({
+
+        ...prev,
+
+        [subject]: !prev[subject]
+
+    }));
+
+};
 
   const [loading, setLoading] = useState(false);
 
@@ -31,19 +43,17 @@ export default function Ask() {
   // ==========================
   useEffect(() => {
 
-    api.get("/documents")
-      .then((res) => {
+    api.get("/documents/grouped")
 
-        setDocuments(res.data);
+    .then(res => {
 
-      })
-      .catch((err) => {
+        setGroupedDocuments(res.data);
 
-        console.log(err);
+    })
 
-      });
+    .catch(console.log);
 
-  }, []);
+}, []);
 
   // ==========================
   // MULTI SELECT
@@ -175,42 +185,7 @@ export default function Ask() {
       <br />
       <br />
 
-      <label>
-        Select Document(s)
-      </label>
-
-      <br />
-
-      <select
-        multiple
-        size="6"
-        value={selectedDocuments}
-        onChange={
-          handleDocumentChange
-        }
-        style={{
-          width: "100%",
-          maxWidth: "600px",
-          padding: "10px"
-        }}
-      >
-
-        {
-          documents.map(
-            (doc) => (
-              <option
-                key={doc.id}
-                value={
-                  doc.filename
-                }
-              >
-                {doc.filename}
-              </option>
-            )
-          )
-        }
-
-      </select>
+      
 
       <p
         style={{
