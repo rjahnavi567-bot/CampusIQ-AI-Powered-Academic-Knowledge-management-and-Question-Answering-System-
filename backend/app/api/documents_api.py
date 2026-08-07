@@ -20,6 +20,11 @@ from collections import defaultdict
 from app.dependencies.auth_dependency import get_current_user
 router = APIRouter()
 
+from collections import defaultdict
+
+from collections import defaultdict
+
+
 @router.get("/documents/grouped")
 def get_documents_grouped(
     current_user=Depends(get_current_user)
@@ -51,11 +56,29 @@ def get_documents_grouped(
             grouped[subject].append(
                 {
                     "id": doc.id,
-                    "filename": doc.filename
+                    "filename": doc.filename,
+                    "subject": doc.subject,
+                    "parent_subject": doc.parent_subject,
+                    "status": doc.status,
+                    "chunk_count": doc.chunk_count,
+                    "created_at": doc.created_at
                 }
             )
 
-        return grouped
+        # Convert dictionary into frontend-friendly list
+
+        result = []
+
+        for subject, documents in grouped.items():
+
+            result.append(
+                {
+                    "subject": subject,
+                    "documents": documents
+                }
+            )
+
+        return result
 
     finally:
         db.close()
