@@ -18,13 +18,440 @@ from app.services.chroma_service import (
 from fastapi import Depends
 from collections import defaultdict
 from app.dependencies.auth_dependency import get_current_user
+
+from collections import defaultdict
+
+from collections import defaultdict
+
+from fastapi import APIRouter, HTTPException, Depends
+from app.services.document_processor import extract_text
+from app.services.preview_service import build_preview_text
+from app.services.subject_detection.subject_classifier import classify_subject
+from app.services.chroma_service import text_collection
+from app.database.connection import SessionLocal
+from app.database.models import Document
+from app.dependencies.auth_dependency import get_current_user
+
+import json
+
 router = APIRouter()
 
-from collections import defaultdict
 
-from collections import defaultdict
+@router.post("/documents/reassign-subjects")
+def reassign_old_document_subjects(
+    current_user=Depends(get_current_user)
+):
+    db = SessionLocal()
 
+    try:
 
+        # --------------------------------------------------
+        # Find documents uploaded before subject detection
+        # --------------------------------------------------
+
+        documents = (
+            db.query(Document)
+            .filter(
+                (Document.subject == None) |
+                (Document.subject == "")
+            )
+            .all()
+        )
+
+        print(
+            f"\nFound {len(documents)} documents "
+            f"without subjects."
+        )
+
+        results = []
+
+        for document in documents:
+
+            print("\n================================")
+            print(
+                f"Processing: {document.filename}"
+            )
+            print(
+                f"Document ID: {document.id}"
+            )
+            print("================================")
+
+            # --------------------------------------------------
+            # Check file
+            # --------------------------------------------------
+
+            if not document.file_path:
+
+                print("No file path. Skipping.")
+
+                results.append({
+                    "document_id": document.id,
+                    "filename": document.filename,
+                    "status": "skipped",
+                    "reason": "No file path"
+                })
+
+                continue
+
+            # --------------------------------------------------
+            # Extract existing document text
+            # --------------------------------------------------
+
+            try:
+
+                pages = extract_text(
+                    document.file_path
+                )
+
+            except Exception as e:
+
+                print(
+                    "Text extraction failed:",
+                    str(e)
+                )
+
+                results.append({
+                    "document_id": document.id,
+                    "filename": document.filename,
+                    "status": "failed",
+                    "reason": "Text extraction failed"
+                })
+
+                continue
+
+            if not pages:
+
+                print("No pages extracted.")
+
+                results.append({
+                    "document_id": document.id,
+                    "filename": document.filename,
+                    "status": "skipped",
+                    "reason": "No text extracted"
+                })
+
+                continue
+
+            # --------------------------------------------------
+            # Build preview text
+            # --------------------------------------------------
+
+            try:
+
+                preview_text = build_preview_text(
+                    pages
+                )
+
+            except Exception as e:
+
+                print(
+                    "Preview generation failed:",
+                    str(e)
+                )
+
+                results.append({
+                    "document_id": document.id,
+                    "filename": document.filename,
+                    "status": "failed",
+                    "reason": "Preview generation failed"
+                })
+
+                continue
+
+            if not preview_text.strip():
+
+                print("Empty preview text.")
+
+                results.append({
+                    "document_id": document.id,
+                    "filename": document.filename,
+                    "status": "skipped",
+                    "reason": "Empty preview text"
+                })
+
+                continue
+
+            # --------------------------------------------------
+            # Existing subject detection pipeline
+            # --------------------------------------------------
+
+            try:
+
+                subject_result = classify_subject(
+                    preview_text
+                )
+
+            except Exception as e:
+
+                print(
+                    "Subject detection failed:",
+                    str(e)
+                )
+
+                results.append({
+                    "document_id": document.id,
+                    "filename": document.filename,
+                    "status": "failed",
+                    "reason": "Subject detection failed"
+                })
+
+                continue
+
+            print(
+                "Detected subject:",
+                subject_result
+            )
+
+            primary_subject = (
+                subject_result.get(
+                    "primary_subject"
+                )
+            )
+
+            # --------------------------------------------------
+            # No subject detected
+            # --------------------------------------------------
+
+            if not primary_subject:
+
+                print(
+                    "No subject detected. "
+                    "Keeping document uncategorized."
+                )
+
+                results.append({
+                    "document_id": document.id,
+                    "filename": document.filename,
+                    "status": "uncategorized"
+                })
+
+                continue
+
+            # --------------------------------------------------
+            # Update Document table
+            # --------------------------------------------------
+
+            document.subject = primary_subject
+
+            document.primary_subject = (
+                primary_subject
+            )
+
+            document.parent_subject = (
+                subject_result.get(
+                    "parent_subject",
+                    ""
+                )
+            )
+
+            document.subject_confidence = (
+                subject_result.get(
+                    "confidence",
+                    0
+                )
+            )
+
+            document.secondary_subjects = json.dumps(
+                subject_result.get(
+                    "secondary_subjects",
+                    []
+                )
+            )
+
+            document.matched_keywords = json.dumps(
+                subject_result.get(
+                    "matched_keywords",
+                    []
+                )
+            )
+
+            document.subject_detection_method = (
+                subject_result.get(
+                    "method",
+                    "migration"
+                )
+            )
+
+            document.subject_detected_by = (
+                "Embedding Similarity v1"
+            )
+
+            db.commit()
+
+            # --------------------------------------------------
+            # Update ChromaDB metadata
+            # --------------------------------------------------
+
+            chroma_updated = 0
+
+            try:
+
+                chroma_results = text_collection.get()
+
+                ids_to_update = []
+                metadata_to_update = []
+
+                for i, metadata in enumerate(
+                    chroma_results.get(
+                        "metadatas",
+                        []
+                    )
+                ):
+
+                    if not metadata:
+                        continue
+
+                    source_file = metadata.get(
+                        "source_file"
+                    )
+
+                    if source_file != document.filename:
+                        continue
+
+                    updated_metadata = dict(
+                        metadata
+                    )
+
+                    updated_metadata["subject"] = (
+                        primary_subject
+                    )
+
+                    updated_metadata["parent_subject"] = (
+                        subject_result.get(
+                            "parent_subject",
+                            ""
+                        )
+                    )
+
+                    updated_metadata[
+                        "subject_confidence"
+                    ] = float(
+                        subject_result.get(
+                            "confidence",
+                            0
+                        )
+                    )
+
+                    secondary = (
+                        subject_result.get(
+                            "secondary_subjects",
+                            []
+                        )
+                    )
+
+                    updated_metadata[
+                        "secondary_subjects"
+                    ] = "|".join(
+                        secondary
+                    )
+
+                    matched_keywords = (
+                        subject_result.get(
+                            "matched_keywords",
+                            []
+                        )
+                    )
+
+                    updated_metadata[
+                        "matched_keywords"
+                    ] = "|".join(
+                        matched_keywords
+                    )
+
+                    updated_metadata[
+                        "subject_detection_method"
+                    ] = subject_result.get(
+                        "method",
+                        "migration"
+                    )
+
+                    ids_to_update.append(
+                        chroma_results["ids"][i]
+                    )
+
+                    metadata_to_update.append(
+                        updated_metadata
+                    )
+
+                if ids_to_update:
+
+                    text_collection.update(
+                        ids=ids_to_update,
+                        metadatas=metadata_to_update
+                    )
+
+                    chroma_updated = len(
+                        ids_to_update
+                    )
+
+                    print(
+                        f"Updated {chroma_updated} "
+                        "Chroma chunks."
+                    )
+
+            except Exception as e:
+
+                print(
+                    "Chroma metadata update failed:",
+                    str(e)
+                )
+
+            # --------------------------------------------------
+            # Result
+            # --------------------------------------------------
+
+            results.append({
+
+                "document_id": document.id,
+
+                "filename": document.filename,
+
+                "status": "updated",
+
+                "subject": primary_subject,
+
+                "parent_subject": (
+                    subject_result.get(
+                        "parent_subject",
+                        ""
+                    )
+                ),
+
+                "confidence": (
+                    subject_result.get(
+                        "confidence",
+                        0
+                    )
+                ),
+
+                "method": (
+                    subject_result.get(
+                        "method",
+                        "migration"
+                    )
+                ),
+
+                "chroma_chunks_updated":
+                    chroma_updated
+
+            })
+
+        return {
+
+            "message":
+                "Old document subject reassignment completed.",
+
+            "total_documents_checked":
+                len(documents),
+
+            "results":
+                results
+
+        }
+
+    finally:
+
+        db.close()
 @router.get("/documents/grouped")
 def get_documents_grouped(
     current_user=Depends(get_current_user)
