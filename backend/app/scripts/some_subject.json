@@ -1,0 +1,136 @@
+[{
+  "subject_name": "Computer Graphics",
+  "parent_subject": "Computer Science",
+  "branch": ["CSE","IT"],
+  "aliases": ["Graphics"],
+  "description": "Generation and manipulation of computer graphics.",
+  "keywords": ["opengl","graphics","rendering","transformation","clipping","rasterization","3d graphics"],
+  "topics": ["OpenGL","2D Graphics","3D Graphics","Viewing","Projection"]
+},
+{
+  "subject_name": "Data Visualization",
+  "parent_subject": "Data Science",
+  "branch": ["CSE-DS","CSE-AIML","IT"],
+  "aliases": ["Visualization"],
+  "description": "Visualization techniques for data analysis.",
+  "keywords": ["matplotlib","seaborn","plotly","dashboard","tableau","visualization"],
+  "topics": ["Charts","Dashboards","Matplotlib","Seaborn","Plotly"]
+},
+{
+  "subject_name": "Business Analytics",
+  "parent_subject": "Data Science",
+  "branch": ["CSE-DS","IT"],
+  "aliases": [],
+  "description": "Business intelligence and analytics.",
+  "keywords": ["analytics","business intelligence","kpi","dashboard","decision making"],
+  "topics": ["BI","KPI","Reporting","Prediction"]
+},
+{
+  "subject_name": "Reinforcement Learning",
+  "parent_subject": "Artificial Intelligence",
+  "branch": ["CSE-AIML"],
+  "aliases": ["RL"],
+  "description": "Learning through interaction using rewards.",
+  "keywords": ["q learning","policy","mdp","actor critic","reward","agent"],
+  "topics": ["MDP","Q Learning","Policy Gradient","Actor Critic"]
+},
+{
+  "subject_name": "Unstructured Databases",
+  "parent_subject": "Database",
+  "branch": ["CSE","IT"],
+  "aliases": ["NoSQL"],
+  "description": "NoSQL databases and document stores.",
+  "keywords": ["mongodb","cassandra","redis","nosql","document database"],
+  "topics": ["MongoDB","Cassandra","Redis","Document Store"]
+},
+{
+  "subject_name": "Internet of Things",
+  "parent_subject": "Computer Science",
+  "branch": ["ECE","EEE","CSE","IT"],
+  "aliases": ["IoT"],
+  "description": "Connected embedded systems and sensors.",
+  "keywords": ["iot","mqtt","esp32","arduino","sensor","edge computing"],
+  "topics": ["MQTT","ESP32","Arduino","Sensors","Cloud IoT"]
+},
+{
+  "subject_name": "Wireless Sensor Networks",
+  "parent_subject": "Computer Science",
+  "branch": ["ECE","CSE"],
+  "aliases": ["WSN"],
+  "description": "Wireless sensor communication systems.",
+  "keywords": ["sensor network","routing","zigbee","wireless","mesh"],
+  "topics": ["Routing","Sensor Nodes","Energy Efficiency"]
+},
+{
+  "subject_name": "Robotic Process Automation",
+  "parent_subject": "Artificial Intelligence",
+  "branch": ["CSE","IT"],
+  "aliases": ["RPA"],
+  "description": "Automation of repetitive business processes.",
+  "keywords": ["uipath","automation anywhere","workflow","rpa","bot"],
+  "topics": ["UiPath","Automation Anywhere","Workflow Automation"]
+},
+{
+  "subject_name": "Android Development",
+  "parent_subject": "Programming",
+  "branch": ["IT","CSE"],
+  "aliases": ["Android"],
+  "description": "Android application development.",
+  "keywords": ["android","kotlin","java","activity","intent","xml","android studio"],
+  "topics": ["Activities","Layouts","Fragments","SQLite"]
+},
+{
+  "subject_name": "Web Development",
+  "parent_subject": "Programming",
+  "branch": ["IT","CSE"],
+  "aliases": ["Web Programming"],
+  "description": "Frontend and backend web development.",
+  "keywords": ["html","css","javascript","django","flask","react","bootstrap"],
+  "topics": ["HTML","CSS","JavaScript","Backend","Frontend"]
+},
+{
+  "subject_name": "Middleware Technologies",
+  "parent_subject": "Computer Science",
+  "branch": ["IT"],
+  "aliases": [],
+  "description": "Middleware communication technologies.",
+  "keywords": ["middleware","rpc","rest","soap","message queue"],
+  "topics": ["REST","SOAP","RPC","Message Brokers"]
+},
+{
+  "subject_name": "Human Computer Interaction",
+  "parent_subject": "Computer Science",
+  "branch": ["IT"],
+  "aliases": ["HCI"],
+  "description": "User interface and interaction design.",
+  "keywords": ["usability","ux","ui","interaction","design"],
+  "topics": ["UX","UI","Evaluation","Accessibility"]
+},
+{
+  "subject_name": "Unix Network Programming",
+  "parent_subject": "Computer Science",
+  "branch": ["IT"],
+  "aliases": ["UNP"],
+  "description": "Network programming in Unix systems.",
+  "keywords": ["socket","fork","tcp","udp","select","poll"],
+  "topics": ["Sockets","TCP","UDP","IPC"]
+},
+{
+  "subject_name": "Information Storage Systems",
+  "parent_subject": "Computer Science",
+  "branch": ["IT"],
+  "aliases": ["Storage Systems"],
+  "description": "Enterprise storage technologies.",
+  "keywords": ["san","nas","raid","storage","backup"],
+  "topics": ["RAID","SAN","NAS","Backup"]
+},
+{
+  "subject_name": "E-Commerce",
+  "parent_subject": "Computer Science",
+  "branch": ["IT"],
+  "aliases": ["Electronic Commerce"],
+  "description": "Electronic commerce technologies and security.",
+  "keywords": ["payment gateway","ecommerce","shopping cart","digital payment"],
+  "topics": ["Online Payments","Security","Business Models"]
+}
+]
