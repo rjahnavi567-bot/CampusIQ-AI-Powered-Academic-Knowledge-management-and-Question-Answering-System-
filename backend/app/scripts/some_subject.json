@@ -132,5 +132,48 @@
   "description": "Electronic commerce technologies and security.",
   "keywords": ["payment gateway","ecommerce","shopping cart","digital payment"],
   "topics": ["Online Payments","Security","Business Models"]
-}
+},
+{
+    "subject_name": "Calculus and Linear Algebra",
+    "parent_subject": "Mathematics",
+    "branch": [
+      "CSE",
+      "CSE-AIML",
+      "CSE-DS",
+      "CSE-CY",
+      "IT",
+      "ECE",
+      "EEE",
+      "Mechanical",
+      "Civil",
+      "Chemical"
+    ],
+    "aliases": [
+      "Calculus",
+      "Linear Algebra",
+      "Engineering Mathematics I"
+    ],
+    "description": "Fundamentals of differential calculus, integral calculus, matrices, vectors and linear algebra.",
+    "keywords": [
+      "calculus",
+      "linear algebra",
+      "differentiation",
+      "integration",
+      "limits",
+      "continuity",
+      "matrices",
+      "vectors",
+      "eigenvalues",
+      "determinants"
+    ],
+    "topics": [
+      "Limits",
+      "Continuity",
+      "Differentiation",
+      "Integration",
+      "Matrices",
+      "Vector Spaces",
+      "Eigenvalues",
+      "Eigenvectors"
+    ]}
 ]
