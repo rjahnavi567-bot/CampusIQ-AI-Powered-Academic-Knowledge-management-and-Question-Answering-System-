@@ -93,7 +93,7 @@ Never output hashes inside the answer body.
             }
         ],
         temperature=0.3,
-        max_tokens=500
+        max_tokens=1400
     )
 
     return response.choices[0].message.content
