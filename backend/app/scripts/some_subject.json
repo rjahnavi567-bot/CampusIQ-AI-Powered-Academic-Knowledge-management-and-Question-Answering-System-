@@ -175,5 +175,118 @@
       "Vector Spaces",
       "Eigenvalues",
       "Eigenvectors"
-    ]}
+    ]},
+    {
+    "subject_name": "Python Programming",
+    "parent_subject": "Programming",
+    "branch": [
+      "CSE",
+      "CSE-AIML",
+      "CSE-DS",
+      "IT",
+      "ECE",
+      "EEE"
+    ],
+    "aliases": [
+      "Python",
+      "Programming with Python"
+    ],
+    "description": "Programming using Python with libraries for scientific computing.",
+    "keywords": [
+      "python",
+      "numpy",
+      "pandas",
+      "matplotlib",
+      "file handling",
+      "oops"
+    ],
+    "topics": [
+      "Functions",
+      "Modules",
+      "NumPy",
+      "Pandas",
+      "OOP",
+      "File Handling"
+    ]
+  }
+  ,
+{
+  "subject_name": "Object Oriented Programming through Java",
+  "parent_subject": "Programming",
+  "branch": [
+    "CSE",
+    "CSE-AIML",
+    "CSE-DS",
+    "CSE-CY",
+    "IT"
+  ],
+  "aliases": [
+    "Java",
+    "Java Programming",
+    "OOP",
+    "Object Oriented Programming"
+  ],
+  "description": "Object-oriented programming concepts using Java.",
+  "keywords": [
+    "java",
+    "class",
+    "object",
+    "inheritance",
+    "polymorphism",
+    "encapsulation",
+    "abstraction",
+    "collections",
+    "exception handling",
+    "multithreading"
+  ],
+  "topics": [
+    "Classes",
+    "Objects",
+    "Inheritance",
+    "Polymorphism",
+    "Collections",
+    "Exceptions",
+    "Threads"
+  ]
+},
+{
+  "subject_name": "Data Structures and Algorithms",
+  "parent_subject": "Computer Science",
+  "branch": [
+    "CSE",
+    "CSE-AIML",
+    "CSE-DS",
+    "CSE-CY",
+    "IT"
+  ],
+  "aliases": [
+    "DSA",
+    "Data Structures",
+    "Algorithms"
+  ],
+  "description": "Study of efficient data organization and algorithm design.",
+  "keywords": [
+    "array",
+    "linked list",
+    "stack",
+    "queue",
+    "tree",
+    "graph",
+    "heap",
+    "hashing",
+    "sorting",
+    "searching"
+  ],
+  "topics": [
+    "Arrays",
+    "Linked Lists",
+    "Stacks",
+    "Queues",
+    "Trees",
+    "Graphs",
+    "Hash Tables",
+    "Sorting",
+    "Searching"
+  ]
+}
 ]
