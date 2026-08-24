@@ -69,14 +69,5 @@
   "description": "Automation of repetitive business processes.",
   "keywords": ["uipath","automation anywhere","workflow","rpa","bot"],
   "topics": ["UiPath","Automation Anywhere","Workflow Automation"]
-},
-{
-  "subject_name": "Android Development",
-  "parent_subject": "Programming",
-  "branch": ["IT","CSE"],
-  "aliases": ["Android"],
-  "description": "Android application development.",
-  "keywords": ["android","kotlin","java","activity","intent","xml","android studio"],
-  "topics": ["Activities","Layouts","Fragments","SQLite"]
 }
 ]
