@@ -78,14 +78,5 @@
   "description": "Android application development.",
   "keywords": ["android","kotlin","java","activity","intent","xml","android studio"],
   "topics": ["Activities","Layouts","Fragments","SQLite"]
-},
-{
-  "subject_name": "Web Development",
-  "parent_subject": "Programming",
-  "branch": ["IT","CSE"],
-  "aliases": ["Web Programming"],
-  "description": "Frontend and backend web development.",
-  "keywords": ["html","css","javascript","django","flask","react","bootstrap"],
-  "topics": ["HTML","CSS","JavaScript","Backend","Frontend"]
 }
 ]
