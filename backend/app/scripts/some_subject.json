@@ -87,33 +87,5 @@
   "description": "Frontend and backend web development.",
   "keywords": ["html","css","javascript","django","flask","react","bootstrap"],
   "topics": ["HTML","CSS","JavaScript","Backend","Frontend"]
-},
-{
-  "subject_name": "Middleware Technologies",
-  "parent_subject": "Computer Science",
-  "branch": ["IT"],
-  "aliases": [],
-  "description": "Middleware communication technologies.",
-  "keywords": ["middleware","rpc","rest","soap","message queue"],
-  "topics": ["REST","SOAP","RPC","Message Brokers"]
-},
-{
-  "subject_name": "Human Computer Interaction",
-  "parent_subject": "Computer Science",
-  "branch": ["IT"],
-  "aliases": ["HCI"],
-  "description": "User interface and interaction design.",
-  "keywords": ["usability","ux","ui","interaction","design"],
-  "topics": ["UX","UI","Evaluation","Accessibility"]
-},
-{
-  "subject_name": "Unix Network Programming",
-  "parent_subject": "Computer Science",
-  "branch": ["IT"],
-  "aliases": ["UNP"],
-  "description": "Network programming in Unix systems.",
-  "keywords": ["socket","fork","tcp","udp","select","poll"],
-  "topics": ["Sockets","TCP","UDP","IPC"]
 }
-  
 ]
