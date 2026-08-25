@@ -60,14 +60,5 @@
   "description": "Wireless sensor communication systems.",
   "keywords": ["sensor network","routing","zigbee","wireless","mesh"],
   "topics": ["Routing","Sensor Nodes","Energy Efficiency"]
-},
-{
-  "subject_name": "Robotic Process Automation",
-  "parent_subject": "Artificial Intelligence",
-  "branch": ["CSE","IT"],
-  "aliases": ["RPA"],
-  "description": "Automation of repetitive business processes.",
-  "keywords": ["uipath","automation anywhere","workflow","rpa","bot"],
-  "topics": ["UiPath","Automation Anywhere","Workflow Automation"]
 }
 ]
