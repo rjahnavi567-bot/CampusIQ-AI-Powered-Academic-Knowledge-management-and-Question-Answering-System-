@@ -51,14 +51,5 @@
   "description": "Connected embedded systems and sensors.",
   "keywords": ["iot","mqtt","esp32","arduino","sensor","edge computing"],
   "topics": ["MQTT","ESP32","Arduino","Sensors","Cloud IoT"]
-},
-{
-  "subject_name": "Wireless Sensor Networks",
-  "parent_subject": "Computer Science",
-  "branch": ["ECE","CSE"],
-  "aliases": ["WSN"],
-  "description": "Wireless sensor communication systems.",
-  "keywords": ["sensor network","routing","zigbee","wireless","mesh"],
-  "topics": ["Routing","Sensor Nodes","Energy Efficiency"]
 }
 ]
