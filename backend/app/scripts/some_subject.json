@@ -42,14 +42,5 @@
   "description": "NoSQL databases and document stores.",
   "keywords": ["mongodb","cassandra","redis","nosql","document database"],
   "topics": ["MongoDB","Cassandra","Redis","Document Store"]
-},
-{
-  "subject_name": "Internet of Things",
-  "parent_subject": "Computer Science",
-  "branch": ["ECE","EEE","CSE","IT"],
-  "aliases": ["IoT"],
-  "description": "Connected embedded systems and sensors.",
-  "keywords": ["iot","mqtt","esp32","arduino","sensor","edge computing"],
-  "topics": ["MQTT","ESP32","Arduino","Sensors","Cloud IoT"]
 }
 ]
