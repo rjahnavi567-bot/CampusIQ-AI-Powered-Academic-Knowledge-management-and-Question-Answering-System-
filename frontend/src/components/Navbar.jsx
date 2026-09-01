@@ -7,7 +7,7 @@ export default function Navbar() {
     <nav className="navbar">
 
       <h2>
-        🎓 campusIQ: Intelligent Academic Assistance System
+        🎓 AetherMind: A Context-Aware Academic Intelligence Platform
       </h2>
 
       <div>

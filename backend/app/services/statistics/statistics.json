@@ -1,25 +1,25 @@
 {
     "counters": {
-        "Total Failed Uploads": 46,
-        "Total Documents Uploaded": 83,
+        "Total Failed Uploads": 47,
+        "Total Documents Uploaded": 84,
         "Total Image Files": 3,
-        "Total Pages Processed": 12883,
-        "Total Words Extracted": 3943960,
-        "Total Paragraphs Identified": 12517,
-        "Total Semantic Chunks Generated": 12614,
-        "Total Useful Images Retained": 6192,
+        "Total Pages Processed": 12896,
+        "Total Words Extracted": 3944295,
+        "Total Paragraphs Identified": 12538,
+        "Total Semantic Chunks Generated": 12627,
+        "Total Useful Images Retained": 6199,
         "Total Useless Images Filtered": 0,
-        "Total Images Extracted": 6187,
-        "Total Images Classified": 6187,
+        "Total Images Extracted": 6194,
+        "Total Images Classified": 6194,
         "Total Image Captions Generated": 0,
-        "Total Metadata Records Generated": 12614,
-        "Total Chunks Stored": 12614,
-        "Total Images Stored": 5843,
-        "Total Embeddings Generated": 18457,
-        "Total Documents Stored": 83,
-        "Total Successful Uploads": 83,
+        "Total Metadata Records Generated": 12627,
+        "Total Chunks Stored": 12627,
+        "Total Images Stored": 5849,
+        "Total Embeddings Generated": 18476,
+        "Total Documents Stored": 84,
+        "Total Successful Uploads": 84,
         "Total TXT Files": 23,
-        "Total PPTX Files": 4,
+        "Total PPTX Files": 5,
         "Total DOCX Files": 16,
         "Total PDF Files": 37
     },
@@ -12101,7 +12101,20 @@
             0.28437519998988137,
             0.9147436000057496,
             0.11982949997764081,
-            1.4856566999806091
+            1.4856566999806091,
+            0.40460570016875863,
+            0.18792379996739328,
+            0.19135649991221726,
+            0.22426209994591773,
+            1.1439718999899924,
+            0.2615853000897914,
+            0.4136856000404805,
+            0.24616650003008544,
+            0.32559049990959466,
+            0.2801477999892086,
+            0.20029109995812178,
+            0.13975710002705455,
+            0.18163550016470253
         ],
         "Text Extraction Time": [
             1.5527900999877602,
@@ -12186,7 +12199,8 @@
             800.0177635000437,
             137.69842620001873,
             723.1898816000321,
-            1.4923275999026373
+            1.4923275999026373,
+            4.266773700015619
         ],
         "Image Filtering Time": [
             2.866278500005137,
@@ -25058,7 +25072,20 @@
             0.0013713000225834548,
             0.0010006999946199358,
             0.0020731999538838863,
-            0.0011828000424429774
+            0.0011828000424429774,
+            0.0018754000775516033,
+            2.2556269001215696,
+            0.0011958000250160694,
+            2.957149599911645,
+            0.002081099897623062,
+            2.8950630999170244,
+            0.0012833001092076302,
+            1.5260823999997228,
+            0.001936499960720539,
+            0.001985300099477172,
+            0.0018980000168085098,
+            0.8046455001458526,
+            1.7461582999676466
         ],
         "Image Extraction Time": [
             6.570490899990546,
@@ -25143,7 +25170,8 @@
             1702.1556257000193,
             509.5030250000418,
             1993.5075604000012,
-            5.438094799988903
+            5.438094799988903,
+            73.91134279989637
         ],
         "Caption Generation Time": [
             8.357403000001796,
@@ -25228,7 +25256,8 @@
             661.3361323000281,
             193.44391239999095,
             1031.8153943000361,
-            0.0005966000026091933
+            0.0005966000026091933,
+            80.88841949985363
         ],
         "End-to-End Document Processing Time": [
             21.42266089998884,
@@ -25313,7 +25342,8 @@
             2552.615183899994,
             792.7546645000111,
             3240.4754801000236,
-            16.481892899959348
+            16.481892899959348,
+            175.86661660019308
         ]
     }
 }

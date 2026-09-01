@@ -71,7 +71,7 @@ export default function Dashboard() {
 </div>
 
 <h1>
-🎓 campusIQ: Intelligent Academic Assistance System
+🎓 AetherMind: A Context-Aware Academic Intelligence Platform
 </h1>
 
 <p>
