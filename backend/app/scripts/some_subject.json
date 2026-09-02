@@ -33,14 +33,5 @@
   "description": "Learning through interaction using rewards.",
   "keywords": ["q learning","policy","mdp","actor critic","reward","agent"],
   "topics": ["MDP","Q Learning","Policy Gradient","Actor Critic"]
-},
-{
-  "subject_name": "Unstructured Databases",
-  "parent_subject": "Database",
-  "branch": ["CSE","IT"],
-  "aliases": ["NoSQL"],
-  "description": "NoSQL databases and document stores.",
-  "keywords": ["mongodb","cassandra","redis","nosql","document database"],
-  "topics": ["MongoDB","Cassandra","Redis","Document Store"]
 }
 ]
