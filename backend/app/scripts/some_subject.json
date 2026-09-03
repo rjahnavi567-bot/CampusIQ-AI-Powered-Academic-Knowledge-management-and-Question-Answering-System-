@@ -24,14 +24,5 @@
   "description": "Business intelligence and analytics.",
   "keywords": ["analytics","business intelligence","kpi","dashboard","decision making"],
   "topics": ["BI","KPI","Reporting","Prediction"]
-},
-{
-  "subject_name": "Reinforcement Learning",
-  "parent_subject": "Artificial Intelligence",
-  "branch": ["CSE-AIML"],
-  "aliases": ["RL"],
-  "description": "Learning through interaction using rewards.",
-  "keywords": ["q learning","policy","mdp","actor critic","reward","agent"],
-  "topics": ["MDP","Q Learning","Policy Gradient","Actor Critic"]
 }
 ]
