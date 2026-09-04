@@ -15,14 +15,5 @@
   "description": "Visualization techniques for data analysis.",
   "keywords": ["matplotlib","seaborn","plotly","dashboard","tableau","visualization"],
   "topics": ["Charts","Dashboards","Matplotlib","Seaborn","Plotly"]
-},
-{
-  "subject_name": "Business Analytics",
-  "parent_subject": "Data Science",
-  "branch": ["CSE-DS","IT"],
-  "aliases": [],
-  "description": "Business intelligence and analytics.",
-  "keywords": ["analytics","business intelligence","kpi","dashboard","decision making"],
-  "topics": ["BI","KPI","Reporting","Prediction"]
 }
 ]
