@@ -6,14 +6,5 @@
   "description": "Generation and manipulation of computer graphics.",
   "keywords": ["opengl","graphics","rendering","transformation","clipping","rasterization","3d graphics"],
   "topics": ["OpenGL","2D Graphics","3D Graphics","Viewing","Projection"]
-},
-{
-  "subject_name": "Data Visualization",
-  "parent_subject": "Data Science",
-  "branch": ["CSE-DS","CSE-AIML","IT"],
-  "aliases": ["Visualization"],
-  "description": "Visualization techniques for data analysis.",
-  "keywords": ["matplotlib","seaborn","plotly","dashboard","tableau","visualization"],
-  "topics": ["Charts","Dashboards","Matplotlib","Seaborn","Plotly"]
 }
 ]
