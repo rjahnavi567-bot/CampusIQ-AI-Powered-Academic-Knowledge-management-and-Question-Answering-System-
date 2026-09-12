@@ -1,410 +1,116 @@
-## 🚧 Development Status
+# 🎓 CampusIQ:AI-Powered-Academic-Knowledge-management-and-Question-Answering-System
 
-**Project Status:** Active Development
-
-AI-Academic-System is currently under active development. Core functionalities such as document ingestion, OCR processing, text extraction, chunking, embedding generation, vector storage, and semantic retrieval are being implemented and tested.
-
-### Current Progress
-
-✅ Project architecture finalized
-
-✅ FastAPI backend setup
-
-✅ Document processing pipeline implementation
-
-✅ OCR integration using Tesseract
-
-✅ Embedding generation pipeline
-
-✅ Vector database integration (FAISS)
-
-✅ Initial RAG workflow design
-
-✅ Duplicate document detection module
-
-✅ Advanced semantic search optimization
-
-✅ LLM integration and response generation
-
-🔄 Frontend development
-
-⏳ User authentication and authorization
-
-⏳ Knowledge graph generation
-
-⏳ Multi-user support
-
-### Note
-
-This repository is currently a work in progress. Features, APIs, folder structures, and implementation details may change as development continues. Contributions, suggestions, and feedback are welcome.
-
-# CampusIQ – AI-Powered Academic Knowledge management and Question Answering System 
-
-An AI-powered Academic Knowledge Management and Question Answering System designed to help students, researchers, and faculty interact with academic documents using Natural Language Processing (NLP), Retrieval-Augmented Generation (RAG), Semantic Search, and Large Language Models (LLMs).
+> An AI-powered Retrieval-Augmented Generation (RAG) platform that enables students and faculty to upload academic documents and receive accurate, context-aware answers grounded only in institutional learning resources.
 
 ---
 
-## Overview
+## 📖 Project Overview
 
-CampusIQ – AI-Powered Academic Knowledge management and Question Answering System  enables users to upload academic resources such as:
+CampusIQ:AI-Powered-Academic-Knowledge-management-and-Question-Answering-System is a context-aware academic intelligence platform designed to improve the way students interact with educational resources. Unlike general-purpose AI assistants, this system answers questions **only from uploaded academic materials** such as textbooks, lecture notes, PowerPoint presentations, and documents.
 
-* PDF files
-* PowerPoint presentations (PPT/PPTX)
-* Word documents (DOC/DOCX)
-* Scanned documents
-* Images containing text
-
-The system automatically extracts content, performs OCR when required, generates embeddings, stores them in a vector database, and allows users to ask natural language questions over their academic content.
-
-The platform is designed to serve as an intelligent academic assistant capable of document search, concept discovery, and contextual question answering.
+The platform extracts text and images, generates semantic embeddings, stores them in a vector database, and retrieves the most relevant content before generating an AI response using Groq LLM.
 
 ---
 
-# Key Objectives
+## ✨ Key Features
 
-* Centralized academic knowledge repository
-* Semantic search across academic resources
-* AI-powered question answering
-* Duplicate document detection
-* OCR support for scanned documents
-* Multi-format document ingestion
-* Retrieval-Augmented Generation (RAG)
-* Scalable architecture for future enhancements
-
----
-
-# System Architecture
-
-## High-Level Architecture
-
-```
-                +------------------+
-                |      User        |
-                +---------+--------+
-                          |
-                          v
-                +------------------+
-                | Frontend UI      |
-                +---------+--------+
-                          |
-                          v
-                +------------------+
-                | FastAPI Backend  |
-                +---------+--------+
-                          |
-        ----------------------------------
-        |                |               |
-        v                v               v
-
-+---------------+ +--------------+ +-------------+
-| File Upload   | | Query Engine | | Admin APIs  |
-+-------+-------+ +------+-------+ +-------------+
-        |                |
-        v                v
-
-+------------------------------------------+
-| Document Processing Pipeline             |
-+------------------------------------------+
-        |
-        v
-
-+------------------+
-| Text Extraction  |
-+------------------+
-        |
-        +---------------------+
-        |                     |
-        v                     v
-
-+---------------+   +-------------------+
-| Native Text   |   | OCR Processing    |
-| Extraction    |   | (Tesseract OCR)   |
-+---------------+   +-------------------+
-
-        |
-        v
-
-+-------------------+
-| Text Cleaning     |
-+-------------------+
-
-        |
-        v
-
-+-------------------+
-| Chunking Engine   |
-+-------------------+
-
-        |
-        v
-
-+-------------------+
-| Embedding Model   |
-+-------------------+
-
-        |
-        v
-
-+-------------------+
-| Vector Database   |
-+-------------------+
-
-        |
-        v
-
-+-------------------+
-| Semantic Search   |
-+-------------------+
-
-        |
-        v
-
-+-------------------+
-| LLM Response      |
-+-------------------+
-```
+- 📄 Upload PDF, DOCX, PPTX and TXT documents
+- 🤖 AI-powered Question Answering using RAG
+- 🔍 Hybrid Semantic Search with Cross-Encoder Re-ranking
+- 🖼️ Automatic Image Extraction from textbooks
+- 📝 OCR support for text-heavy images
+- 📚 Subject-wise academic document organization
+- 📊 Processing statistics and analytics dashboard
+- 🕘 Question history with previous conversations
+- 💾 PostgreSQL + ChromaDB storage architecture
 
 ---
 
-# Document Processing Flow
+## 🏗️ System Architecture
 
-1. User uploads document.
-2. System detects document type.
-3. Extract text from document.
-4. If scanned/image-based:
+The platform follows a Retrieval-Augmented Generation pipeline.
 
-   * Convert pages to images.
-   * Run OCR.
-5. Clean extracted text.
-6. Generate chunks.
-7. Create embeddings.
-8. Store embeddings in vector database.
-9. Store metadata.
-10. Document becomes searchable.
+<img src="Screenshots/End-to-End Architecture.png" alt="End-to-End Architecture" width="100%"/>
 
----
+### Workflow
 
-# Query Processing Flow
-
-1. User asks question.
-2. Query embedding generated.
-3. Vector search performed.
-4. Relevant chunks retrieved.
-5. Context assembled.
-6. LLM generates answer.
-7. Sources returned with response.
+1. Upload academic documents
+2. Extract text and images
+3. Perform OCR when required
+4. Generate semantic embeddings
+5. Store vectors in ChromaDB
+6. Retrieve relevant chunks
+7. Re-rank using Cross Encoder
+8. Generate grounded AI response
 
 ---
 
-# Current Features
+## 🛠️ Technology Stack
 
-## Document Management
-
-* PDF Upload
-* DOCX Upload
-* PPT/PPTX Upload
-* Image Upload
-* Metadata Storage
-
-## Text Extraction
-
-* PDF text extraction
-* DOCX extraction
-* PPT extraction
-* OCR for scanned PDFs
-* OCR for images
-
-## OCR Support
-
-* Tesseract OCR Integration
-* Image preprocessing
-* Scanned document handling
-
-## Text Processing
-
-* Cleaning and normalization
-* Chunk generation
-* Metadata tagging
-
-## Embeddings
-
-* Sentence Transformer embeddings
-* Batch embedding generation
-* Vector indexing
-
-## Semantic Search
-
-* Similarity search
-* Context retrieval
-* Academic content discovery
-
-## AI Question Answering
-
-* Retrieval-Augmented Generation (RAG)
-* Context-aware responses
-* Source-backed answers
-
-## Backend
-
-* FastAPI APIs
-* REST endpoints
-* Modular architecture
+| Layer | Technology |
+|--------|------------|
+| Frontend | HTML, CSS, JavaScript |
+| Backend | FastAPI |
+| Language | Python 3.11 |
+| Database | PostgreSQL |
+| Vector Database | ChromaDB |
+| ORM | SQLAlchemy |
+| AI Embeddings | BAAI BGE Small |
+| Image Embeddings | CLIP ViT-B/32 |
+| Caption Generation | Florence |
+| OCR | Tesseract OCR |
+| Image Processing | OpenCV, Pillow |
+| LLM | Groq API |
 
 ---
 
-# Planned Features
+## 📂 Project Structure
 
-## Duplicate Detection
-
-* Exact duplicate detection
-* Near-duplicate detection
-* Semantic duplicate detection
-
-## Advanced Search
-
-* Hybrid Search
-* Keyword + Semantic Search
-* Metadata Filtering
-
-## User Features
-
-* Authentication
-* Role-based Access Control
-* User-specific document collections
-
-## Academic Enhancements
-
-* Citation extraction
-* Reference linking
-* Topic clustering
-* Knowledge graph generation
-
-## AI Enhancements
-
-* Local LLM support
-* Multi-LLM support
-* Conversation memory
-* Academic summarization
-
----
-
-# Technology Stack
-
-## Backend
-
-* Python 3.11
-* FastAPI
-* Uvicorn
-
-## AI / NLP
-
-* Sentence Transformers
-* Transformers
-* LangChain (Optional)
-* Gemini API (Optional)
-* OpenAI API (Optional)
-
-## OCR
-
-* Tesseract OCR
-* OpenCV
-* Pillow
-
-## Document Processing
-
-* PyMuPDF
-* python-docx
-* python-pptx
-
-## Vector Database
-
-* FAISS
-
-## Data Handling
-
-* NumPy
-* Pandas
-
----
-
-# Project Structure
-
-```
+```text
 AI-Academic-System/
-
+│
 ├── backend/
-│   ├── api/
-│   ├── services/
-│   ├── ingestion/
-│   ├── embeddings/
-│   ├── vector_store/
-│   ├── rag/
-│   ├── ocr/
-│   ├── duplicate_detection/
-│   └── main.py
 │
 ├── frontend/
 │
-├── uploads/
-│
-├── vector_db/
-│
-├── models/
-│
-├── tests/
+├── Screenshots/
+|
+|── testing/
+|
+|──.gitignore
+|
+|──LICENSE
 │
 ├── requirements.txt
-│
 └── README.md
 ```
 
 ---
 
-# Setup Instructions
+## ⚙️ Installation
 
-## Prerequisites
-
-Install:
-
-* Python 3.11
-* Git
-* Tesseract OCR
-
----
-
-## Clone Repository
+### 1. Clone Repository
 
 ```bash
-git clone https://github.com/<your-username>/AI-Academic-System.git
-
+git clone https://github.com/your-username/AI-Academic-System.git
 cd AI-Academic-System
 ```
 
----
-
-## Create Virtual Environment
+### 2. Create Virtual Environment
 
 ```bash
 python -m venv venv
 ```
 
-Activate:
+### 3. Activate Environment
 
-### Windows
+**Windows**
 
 ```bash
 venv\Scripts\activate
 ```
 
-### Linux/Mac
-
-```bash
-source venv/bin/activate
-```
-
----
-
-## Install Dependencies
+### 4. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -412,83 +118,218 @@ pip install -r requirements.txt
 
 ---
 
-## Install Tesseract OCR
+## 🔑 Environment Variables
 
-### Windows
+Create a **.env** file inside the backend directory.
 
-Download and install:
+```env
+DATABASE_URL=postgresql://username:password@localhost/academic_db
 
-https://github.com/UB-Mannheim/tesseract/wiki
+GROQ_API_KEY=your_groq_api_key
 
-Verify:
-
-```bash
-tesseract --version
 ```
 
 ---
 
-## Run Backend
+## ▶️ Running the Project
+
+### Start Backend
 
 ```bash
+cd backend
 uvicorn main:app --reload
 ```
 
-Backend:
+Open browser:
 
-```text
-http://localhost:8000
 ```
-
-Swagger Documentation:
-
-```text
-http://localhost:8000/docs
+http://127.0.0.1:8000
 ```
 
 ---
 
-# Future Roadmap
+# 📱 Application Screenshots
 
-Phase 1
+## 1. Dashboard
 
-* Document ingestion
-* OCR
-* Embeddings
-* Vector storage
+The dashboard provides an overview of uploaded documents, processing statistics, and quick navigation to every module.
 
-Phase 2
-
-* Semantic search
-* RAG pipeline
-* AI-powered Q&A
-
-Phase 3
-
-* Duplicate detection
-* Hybrid search
-* Metadata filtering
-
-Phase 4
-
-* Authentication
-* Multi-user support
-* Knowledge graphs
-
-Phase 5
-
-* Academic copilot
-* Personalized learning assistant
-* Research recommendation engine
+<img src="Screenshots/Dashboard.png" alt="Dashboard" width="100%"/>
 
 ---
 
-# Contributors
+## 2. Upload Document
 
-AI-Academic-System is being developed as an academic AI platform focused on intelligent document understanding, semantic retrieval, and educational assistance.
+Users can upload academic documents, assign subjects, units, and rename files before processing.
+
+<img src="Screenshots/PDF file successfully uploaded and saved with new title.png" alt="Upload Success" width="100%"/>
 
 ---
 
-# License
+## 3. Uploaded Documents Page
 
-MIT License
+Displays every uploaded document with subject information, upload status, and management actions.
+
+<img src="Screenshots/Uploaded_documents_page.png" alt="Uploaded Documents" width="100%"/>
+
+---
+
+## 4. Documents Management
+
+A complete table containing all uploaded academic resources.
+
+<img src="Screenshots/Documents Page – A page with all uploaded files.png" alt="Documents Page" width="100%"/>
+
+---
+
+## 5. View Uploaded File
+
+Users can open and read any uploaded academic document directly within the platform.
+
+<img src="Screenshots/View Page result – A uploaded file opened after clicking view button.png" alt="View Document" width="100%"/>
+
+---
+
+## 6. AI Question Answering
+
+Students ask questions in natural language, and the system retrieves the most relevant academic content before generating an answer.
+
+<img src="Screenshots/Ask Page – Question & Answering Page.png" alt="Ask Page" width="100%"/>
+
+---
+
+## 7. Modern Ask Interface
+
+The redesigned AI chat interface with semantic retrieval and grounded responses.
+
+<img src="Screenshots/Ask_page.png" alt="Ask Interface" width="100%"/>
+
+---
+
+## 8. Question History
+
+Stores previously asked questions and generated answers for future reference.
+
+<img src="Screenshots/Question History Page – A Page containing all asked questions with answers.png" alt="Question History" width="100%"/>
+
+---
+
+## 9. Statistics Dashboard
+
+Displays processing metrics including documents, chunks, embeddings, images, and execution statistics.
+
+<img src="Screenshots/Statistics.png" alt="Statistics" width="100%"/>
+
+---
+
+## 10. Extracted Images
+
+Visual content extracted automatically from uploaded academic textbooks.
+
+<img src="Screenshots/Extracted images of uploaded file.png" alt="Extracted Images" width="100%"/>
+
+---
+
+## 11. Database Tables
+
+### Documents Table
+
+<img src="Screenshots/Documents Table Data.png" alt="Documents Table" width="100%"/>
+
+### Document Images Table
+
+<img src="Screenshots/document_images Table Data.png" alt="Document Images Table" width="100%"/>
+
+---
+
+# 📊 Performance Evaluation
+
+## Average Processing Metrics
+
+Average processing statistics generated for academic documents.
+
+<img src="Screenshots/Average Processing Metrics per Document.png" alt="Average Processing Metrics" width="100%"/>
+
+---
+
+## Chunking Performance Analysis
+
+Analysis of semantic chunk generation across uploaded resources.
+
+<img src="Screenshots/Bar_Graph_of_Chunking Performance Analysis.png" alt="Chunking Analysis" width="100%"/>
+
+---
+
+## Document Upload Status
+
+Distribution of successful and failed document uploads.
+
+<img src="Screenshots/Pie_chart_Document Upload Status.png" alt="Upload Status" width="100%"/>
+
+---
+
+# 🗄️ Database Architecture
+
+Logical design of PostgreSQL and ChromaDB integration.
+
+<img src="Screenshots/Logical Database Design and Architecture.png" alt="Database Architecture" width="100%"/>
+
+---
+
+# 🔍 Retrieval Pipeline
+
+The system combines multiple AI techniques for accurate retrieval.
+
+| Stage | Description |
+|--------|-------------|
+| Text Extraction | PyMuPDF / DOCX / PPTX |
+| OCR | Tesseract |
+| Chunking | Semantic Paragraph Chunking |
+| Embedding | BGE Small (384-dim) |
+| Vector Search | ChromaDB |
+| Re-ranking | Cross Encoder |
+| Response | Groq LLM |
+
+---
+
+# 📈 Performance Highlights
+
+| Metric | Value |
+|---------|-------|
+| Supported Formats | PDF, DOCX, PPTX, TXT |
+| Vector Database | ChromaDB |
+| Embedding Dimension | 384 |
+| Image Embedding | 512 |
+| OCR Engine | Tesseract |
+| Backend Framework | FastAPI |
+| Database | PostgreSQL |
+| AI Response | Groq LLM |
+
+---
+
+# 🚀 Future Enhancements
+
+- 🎥 Audio and Video lecture indexing
+- 🌐 Multi-language academic support
+- 📱 Mobile application
+- 👨‍🏫 Faculty collaborative knowledge base
+- ☁️ Cloud deployment with Docker
+- 📖 Automatic citation generation
+
+---
+
+# 👩‍💻 Developer
+
+**Reddy Jahnavi**
+
+B.Tech Computer Science Engineering Student
+
+CampusIQ:AI-Powered-Academic-Knowledge-management-and-Question-Answering-System —  A project for Quality Learning 
+
+---
+
+# 📄 License
+
+This project is developed for educational and research purposes.
+
+© 2026 Reddy Jahnavi. All Rights Reserved.
