@@ -30,7 +30,8 @@ The platform extracts text and images, generates semantic embeddings, stores the
 
 The platform follows a Retrieval-Augmented Generation pipeline.
 
-<img src="Screenshots/End-to-End Architecture.png" alt="End-to-End Architecture" width="100%"/>
+**Screenshot: **End-to-End Architecture.png
+
 
 ### Workflow
 
@@ -149,92 +150,92 @@ http://127.0.0.1:8000
 ---
 
 # 📸 Application Screenshots
-1. Dashboard
+**1. Dashboard**
 
 The central homepage of the AI Academic System showing quick navigation, document statistics, and an overview of the platform's modules.
 
 Screenshot: Dashboard.png
 
-2. Document Upload
+**2. Document Upload**
 
 Demonstrates the successful upload and renaming of an academic PDF before it is processed by the system.
 
 Screenshot: PDF file successfully uploaded and saved with new title.png
 
-3. Uploaded Documents
+**3. Uploaded Documents**
 
 Displays all uploaded academic resources along with subject information, upload status, and document management options.
 
 Screenshot: Uploaded_documents_page.png
 
-4. Documents Management Page
+**4. Documents Management Page**
 
 A complete table view of every uploaded document, including metadata and available actions such as view and delete.
 
 Screenshot: Documents Page – A page with all uploaded files.png
 
-5. Document Viewer
+**5. Document Viewer**
 
 Shows the built-in viewer used to open and read uploaded academic documents directly within the application.
 
 Screenshot: View Page result – A uploaded file opened after clicking view button.png
 
-6. AI Question Answering
+**6. AI Question Answering**
 
 Illustrates how users ask academic questions and receive answers generated from the retrieved course materials.
 
 Screenshot: Ask Page – Question & Answering Page.png
 
-7. Modern Ask Interface
+**7. Modern Ask Interface**
 
 The redesigned conversational interface providing semantic retrieval and context-aware AI responses.
 
 Screenshot: Ask_page.png
 
-8. Question History
+**8. Question History**
 
 Stores previously asked questions and their generated answers, allowing users to revisit earlier conversations.
 
 Screenshot: Question History Page – A Page containing all asked questions with answers.png
 
-9. Statistics Dashboard
+**9. Statistics **
 
 Presents processing metrics including documents, chunks, embeddings, extracted images, and overall system analytics.
 
 Screenshot: Statistics.png
 
-10. Extracted Images
+**10. Extracted Images**
 
 Shows the images automatically extracted from uploaded textbooks and lecture materials during document processing.
 
 Screenshot: Extracted images of uploaded file.png
 
 # 📊 Performance & Architecture Figures
-End-to-End Architecture
+**End-to-End Architecture**
 
 Illustrates the complete Retrieval-Augmented Generation (RAG) workflow from document upload to AI response generation.
 
 Figure: End-to-End Architecture.png
 
-Logical Database Architecture
+**Logical Database Architecture**
 
 Represents the relationship between PostgreSQL, ChromaDB, documents, chunks, and image storage.
 
 Figure: Logical Database Design and Architecture.png
 
-Average Processing Metrics
+**Average Processing Metrics**
 
 Visualizes the average number of pages, chunks, embeddings, and extracted images processed per academic document.
 
 Figure: Average Processing Metrics per Document.png
 
-Chunking Performance Analysis
+**Chunking Performance Analysis**
 
 Bar graph comparing semantic chunk generation and processing performance across documents.
 
 Figure: Bar_Graph_of_Chunking Performance Analysis.png
 
-Document Upload Status
+**Document Upload Status**
 
 Pie chart showing the distribution of successful and failed document upload attempts.
 
