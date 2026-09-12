@@ -148,133 +148,105 @@ http://127.0.0.1:8000
 
 ---
 
-# 📱 Application Screenshots
+# 📸 Application Screenshots
+1. Dashboard
 
-## 1. Dashboard
+The central homepage of the AI Academic System showing quick navigation, document statistics, and an overview of the platform's modules.
 
-The dashboard provides an overview of uploaded documents, processing statistics, and quick navigation to every module.
+Screenshot: Dashboard.png
 
-<img src="Screenshots/Dashboard.png" alt="Dashboard" width="100%"/>
+2. Document Upload
 
----
+Demonstrates the successful upload and renaming of an academic PDF before it is processed by the system.
 
-## 2. Upload Document
+Screenshot: PDF file successfully uploaded and saved with new title.png
 
-Users can upload academic documents, assign subjects, units, and rename files before processing.
+3. Uploaded Documents
 
-<img src="Screenshots/PDF file successfully uploaded and saved with new title.png" alt="Upload Success" width="100%"/>
+Displays all uploaded academic resources along with subject information, upload status, and document management options.
 
----
+Screenshot: Uploaded_documents_page.png
 
-## 3. Uploaded Documents Page
+4. Documents Management Page
 
-Displays every uploaded document with subject information, upload status, and management actions.
+A complete table view of every uploaded document, including metadata and available actions such as view and delete.
 
-<img src="Screenshots/Uploaded_documents_page.png" alt="Uploaded Documents" width="100%"/>
+Screenshot: Documents Page – A page with all uploaded files.png
 
----
+5. Document Viewer
 
-## 4. Documents Management
+Shows the built-in viewer used to open and read uploaded academic documents directly within the application.
 
-A complete table containing all uploaded academic resources.
+Screenshot: View Page result – A uploaded file opened after clicking view button.png
 
-<img src="Screenshots/Documents Page – A page with all uploaded files.png" alt="Documents Page" width="100%"/>
+6. AI Question Answering
 
----
+Illustrates how users ask academic questions and receive answers generated from the retrieved course materials.
 
-## 5. View Uploaded File
+Screenshot: Ask Page – Question & Answering Page.png
 
-Users can open and read any uploaded academic document directly within the platform.
+7. Modern Ask Interface
 
-<img src="Screenshots/View Page result – A uploaded file opened after clicking view button.png" alt="View Document" width="100%"/>
+The redesigned conversational interface providing semantic retrieval and context-aware AI responses.
 
----
+Screenshot: Ask_page.png
 
-## 6. AI Question Answering
+8. Question History
 
-Students ask questions in natural language, and the system retrieves the most relevant academic content before generating an answer.
+Stores previously asked questions and their generated answers, allowing users to revisit earlier conversations.
 
-<img src="Screenshots/Ask Page – Question & Answering Page.png" alt="Ask Page" width="100%"/>
+Screenshot: Question History Page – A Page containing all asked questions with answers.png
 
----
+9. Statistics Dashboard
 
-## 7. Modern Ask Interface
+Presents processing metrics including documents, chunks, embeddings, extracted images, and overall system analytics.
 
-The redesigned AI chat interface with semantic retrieval and grounded responses.
+Screenshot: Statistics.png
 
-<img src="Screenshots/Ask_page.png" alt="Ask Interface" width="100%"/>
+10. Extracted Images
 
----
+Shows the images automatically extracted from uploaded textbooks and lecture materials during document processing.
 
-## 8. Question History
+Screenshot: Extracted images of uploaded file.png
 
-Stores previously asked questions and generated answers for future reference.
+# 📊 Performance & Architecture Figures
+End-to-End Architecture
 
-<img src="Screenshots/Question History Page – A Page containing all asked questions with answers.png" alt="Question History" width="100%"/>
+Illustrates the complete Retrieval-Augmented Generation (RAG) workflow from document upload to AI response generation.
 
----
+Figure: End-to-End Architecture.png
 
-## 9. Statistics Dashboard
+Logical Database Architecture
 
-Displays processing metrics including documents, chunks, embeddings, images, and execution statistics.
+Represents the relationship between PostgreSQL, ChromaDB, documents, chunks, and image storage.
 
-<img src="Screenshots/Statistics.png" alt="Statistics" width="100%"/>
+Figure: Logical Database Design and Architecture.png
 
----
+Average Processing Metrics
 
-## 10. Extracted Images
+Visualizes the average number of pages, chunks, embeddings, and extracted images processed per academic document.
 
-Visual content extracted automatically from uploaded academic textbooks.
+Figure: Average Processing Metrics per Document.png
 
-<img src="Screenshots/Extracted images of uploaded file.png" alt="Extracted Images" width="100%"/>
+Chunking Performance Analysis
 
----
+Bar graph comparing semantic chunk generation and processing performance across documents.
 
-## 11. Database Tables
+Figure: Bar_Graph_of_Chunking Performance Analysis.png
 
-### Documents Table
+Document Upload Status
 
-<img src="Screenshots/Documents Table Data.png" alt="Documents Table" width="100%"/>
+Pie chart showing the distribution of successful and failed document upload attempts.
 
-### Document Images Table
+Figure: Pie_chart_Document Upload Status.png
 
-<img src="Screenshots/document_images Table Data.png" alt="Document Images Table" width="100%"/>
+# Database Tables
 
----
+Documents Table: Stores uploaded document metadata.
 
-# 📊 Performance Evaluation
+Document Images Table: Stores extracted images, captions, and classification details.
 
-## Average Processing Metrics
-
-Average processing statistics generated for academic documents.
-
-<img src="Screenshots/Average Processing Metrics per Document.png" alt="Average Processing Metrics" width="100%"/>
-
----
-
-## Chunking Performance Analysis
-
-Analysis of semantic chunk generation across uploaded resources.
-
-<img src="Screenshots/Bar_Graph_of_Chunking Performance Analysis.png" alt="Chunking Analysis" width="100%"/>
-
----
-
-## Document Upload Status
-
-Distribution of successful and failed document uploads.
-
-<img src="Screenshots/Pie_chart_Document Upload Status.png" alt="Upload Status" width="100%"/>
-
----
-
-# 🗄️ Database Architecture
-
-Logical design of PostgreSQL and ChromaDB integration.
-
-<img src="Screenshots/Logical Database Design and Architecture.png" alt="Database Architecture" width="100%"/>
-
----
+Figures: Documents Table Data.png, document_images Table Data.png
 
 # 🔍 Retrieval Pipeline
 
